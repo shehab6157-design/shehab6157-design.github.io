@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://shehab6157-design.github.io/sitemap.xml

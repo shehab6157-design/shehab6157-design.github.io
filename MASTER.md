@@ -17,7 +17,7 @@ The single source of truth for the visual and motion language of this portfolio.
 | | `--hair` / `--hair-2` | `#1F2826` / `#2C3734` | Hairline borders |
 | | `--bone` | `#E9EEE9` | Primary text |
 | | `--mute` | `#A2ADA8` | Secondary text (8.6:1 on ground) |
-| | `--faint` | `#7D8A85` | Labels, captions (5.6:1 on ground, 4.7:1 on the frosted label) |
+| | `--faint` | `#8A9792` | Labels, captions (6.6:1 on ground, still 4.5:1 or better over the brightest ambient glow) |
 | | `--lumen` / `--lumen-ink` | `#F0D29A` / `#1A1408` | Accent: actions, focus, immune response |
 | Channels | `--ch-host` | `#7C9CFF` | Devices (like a DAPI stain) |
 | | `--ch-net` | `#4FE3A1` | Network signal |
@@ -50,13 +50,15 @@ The single source of truth for the visual and motion language of this portfolio.
 
 ## Motion rules in code
 
-- **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
+- **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms (peak alpha .12, so small labels keep 4.5:1) take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
 - **Section sweep**: a short line of the section's color (`--sc`) travels along each section's top border every 9 s.
 - **Glass highlight**: a specular spot follows the pointer across each slide.
 - **Focus pull**: on load the name and intro come into focus (blur 14px → 0) as the lens iris opens.
 - **Scroll progress**: a 2px line under the navigation in the six project colors, scaled by scroll position.
 - **APIS honeycomb**: the nine layers light up in order, 0.6 s apart, on a 7.2 s loop.
 
-- All canvases run on one `requestAnimationFrame` loop, only while on screen, and stop when the tab is hidden.
+- All canvases run on one `requestAnimationFrame` loop, only while on screen, and stop when the tab is hidden. A scene is warmed up and first drawn only when it scrolls near the viewport.
+- **Lite mode** (phones, touch screens, ≤4 CPU cores): canvas resolution capped at 1.5×, drawing at ~30 fps, no film grain, the hero's background bubbles baked into a cached layer, and no backdrop blur on the menu bar.
+- While the Examine dialog is open, only its specimen animates.
 - `prefers-reduced-motion` or the "Pause motion" button draws one still frame per specimen and disables reveals.
 - Only `transform`, `opacity` and `clip-path` are animated in CSS.

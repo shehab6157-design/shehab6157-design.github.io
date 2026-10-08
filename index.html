@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shehab Shibli | Network Engineering &amp; Computer Security</title>
-<meta name="description" content="Shehab Shibli, Network Engineering and Computer Security graduate with CCNA and AWS Cloud Practitioner. I build security tools modeled on living systems and test them on real data: APIS lateral-movement detection, an MCP security proxy for AI agents, edge-to-cloud animal detection and more. Available now, open to relocation.">
+<meta name="description" content="Shehab Shibli, Network Engineering &amp; Computer Security graduate (CCNA, AWS). Security tools modeled on living systems, tested on real data. Open to relocation.">
 <meta name="author" content="Shehab Shibli">
 <meta name="theme-color" content="#060908">
 <link rel="canonical" href="https://shehab6157-design.github.io/">
@@ -13,16 +13,21 @@
 <meta property="og:title" content="Shehab Shibli | Network Engineering &amp; Computer Security">
 <meta property="og:description" content="Network defenses modeled on living systems, tested on real data. APIS, MCP Security Proxy, edge-to-cloud animal detection, NASA Space Apps 3rd place. CCNA and AWS certified.">
 <meta property="og:url" content="https://shehab6157-design.github.io/">
-<meta property="og:image" content="https://shehab6157-design.github.io/og.png">
+<meta property="og:image" content="https://shehab6157-design.github.io/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:alt" content="Shehab Shibli: a live microscope view of a network beside the line Network defenses modeled on living systems, tested on real data.">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://shehab6157-design.github.io/og.png">
+<meta name="twitter:image" content="https://shehab6157-design.github.io/og.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23060908'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23F0D29A' stroke-width='3'/%3E%3Ccircle cx='27' cy='29' r='8' fill='%234FE3A1' fill-opacity='.8'/%3E%3Ccircle cx='37' cy='35' r='8' fill='%23F25CCF' fill-opacity='.8'/%3E%3Ccircle cx='32' cy='32' r='3.2' fill='%23FFF3D1'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" media="print" id="fontcss">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"></noscript>
+<script>(function(){var l=document.getElementById("fontcss");if(l){if(l.sheet)l.media="all";else l.addEventListener("load",function(){l.media="all"});}})();</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Shehab Shibli","alternateName":"שהאב שיבלי","url":"https://shehab6157-design.github.io/","email":"mailto:shehab6157@gmail.com","jobTitle":"Network Engineering and Computer Security Graduate","alumniOf":{"@type":"CollegeOrUniversity","name":"Jordan University of Science and Technology"},"knowsLanguage":["Arabic","English","Hebrew"],"knowsAbout":["Network security","Anomaly detection","Lateral movement detection","AI agent security","AWS","Cisco networking"],"sameAs":["https://www.linkedin.com/in/shehab-shibli","https://github.com/shehab6157-design"]}
 </script>
@@ -30,7 +35,7 @@
 /* Layout: a darkfield microscope bench. A lens hero, a readout strip, then the projects as 3:1 glass slides on one 1200px column. */
 :root{
   --ground:#060908; --stage:#0C1110; --stage-2:#121917; --hair:#1F2826; --hair-2:#2C3734; --shade:#000000;
-  --bone:#E9EEE9; --mute:#A2ADA8; --faint:#7D8A85;
+  --bone:#E9EEE9; --mute:#A2ADA8; --faint:#8A9792;
   --lumen:#F0D29A; --lumen-ink:#1A1408;
   --ch-host:#7C9CFF; --ch-net:#4FE3A1; --ch-auth:#F25CCF; --ch-merge:#FFF3D1;
   /* one fluorophore per project */
@@ -86,8 +91,9 @@ strong{font-weight:600;color:var(--bone)}
 .btn:hover .arr{transform:translateX(3px)}
 
 /* ---------- nav ---------- */
-.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:color-mix(in srgb,var(--ground) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid transparent;transition:border-color var(--d-ui) ease-out}
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:60;background:color-mix(in srgb,var(--ground) 94%,transparent);border-bottom:1px solid transparent;transition:border-color var(--d-ui) ease-out}
 .nav.scrolled{border-bottom-color:var(--hair)}
+@media (hover:hover) and (min-width:921px){.nav{background:color-mix(in srgb,var(--ground) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}}
 .nav-in{display:flex;align-items:center;gap:var(--s-4);height:var(--nav-h)}
 .brand{display:inline-flex;align-items:center;gap:10px;text-decoration:none;font:600 15px/1 var(--f-body);letter-spacing:.01em;margin-right:auto;white-space:nowrap}
 .brand svg{width:22px;height:22px}
@@ -134,7 +140,7 @@ strong{font-weight:600;color:var(--bone)}
 .badges li{display:inline-flex;align-items:center;gap:8px}
 .badges li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--lumen)}
 .in{animation:fade-up 900ms var(--e-out) both;animation-delay:calc(380ms + var(--i,0) * var(--stagger))}
-@keyframes fade-up{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
 .scope{display:grid;justify-items:center;gap:18px;min-width:0}
 .lens-wrap{position:relative;width:min(100%,540px);aspect-ratio:1/1;max-width:100%;animation:fade-up 1200ms var(--e-out) 80ms both}
@@ -162,6 +168,7 @@ strong{font-weight:600;color:var(--bone)}
 .phase{font:500 12px/1.4 var(--f-mono);letter-spacing:.04em;color:var(--mute);min-width:0;text-align:center}
 .phase b{font-weight:500;color:var(--lumen)}
 .scope figcaption{max-width:48ch;text-align:center;font-size:13px;line-height:1.5;color:var(--faint)}
+@media (min-width:921px) and (max-width:1180px){.hero-grid{grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr);gap:40px}}
 @media (max-width:920px){
   .hero-grid{grid-template-columns:1fr;gap:0}
   .hero-copy{display:contents}
@@ -476,7 +483,7 @@ body:has(.exam[open]){overflow:hidden}
 <a class="skip" href="#work">Skip to projects</a>
 <canvas id="ambient" aria-hidden="true"></canvas>
 
-<header class="nav" id="nav">
+<header class="nav" id="nav" aria-label="Site">
   <div class="wrap nav-in">
     <a class="brand" href="#top" aria-label="Shehab Shibli, back to top">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="var(--lumen)" stroke-width="1.5"/><circle cx="10" cy="11" r="4" fill="var(--ch-net)" fill-opacity=".85"/><circle cx="14" cy="13" r="4" fill="var(--ch-auth)" fill-opacity=".85"/><circle cx="12" cy="12" r="1.6" fill="var(--ch-merge)"/></svg>
@@ -507,7 +514,7 @@ body:has(.exam[open]){overflow:hidden}
 
 <main id="top">
 <!-- ===================== HERO ===================== -->
-<section class="hero" aria-labelledby="name" data-tint="apis,scam,phish">
+<section class="hero" id="hero" aria-labelledby="name" data-tint="apis,scam,phish">
   <div class="wrap hero-grid">
     <div class="hero-copy">
       <p class="status in" style="--i:0"><span class="pulse" aria-hidden="true"></span>Available now · open to relocation</p>
@@ -520,7 +527,7 @@ body:has(.exam[open]){overflow:hidden}
         <a class="btn" href="https://www.linkedin.com/in/shehab-shibli" target="_blank" rel="noopener">LinkedIn</a>
         <a class="btn" href="https://github.com/shehab6157-design" target="_blank" rel="noopener">GitHub</a>
       </div>
-      <ul class="badges in" style="--i:5" aria-label="Highlights">
+      <ul class="badges in" style="--i:5">
         <li>CCNA</li><li>AWS Cloud Practitioner</li><li>NASA Space Apps 3rd</li>
       </ul>
     </div>
@@ -571,6 +578,7 @@ body:has(.exam[open]){overflow:hidden}
 <!-- ===================== WORK ===================== -->
 <section class="sec" id="work" aria-labelledby="workTitle" style="--sc:var(--c-apis)">
   <div class="wrap">
+    <span id="projects" aria-hidden="true"></span>
     <header class="sec-head" data-tint="apis,mcp,scam">
       <p class="eyebrow">Specimens</p>
       <h2 class="wipe" id="workTitle">Selected projects</h2>
@@ -598,7 +606,7 @@ body:has(.exam[open]){overflow:hidden}
             <li>Hardened against attacks on itself: alert flooding (it separated the real attack from 48 of 50 decoys), slow baseline poisoning, and log tampering, caught by a SHA-256 hash-chained audit trail</li>
             <li>The AI-agent layer was checked on 576 real tool calls across 99 sessions</li>
           </ul>
-          <ul class="chips" aria-label="Technologies"><li>Python</li><li>FastAPI</li><li>Anomaly detection</li><li>MITRE ATT&amp;CK</li><li>LANL dataset</li><li>tcpdump</li></ul>
+          <ul class="chips"><li>Python</li><li>FastAPI</li><li>Anomaly detection</li><li>MITRE ATT&amp;CK</li><li>LANL dataset</li><li>tcpdump</li></ul>
           <div class="links">
             <a class="btn primary" href="https://github.com/shehab6157-design/apis-lateral-movement-detector" target="_blank" rel="noopener">View the code <svg class="arr" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></a>
             <a class="btn" href="https://shehab6157-design.github.io/apis-lateral-movement-detector/" target="_blank" rel="noopener">Project site</a>
@@ -649,7 +657,7 @@ body:has(.exam[open]){overflow:hidden}
             <li>Signals: <span class="sig">NEW_TOOL</span> <span class="sig">OFF_PATTERN</span> <span class="sig">PAYLOAD_OUTLIER</span> <span class="sig">SEQUENCE_SPIKE</span> <span class="sig">UNKNOWN_AGENT</span> <span class="sig">BASELINE_DRIFT</span></li>
             <li>Purple-team loop: a scope-gated red engine (fail-closed allowlist, mock or MITRE Caldera executor) attacks my lab VMs, and every round is scored as alert, observation, suppressed or missed</li>
           </ul>
-          <ul class="chips" aria-label="Technologies"><li>Python</li><li>MCP</li><li>MITRE Caldera</li><li>Telegram</li><li>Anomaly detection</li></ul>
+          <ul class="chips"><li>Python</li><li>MCP</li><li>MITRE Caldera</li><li>Telegram</li><li>Anomaly detection</li></ul>
           <div class="links"><a class="btn" href="https://github.com/shehab6157-design/mcp-security-proxy" target="_blank" rel="noopener">View the code <svg class="arr" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></a></div>
         </div>
       </article>
@@ -676,7 +684,7 @@ body:has(.exam[open]){overflow:hidden}
             <li>MQTT over TLS to AWS IoT Core, Lambda, SNS and DynamoDB</li>
             <li>Top 100 at Jordan's 12th National Technology Parade</li>
           </ul>
-          <ul class="chips" aria-label="Technologies"><li>YOLOv5</li><li>Raspberry Pi 5</li><li>MQTT/TLS</li><li>AWS IoT</li></ul>
+          <ul class="chips"><li>YOLOv5</li><li>Raspberry Pi 5</li><li>MQTT/TLS</li><li>AWS IoT</li></ul>
         </div>
       </article>
 
@@ -702,7 +710,7 @@ body:has(.exam[open]){overflow:hidden}
             <li>Results are Monte Carlo simulations over assumed material ranges and a year of real sunlight data (PVGIS), not hardware measurements</li>
             <li>Negative findings are published too: harvesting light on a glowing screen is a net loss, and a sky-cooling layer makes a phone hotter</li>
           </ul>
-          <ul class="chips" aria-label="Technologies"><li>Python</li><li>Monte Carlo</li><li>PVGIS data</li><li>Bio-inspired design</li></ul>
+          <ul class="chips"><li>Python</li><li>Monte Carlo</li><li>PVGIS data</li><li>Bio-inspired design</li></ul>
           <div class="links"><a class="btn" href="https://github.com/shehab6157-design/bio-inspired-solar-screen" target="_blank" rel="noopener">View the code <svg class="arr" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></a></div>
         </div>
       </article>
@@ -725,7 +733,7 @@ body:has(.exam[open]){overflow:hidden}
             <li>Net-and-gel capture for small debris, a laser array for larger fragments</li>
             <li>Onboard recycling unit and research core</li>
           </ul>
-          <ul class="chips" aria-label="Skills"><li>Mission architecture</li><li>Systems design</li><li>Technical writing</li></ul>
+          <ul class="chips"><li>Mission architecture</li><li>Systems design</li><li>Technical writing</li></ul>
         </div>
       </article>
     </div>
@@ -739,7 +747,7 @@ body:has(.exam[open]){overflow:hidden}
             <p class="kicker"><span class="tag">In development</span></p>
             <h3>ScamShield</h3>
             <p>An end-to-end encrypted messenger on the Matrix protocol with a self-hosted Dendrite homeserver. The server only ever sees ciphertext, so my custom client checks every message for scams on your device, using my phishing detector's engine.</p>
-            <ul class="chips" aria-label="Technologies"><li>Matrix</li><li>Dendrite</li><li>E2E encryption</li></ul>
+            <ul class="chips"><li>Matrix</li><li>Dendrite</li><li>E2E encryption</li></ul>
           </div>
         </article>
         <article class="mini" data-host style="--c:var(--c-phish)">
@@ -752,7 +760,7 @@ body:has(.exam[open]){overflow:hidden}
               <div class="metric"><b>9/12</b><span>phishing caught on my test set</span></div>
               <div class="metric"><b>0/12</b><span>false positives on my test set</span></div>
             </div>
-            <ul class="chips" aria-label="Technologies"><li>TF-IDF + LogReg</li><li>Regex signals</li></ul>
+            <ul class="chips"><li>TF-IDF + LogReg</li><li>Regex signals</li></ul>
           </div>
         </article>
         <article class="mini" data-host style="--c:var(--c-ai)">
@@ -761,7 +769,7 @@ body:has(.exam[open]){overflow:hidden}
             <p class="kicker"><span class="tag">Full-stack build</span></p>
             <h3>Personal AI Assistant</h3>
             <p>An AI assistant web app with persistent memory and RAG-style context, built on the Claude API, FastAPI and SQLite. It pulls the relevant memories into each answer and saves what it learns.</p>
-            <ul class="chips" aria-label="Technologies"><li>Claude API</li><li>FastAPI</li><li>SQLite</li><li>RAG</li></ul>
+            <ul class="chips"><li>Claude API</li><li>FastAPI</li><li>SQLite</li><li>RAG</li></ul>
           </div>
         </article>
       </div>
@@ -816,7 +824,7 @@ body:has(.exam[open]){overflow:hidden}
       <p class="eyebrow">Certifications, education, recognition</p>
       <h2 class="wipe" id="credTitle">Credentials</h2>
     </header>
-    <div class="certs">
+    <div class="certs" id="certifications">
       <article class="cert rv" style="--c:var(--c-scam)">
         <p class="issuer">Cisco Systems</p>
         <h3>Cisco Certified Network Associate (CCNA)</h3>
@@ -836,13 +844,13 @@ body:has(.exam[open]){overflow:hidden}
         </div>
       </article>
       <div class="netacad rv" style="--i:2">
-        <div style="--c:var(--c-phish)"><span>Cisco Networking Academy</span><b>Cyber Threat Management</b></div>
-        <div style="--c:var(--c-mcp)"><span>Cisco Networking Academy</span><b>Ethical Hacker</b></div>
-        <div style="--c:var(--c-apis)"><span>Cisco Networking Academy</span><b>Introduction to Cybersecurity</b></div>
+        <div style="--c:var(--c-phish)"><span>Cisco Networking Academy · Sep 2025</span><b>Cyber Threat Management</b></div>
+        <div style="--c:var(--c-mcp)"><span>Cisco Networking Academy · Sep 2025</span><b>Ethical Hacker</b></div>
+        <div style="--c:var(--c-apis)"><span>Cisco Networking Academy · Sep 2025</span><b>Introduction to Cybersecurity</b></div>
       </div>
     </div>
 
-    <div class="honors">
+    <div class="honors" id="achievements">
       <div class="rv">
         <p class="eyebrow">Education</p>
         <ul class="list">
@@ -891,7 +899,7 @@ body:has(.exam[open]){overflow:hidden}
       <span class="copied" id="copied" aria-live="polite"></span>
     </div>
     <div class="channels rv">
-      <a href="tel:+972507848250"><span>Phone</span><b>+972 50-784-8250</b></a>
+      <a href="tel:+972507848250"><span>Phone</span><b>+972&nbsp;50&#8209;784&#8209;8250</b></a>
       <a href="https://www.linkedin.com/in/shehab-shibli" target="_blank" rel="noopener"><span>LinkedIn</span><b>in/shehab-shibli</b></a>
       <a href="https://github.com/shehab6157-design" target="_blank" rel="noopener"><span>GitHub</span><b>shehab6157-design</b></a>
       <div><span>Location</span><b>Israel · open to relocation</b><small class="lt" id="localTime"></small></div>
@@ -902,10 +910,10 @@ body:has(.exam[open]){overflow:hidden}
 
 <dialog class="exam" id="exam" aria-labelledby="examTitle">
   <div class="exam-in">
-    <header class="exam-head">
-      <div><p class="eyebrow" id="examEyebrow"></p><h3 id="examTitle"></h3></div>
+    <div class="exam-head">
+      <div><p class="eyebrow" id="examEyebrow">Specimen</p><h3 id="examTitle">Project animation</h3></div>
       <button class="icon-btn" type="button" id="examClose"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="sr">Close</span></button>
-    </header>
+    </div>
     <div class="exam-stage" id="examStage"></div>
     <div class="exam-notes">
       <div><p class="eyebrow">What the colors mean</p><ul class="legend" id="examLegend"></ul></div>
@@ -937,6 +945,8 @@ const tok = n => cs.getPropertyValue(n).trim();
 const C = {ground:tok("--ground"),stage:tok("--stage"),stage2:tok("--stage-2"),hair:tok("--hair"),bone:tok("--bone"),mute:tok("--mute"),faint:tok("--faint"),lumen:tok("--lumen"),host:tok("--ch-host"),net:tok("--ch-net"),auth:tok("--ch-auth"),merge:tok("--ch-merge")};
 const PC = {apis:tok("--c-apis"),mcp:tok("--c-mcp"),animal:tok("--c-animal"),solar:tok("--c-solar"),sos:tok("--c-sos"),scam:tok("--c-scam"),phish:tok("--c-phish"),ai:tok("--c-ai")};
 const MONO = '"IBM Plex Mono", ui-monospace, Menlo, monospace';
+// phones and low-core machines: lower canvas resolution, ~30 fps, fewer per-frame layers
+const LITE = matchMedia("(max-width: 700px), (pointer: coarse)").matches || (navigator.hardwareConcurrency || 8) <= 4;
 const TAU = Math.PI * 2;
 const clamp = (x, a = 0, b = 1) => x < a ? a : x > b ? b : x;
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -969,6 +979,7 @@ function glow(ctx, hex, soft, x, y, r, a){
 }
 let GRAIN = null;
 function grain(ctx, w, h, a){
+  if (LITE) return;
   if (!GRAIN){
     const n = document.createElement("canvas"); n.width = n.height = 128; const g = n.getContext("2d"); const id = g.createImageData(128, 128);
     for (let i = 0; i < id.data.length; i += 4){ const v = Math.random(); const on = v > .5 ? 255 : 0; id.data[i] = id.data[i + 1] = id.data[i + 2] = on; id.data[i + 3] = 18 + Math.random() * 60; }
@@ -1079,6 +1090,7 @@ function sceneLens(stage){
       gr.addColorStop(0, rgba(C.host, .085)); gr.addColorStop(.55, rgba(C.host, .03)); gr.addColorStop(1, rgba(C.host, 0)); g.fillStyle = gr; g.fillRect(0, 0, w, h);
       gr = g.createRadialGradient(cx + R * .35, cy + R * .4, 0, cx + R * .35, cy + R * .4, R * .7);
       gr.addColorStop(0, rgba(C.lumen, .035)); gr.addColorStop(1, rgba(C.lumen, 0)); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      if (LITE){ g.globalCompositeOperation = "lighter"; for (const b of B) glow(g, b.host ? C.host : C.bone, 3, cx + b.ux * R, cy + b.uy * R, b.r * R, b.a * .85); g.globalCompositeOperation = "source-over"; }
       [vigC, g] = mk();
       gr = g.createRadialGradient(cx, cy, R * .6, cx, cy, R);
       gr.addColorStop(0, rgba(C.ground, 0)); gr.addColorStop(.78, rgba(C.ground, .45)); gr.addColorStop(1, rgba(C.ground, 1)); g.fillStyle = gr; g.fillRect(0, 0, w, h);
@@ -1143,7 +1155,7 @@ function sceneLens(stage){
       ctx.globalCompositeOperation = "source-over";
       ctx.drawImage(bgC, 0, 0, w, h);
       ctx.globalCompositeOperation = "lighter";
-      for (const b of B){ const x = cx + b.ux * R + Math.sin(t * .07 + b.ph) * R * .02, y = cy + b.uy * R + Math.cos(t * .05 + b.ph) * R * .02; glow(ctx, b.host ? C.host : C.bone, 3, x, y, b.r * R, b.a * (.7 + .3 * Math.sin(t * .4 + b.ph))); }
+      if (!LITE) for (const b of B){ const x = cx + b.ux * R + Math.sin(t * .07 + b.ph) * R * .02, y = cy + b.uy * R + Math.cos(t * .05 + b.ph) * R * .02; glow(ctx, b.host ? C.host : C.bone, 3, x, y, b.r * R, b.a * (.7 + .3 * Math.sin(t * .4 + b.ph))); }
       ctx.globalCompositeOperation = "source-over";
       ctx.beginPath(); for (const e of E) edgePath(ctx, e); ctx.strokeStyle = rgba(C.bone, .07); ctx.lineWidth = 1; ctx.stroke();
       if (showN){
@@ -1154,7 +1166,7 @@ function sceneLens(stage){
       ctx.globalCompositeOperation = "lighter";
       if (showN){
         for (const k of PK){ if (!k.on) continue;
-          const n = k.evil ? 6 : 4, st = k.evil ? .035 : .028;
+          const n = LITE ? (k.evil ? 3 : 1) : (k.evil ? 6 : 4), st = LITE ? (k.evil ? .06 : .05) : (k.evil ? .035 : .028);
           for (let j = n; j >= 0; j--){ const p = k.p - j * st; if (p < 0) continue; curve(k.e, p, q); const f = 1 - j / (n + 1); glow(ctx, C.net, 0, q[0], q[1], (k.evil ? 5.5 : 3.6) * (.55 + .45 * f), (k.evil ? .95 : .6) * f); }
         }
       }
@@ -1876,7 +1888,7 @@ function sceneMemory(){
 const amb = (() => {
   const cv = document.getElementById("ambient"), ctx = cv && cv.getContext && cv.getContext("2d");
   if (!ctx) return null;
-  const S = .5, small = innerWidth < 700, R1 = rng(909), BA = small ? .15 : .17;
+  const S = innerWidth < 700 ? .35 : .5, small = innerWidth < 700, R1 = rng(909), BA = small ? .11 : .12;
   const cur = [rgb(PC.apis).slice(), rgb(PC.scam).slice(), rgb(PC.phish).slice()], tgt = cur.map(c => c.slice());
   const BL = [
     {fx:.11, fy:.08, px:0, py:1.3, ci:0, r:.62},
@@ -1884,7 +1896,7 @@ const amb = (() => {
     {fx:.09, fy:.06, px:4.2, py:2.2, ci:2, r:.5},
     {fx:.05, fy:.12, px:1.1, py:5.1, ci:0, r:.38}
   ];
-  const PT = []; const N = small ? 26 : 60;
+  const PT = []; const N = small ? 18 : 60;
   for (let i = 0; i < N; i++) PT.push({x:R1(), y:R1(), z:.25 + R1() * .75, r:.5 + R1() * 1.3, ph:R1() * TAU, ci:i % 3, vy:.005 + R1() * .01});
   const RG = []; for (let i = 0; i < (small ? 3 : 6); i++) RG.push({x:R1(), y:R1(), r:10 + R1() * 16, ph:R1() * TAU, ci:i % 3, vy:.003 + R1() * .004});
   let W = 1, H = 1, t = 0;
@@ -1931,12 +1943,13 @@ const amb = (() => {
    ========================================================= */
 const FACTORIES = {lens:sceneLens, trace:sceneTrace, proxy:sceneProxy, camera:sceneCamera, solar:sceneSolar, orbit:sceneOrbit, chat:sceneChat, inbox:sceneInbox, memory:sceneMemory};
 const stages = [];
-let raf = 0, last = 0, ambAcc = 0;
+let raf = 0, last = 0, ambAcc = 0, frameAcc = 0;
 const motionOn = () => !reduce && !paused && !document.hidden;
+const FRAME = LITE ? 1 / 30 : 0;
 
-function sizeStage(st){
-  const r = st.cv.getBoundingClientRect(), w = Math.max(1, r.width), h = Math.max(1, r.height);
-  const dpr = Math.min(window.devicePixelRatio || 1, w < 520 ? 1.75 : 2);
+function sizeStage(st, rect){
+  const r = rect || st.cv.getBoundingClientRect(), w = Math.max(1, r.width), h = Math.max(1, r.height);
+  const dpr = Math.min(window.devicePixelRatio || 1, LITE ? 1.5 : 2);
   st.cv.width = Math.round(w * dpr); st.cv.height = Math.round(h * dpr);
   st.w = w; st.h = h; st.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (st.scene.resize) st.scene.resize(w, h);
@@ -1945,19 +1958,27 @@ function drawNow(st){ st.ctx.save(); st.scene.draw(st.ctx, st.w, st.h, st.t); st
 function warm(st, toT){
   const dt = 1 / 30; while (st.t < toT){ st.t += dt; if (st.scene.step) st.scene.step(dt, st.t); }
 }
+function prime(st){
+  if (st.primed) return; st.primed = true;
+  const sc = st.cv.dataset.scene;
+  if (sc && sc !== "lens" && st.t < 1) warm(st, sc === "solar" ? 4.5 : 6);
+  drawNow(st);
+}
 function loop(now){
   raf = 0;
-  const dt = Math.min(.05, Math.max(0, (now - last) / 1000)); last = now;
+  frameAcc += Math.max(0, (now - last) / 1000); last = now;
+  if (FRAME && frameAcc < FRAME){ if (motionOn()) raf = requestAnimationFrame(loop); return; }
+  const dt = Math.min(.07, frameAcc); frameAcc = 0;
   let any = false;
   for (const st of stages){
     st.boost += (st.boostT - st.boost) * Math.min(1, dt * 5);
-    if (!st.visible) continue;
+    if (!st.visible || (examStage && st !== examStage)) continue;
     any = true;
     const k = dt * (1 + st.boost * .55);
     st.t += k; if (st.scene.step) st.scene.step(k, st.t);
     drawNow(st);
   }
-  if (amb){ any = true; ambAcc += dt; if (ambAcc >= 1 / 30){ amb.step(ambAcc); amb.draw(); ambAcc = 0; } }
+  if (amb){ any = true; ambAcc += dt; if (ambAcc >= (LITE ? 1 / 24 : 1 / 30)){ amb.step(ambAcc); amb.draw(); ambAcc = 0; } }
   if (any && motionOn()) raf = requestAnimationFrame(loop);
 }
 function startLoop(){ if (!raf && motionOn()){ last = performance.now(); raf = requestAnimationFrame(loop); } }
@@ -1969,19 +1990,20 @@ function applyMotion(){
 }
 
 const ro = "ResizeObserver" in window ? new ResizeObserver(es => { for (const e of es){ const st = e.target.__st; if (!st) continue; sizeStage(st); if (!raf) drawNow(st); } }) : null;
-const io = "IntersectionObserver" in window ? new IntersectionObserver(es => { for (const e of es){ const st = e.target.__st; if (st) st.visible = e.isIntersecting; } startLoop(); }, {rootMargin:"100px 0px"}) : null;
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => { for (const e of es){ const st = e.target.__st; if (!st) continue; st.visible = e.isIntersecting; if (e.isIntersecting) prime(st); } startLoop(); }, {rootMargin:"200px 0px"}) : null;
 
-document.querySelectorAll("canvas[data-scene]").forEach(cv => {
-  const f = FACTORIES[cv.dataset.scene]; const ctx = cv.getContext && cv.getContext("2d"); if (!f || !ctx) return;
-  const st = {cv, ctx, w:1, h:1, t:0, visible:!io, boost:0, boostT:0, warmed:false};
-  st.scene = f(st); cv.__st = st; stages.push(st);
-  sizeStage(st);
-  if (ro) ro.observe(cv); if (io) io.observe(cv);
-  const host = cv.closest("[data-host]");
-  if (host){ host.addEventListener("pointerenter", () => st.boostT = 1); host.addEventListener("pointerleave", () => st.boostT = 0); }
-  if (cv.dataset.scene !== "lens") warm(st, cv.dataset.scene === "solar" ? 4.5 : 6);
-  drawNow(st);
-});
+{
+  const made = [];
+  document.querySelectorAll("canvas[data-scene]").forEach(cv => {
+    const f = FACTORIES[cv.dataset.scene]; const ctx = cv.getContext && cv.getContext("2d"); if (!f || !ctx) return;
+    const st = {cv, ctx, w:1, h:1, t:0, visible:!io, boost:0, boostT:0, warmed:false, primed:false};
+    st.scene = f(st); cv.__st = st; stages.push(st); made.push(st);
+    const host = cv.closest("[data-host]");
+    if (host){ host.addEventListener("pointerenter", () => st.boostT = 1); host.addEventListener("pointerleave", () => st.boostT = 0); }
+  });
+  const rects = made.map(st => st.cv.getBoundingClientRect());   // read every size first, then write
+  made.forEach((st, i) => { sizeStage(st, rects[i]); if (ro) ro.observe(st.cv); if (io) io.observe(st.cv); else prime(st); });
+}
 if (!ro) addEventListener("resize", () => stages.forEach(st => { sizeStage(st); drawNow(st); }));
 
 /* lens interaction: focus follows the pointer, channels switch the stain */
@@ -2057,7 +2079,7 @@ function openExam(key){
   const holder = document.getElementById("examStage"); holder.textContent = "";
   const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true"); holder.append(cv);
   exam.showModal();
-  const st = {cv, ctx:cv.getContext("2d"), w:1, h:1, t:0, visible:true, boost:0, boostT:0, warmed:true};
+  const st = {cv, ctx:cv.getContext("2d"), w:1, h:1, t:0, visible:true, boost:0, boostT:0, warmed:true, primed:true};
   st.scene = FACTORIES[key](st); cv.__st = st; examStage = st;
   sizeStage(st); if (ro) ro.observe(cv);
   warm(st, st.scene.still ? st.scene.still() : 6);
@@ -2099,7 +2121,9 @@ motionBtn.addEventListener("click", () => { paused = !paused; try { localStorage
 syncMotionBtn();
 mqReduce.addEventListener && mqReduce.addEventListener("change", e => { reduce = e.matches; applyMotion(); });
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopLoop(); else startLoop(); });
-applyMotion();
+if (LITE) setTimeout(applyMotion, 400); else applyMotion();
+// canvas labels use the web fonts: redraw still frames once they arrive
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!raf) stages.forEach(st => { if (st.primed) drawNow(st); }); });
 
 /* ---------------- nav ---------------- */
 const nav = document.getElementById("nav"), menuBtn = document.getElementById("menuBtn");
