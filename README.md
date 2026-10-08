@@ -14,7 +14,7 @@ The page is built like a darkfield microscope bench: the hero is a live "microsc
 - `og.jpg`: the 1200×630 preview image shown when the link is shared on LinkedIn, X or WhatsApp.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.
-- `shehab-shibli.webp` / `shehab-shibli.jpg`: portrait in the About section.
+- `shehab-shibli.jpg`: portrait file used in search-engine data (the About photo itself is embedded in `index.html`).
 - `404.html`: custom "Specimen not found" page that GitHub Pages shows for missing URLs.
 - `MASTER.md`: design system and motion rules.
 - Every animation is drawn live with the Canvas 2D API, runs only while it is on screen, and stops when the tab is hidden. Visitors with "reduce motion" turned on (or who press the pause button) see still frames instead.
