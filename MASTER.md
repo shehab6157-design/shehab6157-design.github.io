@@ -23,6 +23,8 @@ The single source of truth for the visual and motion language of this portfolio.
 | | `--ch-net` | `#4FE3A1` | Network signal |
 | | `--ch-auth` | `#F25CCF` | Auth signal, anomalies |
 | | `--ch-merge` | `#FFF3D1` | Both signals overlap: confirmed |
+| Projects | `--c-apis` `--c-mcp` `--c-animal` `--c-solar` | `#4FE3A1` `#B79BFF` `#FFB547` `#5BD6FF` | One fluorophore per project: frosted slide label, metric ticks, signal names, hover glow |
+| | `--c-sos` `--c-scam` `--c-phish` `--c-ai` | `#FF8A5C` `#7C9CFF` `#F25CCF` `#F0D29A` | |
 | Type | `--f-display` | Newsreader | Name, headings, serif italics |
 | | `--f-body` | Hanken Grotesk | Reading text, buttons |
 | | `--f-mono` | IBM Plex Mono | Data, labels, specimen tags |
@@ -39,10 +41,15 @@ The single source of truth for the visual and motion language of this portfolio.
 
 - **Button**: 44px tall, hairline border, lamp fill sweeps in from the left on hover; `.primary` is filled. Focus: 2px lamp outline, 3px offset.
 - **Lens**: circular canvas inside a graduated focus ring that turns with the focus value.
-- **Slide**: glass slide with a frosted label end and a cover-slip outline over the live specimen. The featured slide keeps the real 3:1 shape of a 75×25 mm slide; half-width slides use 2.4:1 and phones 2.1:1 so the specimen stays readable.
+- **Slide**: glass slide with a frosted label end tinted in the project's color and a cover-slip outline over the live specimen. The featured slide keeps the real 3:1 shape of a 75×25 mm slide; half-width slides use 2.4:1 and phones 2.1:1 so the specimen stays readable.
 - **Readout**: mono label over a serif number with tabular figures.
 
 ## Motion rules in code
+
+- **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
+- **Section sweep**: a short line of the section's color (`--sc`) travels along each section's top border every 9 s.
+- **Glass highlight**: a specular spot follows the pointer across each slide.
+- **APIS honeycomb**: the nine layers light up in order, 0.6 s apart, on a 7.2 s loop.
 
 - All canvases run on one `requestAnimationFrame` loop, only while on screen, and stop when the tab is hidden.
 - `prefers-reduced-motion` or the "Pause motion" button draws one still frame per specimen and disables reveals.
