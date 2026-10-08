@@ -29,7 +29,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"></noscript>
 <script>(function(){var l=document.getElementById("fontcss");if(l){if(l.sheet)l.media="all";else l.addEventListener("load",function(){l.media="all"});}})();</script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Shehab Shibli","alternateName":"שהאב שיבלי","url":"https://shehab6157-design.github.io/","email":"mailto:shehab6157@gmail.com","jobTitle":"Network Engineering and Computer Security Graduate","alumniOf":{"@type":"CollegeOrUniversity","name":"Jordan University of Science and Technology"},"knowsLanguage":["Arabic","English","Hebrew"],"knowsAbout":["Network security","Anomaly detection","Lateral movement detection","AI agent security","AWS","Cisco networking"],"sameAs":["https://www.linkedin.com/in/shehab-shibli","https://github.com/shehab6157-design"]}
+{"@context":"https://schema.org","@type":"Person","name":"Shehab Shibli","alternateName":"שהאב שיבלי","url":"https://shehab6157-design.github.io/","email":"mailto:shehab6157@gmail.com","jobTitle":"Network Engineering and Computer Security Graduate","image":"https://shehab6157-design.github.io/shehab-shibli.jpg","alumniOf":{"@type":"CollegeOrUniversity","name":"Jordan University of Science and Technology"},"knowsLanguage":["Arabic","English","Hebrew"],"knowsAbout":["Network security","Anomaly detection","Lateral movement detection","AI agent security","AWS","Cisco networking"],"sameAs":["https://www.linkedin.com/in/shehab-shibli","https://github.com/shehab6157-design"]}
 </script>
 <style>
 /* Layout: a darkfield microscope bench. A lens hero, a readout strip, then the projects as 3:1 glass slides on one 1200px column. */
@@ -297,6 +297,19 @@ strong{font-weight:600;color:var(--bone)}
 .about-text p{color:var(--mute)}
 .about-text p.first{font:300 clamp(22px,2.2vw,27px)/1.42 var(--f-display);font-variation-settings:"opsz" 30;color:var(--bone)}
 .dl{border-top:1px solid var(--hair)}
+.about-side{display:grid;gap:36px;align-content:start;min-width:0}
+.portrait{position:relative;width:min(300px,78%);aspect-ratio:1/1;max-width:100%;margin:0}
+.portrait::before{content:"";position:absolute;inset:-12%;z-index:-1;border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--c-phish) 16%,transparent),color-mix(in srgb,var(--c-ai) 6%,transparent) 45%,transparent 70%);pointer-events:none}
+.portrait-ring{position:absolute;inset:0;border-radius:50%;pointer-events:none;opacity:.8;
+  background:repeating-conic-gradient(from 0deg,var(--faint) 0deg .5deg,transparent .5deg 6deg);
+  -webkit-mask:radial-gradient(circle closest-side,transparent calc(100% - 9px),#000 calc(100% - 8px),#000 calc(100% - 1px),transparent 100%);
+  mask:radial-gradient(circle closest-side,transparent calc(100% - 9px),#000 calc(100% - 8px),#000 calc(100% - 1px),transparent 100%);
+  animation:ring-turn 80s linear infinite}
+@keyframes ring-turn{to{transform:rotate(1turn)}}
+.portrait picture{position:absolute;inset:16px;display:block;border-radius:50%;overflow:hidden;box-shadow:0 0 0 1px var(--hair-2),0 0 0 5px var(--stage),0 0 0 6px var(--hair),0 40px 80px -40px var(--shade)}
+.portrait img{display:block;width:100%;height:100%;object-fit:cover;transition:transform 600ms var(--e-out)}
+.portrait:hover img{transform:scale(1.03)}
+@media (max-width:820px){.about-side{display:contents}.portrait{order:-1;width:min(220px,60%)}.about-text{order:0}.dl{order:1}}
 .dl div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:16px;padding:15px 0;border-bottom:1px solid var(--hair)}
 .dl dt{font:500 12px/1.9 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
 .dl dd{color:var(--bone);min-width:0;overflow-wrap:anywhere}
@@ -385,11 +398,13 @@ footer{border-top:1px solid var(--hair);padding-block:28px}
     .rv{animation:rv-in linear both;animation-timeline:view();animation-range:entry calc(4% + var(--i,0) * 3%) entry calc(46% + var(--i,0) * 3%)}
     .wipe{animation:wipe linear both;animation-timeline:view();animation-range:entry 0% entry 62%}
     .timeline::after{animation:grow linear both;animation-timeline:view();animation-range:entry 30% cover 62%}
+    .portrait picture{animation:focus-in linear both;animation-timeline:view();animation-range:entry 0% entry 80%}
   }
 }
 @keyframes rv-in{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
 @keyframes wipe{from{clip-path:inset(0 100% -10% 0)}to{clip-path:inset(0 0 -10% 0)}}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes focus-in{from{filter:blur(10px);opacity:.4}to{filter:blur(0);opacity:1}}
 
 
 /* ---------- hero attack button ---------- */
@@ -438,7 +453,7 @@ body:has(.exam[open]){overflow:hidden}
 @media print{
   :root{--ground:#fff;--stage:#fff;--stage-2:#fff;--hair:#d4d8d6;--hair-2:#bcc2bf;--bone:#111;--mute:#333;--faint:#555;--lumen:#6b4e0f;--shade:transparent;color-scheme:light}
   html,body{background:#fff!important;color:#111!important}
-  body::before,#ambient,.nav,.skip,.scope,.cta,.badges,.glass,.mini .specimen,.examine,.layers,.icon-btn,#copyBtn,.copied,.exam,.mini::before,.sec::before{display:none!important}
+  body::before,#ambient,.nav,.skip,.scope,.cta,.badges,.glass,.portrait,.mini .specimen,.examine,.layers,.icon-btn,#copyBtn,.copied,.exam,.mini::before,.sec::before{display:none!important}
   .hero{padding-block:0 12px}.hero-grid{grid-template-columns:1fr}
   .name{font-size:52px;margin-top:8px}.thesis{font-size:20px;margin-top:10px}
   .sec{padding-block:18px;border:0}.sec-head{margin-bottom:14px}
@@ -471,11 +486,11 @@ body:has(.exam[open]){overflow:hidden}
   .name .ln > span,.in,.lens-wrap,.lens canvas,.pulse::after{animation:none!important}
   .btn::before,.glass,.mini,.bigmail::after,.examine,.exam{transition:none}
   .lens-hit{animation:none;display:none}
-  .sec::before,.layers li::after,.node::after{animation:none!important}
+  .sec::before,.layers li::after,.node::after,.portrait-ring,.portrait picture{animation:none!important}
   .node::after{opacity:1;transform:none}
 }
 .still .pulse::after{animation:none}
-.still .rv,.still .wipe,.still .timeline::after,.still .sec::before,.still .layers li::after,.still .node::after{animation:none}
+.still .rv,.still .wipe,.still .timeline::after,.still .sec::before,.still .layers li::after,.still .node::after,.still .portrait-ring,.still .portrait picture{animation:none}
 .still .node::after{opacity:1;transform:none}
 </style>
 </head>
@@ -523,7 +538,7 @@ body:has(.exam[open]){overflow:hidden}
       <p class="lede in" style="--i:3">I'm a Network Engineering and Computer Security graduate with the <strong>CCNA</strong> and <strong>AWS Certified Cloud Practitioner</strong>. My flagship project, <strong>APIS</strong>, defends a network the way a honeybee colony defends its hive: it learns what normal looks like for every device and acts only when different signals agree.</p>
       <div class="cta in" style="--i:4">
         <a class="btn primary" href="#work">See the projects <svg class="arr" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></a>
-        <a class="btn" href="mailto:shehab6157@gmail.com">Email me</a>
+        <a class="btn" href="Shehab_Shibli_CV.pdf" download="Shehab_Shibli_CV.pdf"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M3 13.5h10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>Download CV</a>
         <a class="btn" href="https://www.linkedin.com/in/shehab-shibli" target="_blank" rel="noopener">LinkedIn</a>
         <a class="btn" href="https://github.com/shehab6157-design" target="_blank" rel="noopener">GitHub</a>
       </div>
@@ -791,12 +806,18 @@ body:has(.exam[open]){overflow:hidden}
         <p class="rv" style="--i:2">My biggest project, <strong>APIS</strong>, spots attackers moving inside a network. I tested it on LANL's real public dataset, where it cut false alarms by 79%. Before that, I led the team behind a <strong>real-time animal detection system</strong> on Raspberry Pi and AWS, which made the Top 100 at Jordan's 12th National Technology Parade. I also placed 3rd at <strong>NASA Space Apps 2025</strong>.</p>
         <p class="rv" style="--i:3">I write down what failed as well as what worked, and I only report numbers I measured or simulated, and say which is which.</p>
       </div>
+      <div class="about-side">
+        <figure class="portrait rv">
+          <span class="portrait-ring" aria-hidden="true"></span>
+          <picture><source srcset="shehab-shibli.webp" type="image/webp"><img src="shehab-shibli.jpg" alt="Portrait of Shehab Shibli" width="720" height="720" loading="lazy" decoding="async"></picture>
+        </figure>
       <dl class="dl rv" style="--i:1">
         <div><dt>Based in</dt><dd>Israel, open to relocation</dd></div>
         <div><dt>Languages</dt><dd>Arabic (native), English (fluent), Hebrew (conversational)</dd></div>
         <div><dt>Open to</dt><dd>Roles where I can gain experience on real projects: networking, security, cloud, AI, data and more</dd></div>
         <div><dt>Start</dt><dd>Available now</dd></div>
       </dl>
+      </div>
     </div>
   </div>
 </section>
@@ -896,6 +917,7 @@ body:has(.exam[open]){overflow:hidden}
     <div class="mailrow rv">
       <a class="bigmail" href="mailto:shehab6157@gmail.com" id="mail">shehab6157@gmail.com</a>
       <button class="btn" type="button" id="copyBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="8" height="9" rx="1" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3 11V3a1 1 0 0 1 1-1h6" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>Copy email</button>
+      <a class="btn" href="Shehab_Shibli_CV.pdf" download="Shehab_Shibli_CV.pdf"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v8M4.5 6.8 8 10.3l3.5-3.5M3 13.5h10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>Download CV (PDF)</a>
       <span class="copied" id="copied" aria-live="polite"></span>
     </div>
     <div class="channels rv">
