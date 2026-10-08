@@ -12,6 +12,7 @@ The page is built like a darkfield microscope bench: the hero is a live "microsc
 
 - `index.html`: the whole site in one static page with inline CSS and JavaScript. No build step and no dependencies (fonts come from Google Fonts).
 - `og.png`: the 1200×630 preview image shown when the link is shared on LinkedIn, X or WhatsApp.
+- `404.html`: custom "Specimen not found" page that GitHub Pages shows for missing URLs.
 - `MASTER.md`: design system and motion rules.
 - Every animation is drawn live with the Canvas 2D API, runs only while it is on screen, and stops when the tab is hidden. Visitors with "reduce motion" turned on (or who press the pause button) see still frames instead.
 - Hosted with GitHub Pages straight from the `main` branch. To run it locally, open `index.html` in a browser.

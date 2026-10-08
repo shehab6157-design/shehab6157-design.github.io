@@ -126,7 +126,7 @@ strong{font-weight:600;color:var(--bone)}
 .name .ln > span{display:inline-block;animation:rise 1100ms var(--e-out) 120ms both}
 .name .ln + .ln{padding-left:.55em}
 .name .ln + .ln > span{font-style:italic;font-weight:300;animation-delay:220ms}
-@keyframes rise{from{transform:translateY(104%)}to{transform:none}}
+@keyframes rise{from{transform:translateY(104%);filter:blur(14px)}60%{filter:blur(2px)}to{transform:none;filter:blur(0)}}
 .thesis{margin-top:30px;max-width:25ch;font:italic 300 clamp(23px,2.5vw,31px)/1.28 var(--f-display);font-variation-settings:"opsz" 36;color:var(--bone)}
 .lede{margin-top:20px;max-width:54ch;color:var(--mute)}
 .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
@@ -134,7 +134,7 @@ strong{font-weight:600;color:var(--bone)}
 .badges li{display:inline-flex;align-items:center;gap:8px}
 .badges li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--lumen)}
 .in{animation:fade-up 900ms var(--e-out) both;animation-delay:calc(380ms + var(--i,0) * var(--stagger))}
-@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
 
 .scope{display:grid;justify-items:center;gap:18px;min-width:0}
 .lens-wrap{position:relative;width:min(100%,540px);aspect-ratio:1/1;max-width:100%;animation:fade-up 1200ms var(--e-out) 80ms both}
@@ -144,7 +144,7 @@ strong{font-weight:600;color:var(--bone)}
   mask:radial-gradient(circle closest-side,transparent calc(100% - 12px),#000 calc(100% - 11px),#000 calc(100% - 2px),transparent calc(100% - 1px));
   transform:rotate(var(--focus-rot,0deg));opacity:.85}
 .lens-index{position:absolute;left:50%;top:-6px;width:1px;height:16px;background:var(--lumen);transform:translateX(-50%)}
-.lens{position:absolute;inset:20px;border-radius:50%;overflow:hidden;background:var(--ground);box-shadow:0 0 0 1px var(--hair-2),0 0 0 6px var(--stage),0 0 0 7px var(--hair),0 60px 120px -50px var(--shade);touch-action:pan-y}
+.lens{position:absolute;inset:20px;border-radius:50%;overflow:hidden;cursor:crosshair;background:var(--ground);box-shadow:0 0 0 1px var(--hair-2),0 0 0 6px var(--stage),0 0 0 7px var(--hair),0 60px 120px -50px var(--shade);touch-action:pan-y}
 .lens canvas{position:absolute;inset:0;width:100%;height:100%;display:block;animation:iris 1600ms var(--e-out) 160ms both}
 @keyframes iris{from{clip-path:circle(5% at 50% 50%)}to{clip-path:circle(72% at 50% 50%)}}
 .reticle{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;color:var(--bone);opacity:.32}
@@ -384,11 +384,86 @@ footer{border-top:1px solid var(--hair);padding-block:28px}
 @keyframes wipe{from{clip-path:inset(0 100% -10% 0)}to{clip-path:inset(0 0 -10% 0)}}
 @keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
 
+
+/* ---------- hero attack button ---------- */
+.btn.attack{min-height:38px;padding-inline:12px;font:500 12px/1 var(--f-mono);letter-spacing:.06em;border-color:color-mix(in srgb,var(--ch-auth) 55%,var(--hair-2));color:var(--bone)}
+.btn.attack::before{background:var(--ch-auth)}
+.btn.attack:hover{color:var(--ground);border-color:var(--ch-auth)}
+.lens-hit{position:absolute;pointer-events:none;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;border:1.5px solid var(--ch-auth);animation:hit 700ms var(--e-out) forwards}
+@keyframes hit{from{transform:scale(.4);opacity:1}to{transform:scale(1.6);opacity:0}}
+
+/* ---------- scroll progress ---------- */
+.nav::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;background:linear-gradient(90deg,var(--c-apis),var(--c-solar),var(--c-scam),var(--c-mcp),var(--c-phish),var(--c-ai));transform-origin:left center;transform:scaleX(var(--prog,0));opacity:.85}
+
+/* ---------- examine ---------- */
+.examine{position:absolute;right:10px;top:10px;z-index:3;display:inline-flex;align-items:center;gap:7px;min-height:30px;padding:0 10px;border:1px solid color-mix(in srgb,var(--c,var(--lumen)) 50%,var(--hair-2));border-radius:999px;background:color-mix(in srgb,var(--ground) 72%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:var(--bone);font:500 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;opacity:0;transform:translateY(-4px);transition:opacity var(--d-ui) var(--e-out),transform var(--d-ui) var(--e-out),background-color var(--d-micro),color var(--d-micro)}
+.examine svg{width:12px;height:12px}
+.slide:hover .examine,.mini:hover .examine,.examine:focus-visible{opacity:1;transform:none}
+.examine:hover{background:var(--c,var(--lumen));color:var(--ground)}
+@media (hover:none){.examine{opacity:1;transform:none}}
+body:has(.exam[open]){overflow:hidden}
+.exam{width:min(1120px,calc(100% - 32px));max-width:none;max-height:calc(100% - 32px);padding:0;border:1px solid color-mix(in srgb,var(--c,var(--lumen)) 40%,var(--hair-2));border-radius:var(--r-2);background:var(--stage);color:var(--bone);box-shadow:0 40px 120px -20px var(--shade),0 0 80px -30px color-mix(in srgb,var(--c,var(--lumen)) 50%,transparent);overflow:auto;opacity:1;transform:none;transition:opacity var(--d-ui) var(--e-out),transform var(--d-ui) var(--e-out),overlay var(--d-ui) allow-discrete,display var(--d-ui) allow-discrete}
+@starting-style{.exam[open]{opacity:0;transform:translateY(10px) scale(.98)}}
+.exam::backdrop{background:color-mix(in srgb,var(--ground) 78%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.exam-in{display:grid;gap:22px;padding:clamp(16px,2.4vw,28px)}
+.exam-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.exam-head .eyebrow{color:var(--c,var(--faint))}
+.exam-head h3{margin-top:6px;font-size:clamp(22px,2.6vw,30px)}
+.exam-stage{position:relative;aspect-ratio:2.2/1;max-height:58vh;width:100%;border-radius:var(--r-1);overflow:hidden;box-shadow:inset 0 0 0 1px var(--hair-2)}
+.exam-stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.exam-notes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 48px}
+.exam-notes .eyebrow{margin-bottom:12px}
+.legend{list-style:none;padding:0;display:grid;gap:10px}
+.legend li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:12px;align-items:start;font-size:15px;line-height:1.5;color:var(--mute)}
+.legend i{width:12px;height:12px;margin-top:5px;border-radius:3px;background:var(--sw);box-shadow:0 0 10px var(--sw)}
+.legend b{color:var(--bone);font-weight:600}
+.steps{padding:0;list-style:none;counter-reset:st;display:grid;gap:10px}
+.steps li{counter-increment:st;display:grid;grid-template-columns:26px minmax(0,1fr);gap:10px;font-size:15px;line-height:1.5;color:var(--mute)}
+.steps li::before{content:counter(st);display:grid;place-items:center;width:22px;height:22px;margin-top:1px;border-radius:50%;border:1px solid color-mix(in srgb,var(--c,var(--lumen)) 60%,var(--hair-2));font:500 11px/1 var(--f-mono);color:var(--bone)}
+.exam-note{font-size:13px;line-height:1.5;color:var(--faint);border-top:1px solid var(--hair);padding-top:14px}
+@media (max-width:720px){.exam-stage{aspect-ratio:1.5/1}.exam-notes{grid-template-columns:1fr}}
+
+/* ---------- local time ---------- */
+.channels small.lt{font:500 12px/1.4 var(--f-mono);color:var(--faint);letter-spacing:.04em}
+.channels small.lt:empty{display:none}
+
+/* ---------- print: a clean one-column CV ---------- */
+@media print{
+  :root{--ground:#fff;--stage:#fff;--stage-2:#fff;--hair:#d4d8d6;--hair-2:#bcc2bf;--bone:#111;--mute:#333;--faint:#555;--lumen:#6b4e0f;--shade:transparent;color-scheme:light}
+  html,body{background:#fff!important;color:#111!important}
+  body::before,#ambient,.nav,.skip,.scope,.cta,.badges,.glass,.mini .specimen,.examine,.layers,.icon-btn,#copyBtn,.copied,.exam,.mini::before,.sec::before{display:none!important}
+  .hero{padding-block:0 12px}.hero-grid{grid-template-columns:1fr}
+  .name{font-size:52px;margin-top:8px}.thesis{font-size:20px;margin-top:10px}
+  .sec{padding-block:18px;border:0}.sec-head{margin-bottom:14px}
+  h2{font-size:28px}
+  .rv,.wipe,.in,.name .ln > span{animation:none!important;opacity:1!important;transform:none!important;clip-path:none!important;filter:none!important}
+  .metric,.cert,.job,.netacad,.list li,.skill,.mini,.sec-head{break-inside:avoid}
+  .sec-head,.slide h3{break-after:avoid}
+  .mini{display:block!important;border:1px solid var(--hair);padding:0}
+  .mini .body{padding:12px 14px}
+  .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))!important;margin-top:28px}
+  .feature .body{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+  .more{margin-top:28px}
+  .body > p:not(.kicker),.facts li,.about-text p,.job p:not(.org){font-size:12.5px;line-height:1.45}
+  h3,.body h3{font-size:19px}.mini h3{font-size:17px}
+  .metric b{font-size:24px}.metric{padding:10px 12px}
+  .readout li{padding:14px 12px}.num{font-size:28px}
+  .readout li::before,.metric::before,.f-name::before,.node,.bar i{box-shadow:none!important}
+  .btn{border:0;padding:0;min-height:0;background:none!important;color:#111!important}
+  .btn::before{display:none}
+  .links a::after,.channels a::after{content:" " attr(href);font:400 10px var(--f-mono);color:#555}
+  .grid-2,.grid-3{gap:18px}
+  .contact{padding-block:18px}.bigmail{font-size:30px}
+  footer{display:none}
+}
+
 /* ---------- reduced motion / paused ---------- */
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
   .name .ln > span,.in,.lens-wrap,.lens canvas,.pulse::after{animation:none!important}
-  .btn::before,.glass,.mini,.bigmail::after{transition:none}
+  .btn::before,.glass,.mini,.bigmail::after,.examine,.exam{transition:none}
+  .lens-hit{animation:none;display:none}
   .sec::before,.layers li::after,.node::after{animation:none!important}
   .node::after{opacity:1;transform:none}
 }
@@ -472,9 +547,10 @@ footer{border-top:1px solid var(--hair);padding-block:28px}
           <button type="button" data-ch="auth" aria-pressed="false"><span class="d" style="--c:var(--ch-auth)"></span>Auth</button>
           <button type="button" data-ch="both" aria-pressed="true"><span class="dd"></span>Merged</button>
         </div>
-        <p class="phase" id="phase" aria-live="off"><b>Baseline</b> · learning each host's normal peers</p>
+        <button class="btn attack" type="button" id="attackBtn"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3" stroke="currentColor" stroke-width="1.4"/></svg>Launch an attack</button>
+        <p class="phase" id="phase" aria-live="off"><b>The Queen</b> · learning every host's baseline</p>
       </div>
-      <figcaption id="scopeCap">A live simulation of how APIS works. Network and login signals are drawn as two stains. No single signal is ever acted on: a host is confirmed only when both agree, and then it is contained. Move over the lens to change focus.</figcaption>
+      <figcaption id="scopeCap">A live simulation of how APIS works. Network and login signals are drawn as two stains. No single signal is ever acted on: a host is confirmed only when both agree, and then it is contained. <strong>Click any host to attack from it</strong>, or move over the lens to change focus.</figcaption>
     </figure>
   </div>
 </section>
@@ -818,11 +894,26 @@ footer{border-top:1px solid var(--hair);padding-block:28px}
       <a href="tel:+972507848250"><span>Phone</span><b>+972 50-784-8250</b></a>
       <a href="https://www.linkedin.com/in/shehab-shibli" target="_blank" rel="noopener"><span>LinkedIn</span><b>in/shehab-shibli</b></a>
       <a href="https://github.com/shehab6157-design" target="_blank" rel="noopener"><span>GitHub</span><b>shehab6157-design</b></a>
-      <div><span>Location</span><b>Israel · open to relocation</b></div>
+      <div><span>Location</span><b>Israel · open to relocation</b><small class="lt" id="localTime"></small></div>
     </div>
   </div>
 </section>
 </main>
+
+<dialog class="exam" id="exam" aria-labelledby="examTitle">
+  <div class="exam-in">
+    <header class="exam-head">
+      <div><p class="eyebrow" id="examEyebrow"></p><h3 id="examTitle"></h3></div>
+      <button class="icon-btn" type="button" id="examClose"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke="currentColor" stroke-width="1.6" fill="none"/></svg><span class="sr">Close</span></button>
+    </header>
+    <div class="exam-stage" id="examStage"></div>
+    <div class="exam-notes">
+      <div><p class="eyebrow">What the colors mean</p><ul class="legend" id="examLegend"></ul></div>
+      <div><p class="eyebrow">What happens</p><ol class="steps" id="examSteps"></ol></div>
+    </div>
+    <p class="exam-note" id="examNote"></p>
+  </div>
+</dialog>
 
 <footer>
   <div class="wrap foot">
@@ -912,7 +1003,7 @@ function sceneLens(stage){
   const PK = []; for (let i = 0; i < 120; i++) PK.push({on:0, e:null, p:0, v:0, evil:0});
   const PU = []; for (let i = 0; i < 32; i++) PU.push({on:0, h:0, age:0, evil:0, hit:0});
   const P = 15;
-  let cyc = -1, intr = 0, tg = [], EE = [], blips = [], contain = 0, spawnAcc = 0, evilAcc = 0, blipT = 0, intro = 1, bcDone = 0, bcT = 0;
+  let cyc = -1, intr = 0, tg = [], EE = [], blips = [], contain = 0, spawnAcc = 0, evilAcc = 0, blipT = 0, intro = 1, bcDone = 0, bcT = 0, forced = -1;
   const RIP = [];
   let showN = true, showA = true, focus = 1.6, ptr = null;
   let w = 0, h = 0, cx = 0, cy = 0, R = 0, bgC = null, vigC = null;
@@ -924,7 +1015,7 @@ function sceneLens(stage){
   function newCycle(n){
     const r = rng(97 + n * 31);
     const outer = []; for (let i = 0; i < H.length; i++) if (Math.hypot(H[i].ux, H[i].uy) > .42) outer.push(i);
-    intr = outer[Math.floor(r() * outer.length)];
+    intr = forced >= 0 ? forced : outer[Math.floor(r() * outer.length)]; forced = -1;
     const cand = []; for (let i = 0; i < H.length; i++) if (i !== intr && !H[intr].peers.includes(i)) cand.push(i);
     cand.sort((a, b) => dist(a, intr) - dist(b, intr));
     const pool = cand.slice(0, 6); tg = [];
@@ -962,6 +1053,20 @@ function sceneLens(stage){
   }
 
   const api = {
+    // start the attack from the host nearest to (ux, uy) in lens units (-1..1)
+    inject(ux, uy){
+      let best = -1, bd = 9;
+      for (let i = 0; i < H.length; i++){ const d = Math.hypot(H[i].ux - ux, H[i].uy - uy); if (d < bd){ bd = d; best = i; } }
+      if (best < 0 || bd > .22) return null;
+      forced = best;
+      for (const k of PK) k.on = 0;
+      for (const u of PU) u.on = 0;
+      for (const hh of H){ hh.fN = 0; hh.fA = 0; hh.cf = 0; }
+      contain = 0; RIP.length = 0; blipT = 0; bcT = 0; intro = 0;
+      stage.t = (Math.floor(stage.t / P) + 1) * P + 2.9;
+      return {ux:H[best].ux, uy:H[best].uy};
+    },
+    randomHost(){ const pool = []; for (let i = 0; i < H.length; i++) if (Math.hypot(H[i].ux, H[i].uy) > .3 && i !== intr) pool.push(i); const i = pool[Math.floor(Math.random() * pool.length)]; return {ux:H[i].ux, uy:H[i].uy}; },
     set channel(v){ showN = v !== "auth"; showA = v !== "net"; },
     set pointer(p){ ptr = p; },
     resize(W, Hh){
@@ -1885,11 +1990,91 @@ const lensEl = document.getElementById("lens");
 if (lensSt && lensEl){
   lensEl.addEventListener("pointermove", e => { const r = lensEl.getBoundingClientRect(); lensSt.scene.pointer = {x:(e.clientX - r.left) / r.width * 2 - 1, y:(e.clientY - r.top) / r.height * 2 - 1}; });
   lensEl.addEventListener("pointerleave", () => { lensSt.scene.pointer = null; });
+  const attackAt = (ux, uy) => {
+    const hit = lensSt.scene.inject(ux, uy); if (!hit) return false;
+    if (!reduce){ const m = document.createElement("span"); m.className = "lens-hit"; m.style.left = ((hit.ux + 1) / 2 * 100) + "%"; m.style.top = ((hit.uy + 1) / 2 * 100) + "%"; lensEl.append(m); setTimeout(() => m.remove(), 800); }
+    if (!raf){ warm(lensSt, lensSt.t + 4.7); drawNow(lensSt); }
+    return true;
+  };
+  lensEl.addEventListener("click", e => { const r = lensEl.getBoundingClientRect(); attackAt((e.clientX - r.left) / r.width * 2 - 1, (e.clientY - r.top) / r.height * 2 - 1); });
+  const attackBtn = document.getElementById("attackBtn");
+  if (attackBtn) attackBtn.addEventListener("click", () => { const p = lensSt.scene.randomHost(); attackAt(p.ux, p.uy); });
   document.querySelectorAll(".chan button").forEach(b => b.addEventListener("click", () => {
     document.querySelectorAll(".chan button").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
     lensSt.scene.channel = b.dataset.ch;
     if (!raf) drawNow(lensSt);
   }));
+}
+
+/* =========================================================
+   EXAMINE — a full-size live view of a specimen with a legend
+   ========================================================= */
+const EXAM = {
+  trace:{c:"apis", eyebrow:"APIS · lab result, re-enacted", title:"Traffic between three lab machines, against their baselines",
+    legend:[[C.net, "<b>Green line:</b> how much each pair of machines talks over time"], [C.host, "<b>Shaded band:</b> the normal range APIS learned for that pair"], [C.auth, "<b>Pink spikes:</b> <code>VOLUME_OUTLIER</code> alerts, bursts far above the band"]],
+    steps:["APIS learns a baseline for every pair of machines: who talks to whom, when, and how much.", "An attacker on 10.0.2.10 fires rapid SSH connections at 10.0.2.11.", "Each burst leaves the learned band and raises a VOLUME_OUTLIER alert. In my real lab test this fired 7 alerts, all on that one pair.", "The other pairs stay inside their bands, so they raise nothing."],
+    note:"The lines are generated for the animation; the IPs and the 7-alert result come from my real 3-VM lab capture."},
+  proxy:{c:"mcp", eyebrow:"MCP Security Proxy · illustration", title:"Every AI-agent tool call goes through the proxy",
+    legend:[[PC.mcp, "<b>Violet:</b> AI agents (left), the proxy (striped line) and the MCP tools (hexagons)"], [C.net, "<b>Green:</b> a call that fits the agent's learned pattern"], [C.lumen, "<b>Amber:</b> one unusual signal, an <b>observation</b>, logged only"], [C.auth, "<b>Pink:</b> two correlated signals, an <b>alert</b>, narrated to Telegram"]],
+    steps:["Every call is forwarded to the tool (never blocked) and written to a hash-chained audit log, the row of blocks along the bottom.", "Agent 2 uses a tool it has never used before: NEW_TOOL. One signal alone is only an observation.", "Agent 3 is hijacked: it calls http_post, which is new for it, then bursts calls in quick succession: NEW_TOOL plus SEQUENCE_SPIKE.", "Two correlated signals make an alert, and the run is narrated to Telegram."],
+    note:"Tiering, signals and audit log follow the project's README. Containment in this project is a written recommendation, never an automatic action."},
+  camera:{c:"animal", eyebrow:"Animal Detection · illustration", title:"From a roadside camera to a real-time alert",
+    legend:[[PC.animal, "<b>Amber box:</b> YOLOv5 detection on the Raspberry Pi 5 (83% mAP, 280 ms inference)"], [PC.animal, "<b>Right column:</b> the alert path, lit as the message travels"], [C.auth, "<b>Red dot:</b> the camera is live"]],
+    steps:["The Pi 5 runs YOLOv5 on the camera feed, right at the edge.", "When an animal is detected, the Pi publishes a message over MQTT secured with TLS.", "AWS IoT Core receives it in the cloud.", "Lambda, SNS and DynamoDB turn it into a real-time alert and keep a record of it."],
+    note:"The animal and scene are drawn for illustration; the pipeline and numbers are the project's."},
+  solar:{c:"solar", eyebrow:"Bio-Inspired Solar Screen · one simulated day", title:"How the bio-stack screen spends a day",
+    legend:[[PC.solar, "<b>Cyan:</b> the bio-stack screen and its energy use"], [C.lumen, "<b>Gold rays:</b> daylight, reused by the reflective display"], [PC.sos, "<b>Coral rays:</b> near-infrared light, harvested by the antenna layer"]],
+    steps:["In daylight the screen switches to <b>reflective</b> mode (chameleon layer): room light lights the display, and near-IR light is harvested.", "After dark it <b>glows</b>, using firefly-style light extraction to get more light per watt. It harvests nothing then, because harvesting on a glowing screen is a net loss.", "When stored energy runs low it enters <b>torpor</b>, slowing its updates like a hummingbird at night.", "Across one office day the model uses 2,004 J instead of 6,300 J, and wakes up 3 times instead of 73. The moth-eye texture cuts glare from 4.4% to under 1%."],
+    note:"All results are simulations from the project's model, not hardware measurements. The bars fill evenly for illustration; only the end values come from the model."},
+  orbit:{c:"sos", eyebrow:"S.O.S · mission concept", title:"Sweeping debris from low Earth orbit",
+    legend:[[PC.sos, "<b>Coral lines:</b> the net-and-gel capture pulling small debris in"], [C.auth, "<b>Pink beam:</b> the laser array working on larger fragments"], [C.host, "<b>Blue:</b> the satellite's solar panels and Earth's atmosphere"]],
+    steps:["The sweeper flies through a debris band in low Earth orbit.", "Small pieces are caught with the net and gel. The satellite also carries an onboard recycling unit and a research core.", "Larger fragments are handled by the laser array."],
+    note:"A concept illustration of Team Orion's design, which placed 3rd at NASA Space Apps 2025."},
+  chat:{c:"scam", eyebrow:"ScamShield · in development", title:"Encrypted end to end, checked on your device",
+    legend:[[PC.scam, "<b>Blue locks:</b> end-to-end encrypted messages; the scrambled text is all the server sees"], [C.lumen, "<b>Gold line:</b> the scam check running inside the app"], [C.net, "<b>Green check:</b> a clean message"], [C.auth, "<b>Pink:</b> a likely scam, shown with a warning"]],
+    steps:["A message leaves the sender already encrypted.", "The self-hosted Dendrite homeserver relays it but can only see ciphertext.", "My custom client decrypts it on your device and runs the scam check, using my phishing detector's engine.", "Clean messages show normally; likely scams are flagged with a warning."],
+    note:"The check has to run on the device, because with end-to-end encryption the server cannot read messages."},
+  inbox:{c:"phish", eyebrow:"Phishing Detector · finished", title:"Three signals per message",
+    legend:[[PC.phish, "<b>Pink:</b> words the TF-IDF text model weighs as phishing"], [PC.animal, "<b>Amber outline:</b> a regex-based behavioral pattern"], [PC.scam, "<b>Blue:</b> a sender-history signal"], [C.faint, "<b>MISSED:</b> phishing that slipped through"]],
+    steps:["Each message passes the scan line.", "The text model, the regex patterns and the sender history each add evidence.", "Messages with strong signals are flagged as phishing.", "One in four phishing messages slips through, matching my real result of 9 caught out of 12, with 0 false alarms on 12 clean messages."],
+    note:"The miss rate is shown on purpose. It's my measured result, not a perfect demo."},
+  memory:{c:"ai", eyebrow:"Personal AI Assistant · full-stack build", title:"Retrieve, answer, remember",
+    legend:[[C.host, "<b>Blue dots:</b> stored memories in SQLite"], [PC.ai, "<b>Gold:</b> the memories retrieved for this question (RAG)"], [C.net, "<b>Green:</b> the new memory saved after answering"]],
+    steps:["A question arrives.", "The most relevant memories are pulled into the context.", "The Claude API answers using them.", "The exchange is saved back, so the assistant remembers next time."],
+    note:"Built with the Claude API, FastAPI and SQLite."}
+};
+const exam = document.getElementById("exam");
+let examStage = null;
+function closeExam(){ if (exam && exam.open) exam.close(); }
+function openExam(key){
+  const d = EXAM[key]; if (!exam || !d || typeof exam.showModal !== "function") return;
+  exam.style.setProperty("--c", PC[d.c]);
+  document.getElementById("examEyebrow").textContent = d.eyebrow;
+  document.getElementById("examTitle").textContent = d.title;
+  document.getElementById("examLegend").innerHTML = d.legend.map(([c, txt]) => `<li style="--sw:${c}"><i></i><span>${txt}</span></li>`).join("");
+  document.getElementById("examSteps").innerHTML = d.steps.map(x => `<li><span>${x}</span></li>`).join("");
+  document.getElementById("examNote").textContent = d.note;
+  const holder = document.getElementById("examStage"); holder.textContent = "";
+  const cv = document.createElement("canvas"); cv.setAttribute("aria-hidden", "true"); holder.append(cv);
+  exam.showModal();
+  const st = {cv, ctx:cv.getContext("2d"), w:1, h:1, t:0, visible:true, boost:0, boostT:0, warmed:true};
+  st.scene = FACTORIES[key](st); cv.__st = st; examStage = st;
+  sizeStage(st); if (ro) ro.observe(cv);
+  warm(st, st.scene.still ? st.scene.still() : 6);
+  stages.push(st); drawNow(st); startLoop();
+}
+if (exam){
+  exam.addEventListener("close", () => { if (examStage){ const i = stages.indexOf(examStage); if (i >= 0) stages.splice(i, 1); if (ro) ro.unobserve(examStage.cv); examStage = null; } });
+  exam.addEventListener("click", e => { if (e.target === exam) closeExam(); });
+  document.getElementById("examClose").addEventListener("click", closeExam);
+  const ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M13.5 2.5 9 7M6.5 13.5h-4v-4M2.5 13.5 7 9" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+  document.querySelectorAll("[data-host] canvas[data-scene]").forEach(cv => {
+    const key = cv.dataset.scene; if (!EXAM[key]) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "examine"; b.innerHTML = ICON + "Examine";
+    b.setAttribute("aria-label", "Examine: " + EXAM[key].title);
+    b.addEventListener("click", () => openExam(key));
+    (cv.closest(".glass") || cv.parentElement).append(b);
+  });
 }
 
 /* ambient: size with the window, tint by the section in view */
@@ -1918,7 +2103,11 @@ applyMotion();
 
 /* ---------------- nav ---------------- */
 const nav = document.getElementById("nav"), menuBtn = document.getElementById("menuBtn");
-const onScroll = () => nav.classList.toggle("scrolled", scrollY > 8);
+const onScroll = () => {
+  nav.classList.toggle("scrolled", scrollY > 8);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  nav.style.setProperty("--prog", max > 0 ? Math.min(1, scrollY / max).toFixed(4) : "0");
+};
 addEventListener("scroll", onScroll, {passive:true}); onScroll();
 menuBtn.addEventListener("click", () => { const open = !nav.classList.contains("open"); nav.classList.toggle("open", open); menuBtn.setAttribute("aria-expanded", open ? "true" : "false"); });
 document.querySelectorAll(".nav-links a").forEach(a => a.addEventListener("click", () => { nav.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }));
@@ -1947,6 +2136,18 @@ document.querySelectorAll(".valid[data-start]").forEach(v => {
   const k = clamp((now - s) / (e - s)); const bar = v.querySelector(".bar i"); if (bar) bar.style.setProperty("--v", k.toFixed(3));
   const left = Math.max(0, Math.round((e - now) / (30.44 * 864e5))); const l = v.querySelector(".left"); if (l) l.textContent = left + " months left";
 });
+
+/* ---------------- local time in Israel ---------------- */
+const lt = document.getElementById("localTime");
+if (lt && window.Intl){
+  try {
+    const f = new Intl.DateTimeFormat("en-GB", {hour:"2-digit", minute:"2-digit", timeZone:"Asia/Jerusalem"});
+    let off = "";
+    try { const part = new Intl.DateTimeFormat("en-US", {timeZone:"Asia/Jerusalem", timeZoneName:"shortOffset"}).formatToParts(new Date()).find(x => x.type === "timeZoneName"); if (part) off = part.value.replace("GMT", "UTC"); } catch (e) {}
+    const tick = () => { lt.textContent = "Local time " + f.format(new Date()) + (off ? " · " + off : ""); };
+    tick(); setInterval(tick, 30000);
+  } catch (e) {}
+}
 
 /* ---------------- copy email ---------------- */
 const copyBtn = document.getElementById("copyBtn"), copied = document.getElementById("copied"), mail = document.getElementById("mail");

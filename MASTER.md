@@ -43,12 +43,18 @@ The single source of truth for the visual and motion language of this portfolio.
 - **Lens**: circular canvas inside a graduated focus ring that turns with the focus value.
 - **Slide**: glass slide with a frosted label end tinted in the project's color and a cover-slip outline over the live specimen. The featured slide keeps the real 3:1 shape of a 75×25 mm slide; half-width slides use 2.4:1 and phones 2.1:1 so the specimen stays readable.
 - **Readout**: mono label over a serif number with tabular figures.
+- **Examine dialog**: native `<dialog>` with a live full-size copy of a specimen, a color legend and numbered steps (the steps are a real sequence). Opens with `@starting-style` fade and lift, closes on Esc or backdrop click.
+- **Attack control**: clicking a host in the hero lens (or the Launch button) restarts the APIS cycle with that host as the intruder.
+- **Print**: a white, two-column CV layout; canvases, navigation and buttons are hidden and link URLs are printed.
+- **404**: `404.html`, an empty microscope slide in the same tokens.
 
 ## Motion rules in code
 
 - **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
 - **Section sweep**: a short line of the section's color (`--sc`) travels along each section's top border every 9 s.
 - **Glass highlight**: a specular spot follows the pointer across each slide.
+- **Focus pull**: on load the name and intro come into focus (blur 14px → 0) as the lens iris opens.
+- **Scroll progress**: a 2px line under the navigation in the six project colors, scaled by scroll position.
 - **APIS honeycomb**: the nine layers light up in order, 0.6 s apart, on a 7.2 s loop.
 
 - All canvases run on one `requestAnimationFrame` loop, only while on screen, and stop when the tab is hidden.
