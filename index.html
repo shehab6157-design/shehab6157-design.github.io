@@ -28,7 +28,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" media="print" id="fontcss">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"></noscript>
 <script>(function(){var l=document.getElementById("fontcss");if(l){if(l.sheet)l.media="all";else l.addEventListener("load",function(){l.media="all"});}})();</script>
-<script>(function(){try{var d=document.documentElement,q=location.search,n=navigator,seen=false,still=false;try{seen=sessionStorage.getItem("ss-intro")==="seen"}catch(e){}try{still=localStorage.getItem("ss-motion")==="off"}catch(e){}var bot=/bot|crawl|spider|lighthouse|slurp|bingpreview|facebookexternalhit|embedly|whatsapp|telegram|linkedinbot|twitterbot|headless/i.test(n.userAgent||"")||n.webdriver;var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;if(/[?&]intro=1\b/.test(q)||(!/[?&]intro=0\b/.test(q)&&!seen&&!still&&!bot&&!rm&&!location.hash)){d.classList.add("intro-hold","intro-show");var s=document.createElement("script");s.src="intro.js?v=a96d0859";s.async=true;s.setAttribute("data-intro","1");document.head.appendChild(s);var off=function(){if(!window.__introReady&&d.classList.contains("intro-show")){d.classList.remove("intro-hold","intro-show");dispatchEvent(new Event("intro-off"))}};addEventListener("load",function(){setTimeout(off,300)});setTimeout(off,9000)}}catch(e){}})();</script>
+<script>(function(){try{var d=document.documentElement,q=location.search,n=navigator,seen=false,still=false;try{seen=sessionStorage.getItem("ss-intro")==="seen"}catch(e){}try{still=localStorage.getItem("ss-motion")==="off"}catch(e){}var bot=/bot|crawl|spider|lighthouse|slurp|bingpreview|facebookexternalhit|embedly|whatsapp|telegram|linkedinbot|twitterbot|headless/i.test(n.userAgent||"")||n.webdriver;var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;if(/[?&]intro=1\b/.test(q)||(!/[?&]intro=0\b/.test(q)&&!seen&&!still&&!bot&&!rm&&!location.hash)){d.classList.add("intro-hold","intro-show");var s=document.createElement("script");s.src="intro.js?v=b6f9f14b";s.async=true;s.setAttribute("data-intro","1");document.head.appendChild(s);var off=function(){if(!window.__introReady&&d.classList.contains("intro-show")){d.classList.remove("intro-hold","intro-show");dispatchEvent(new Event("intro-off"))}};addEventListener("load",function(){setTimeout(off,300)});setTimeout(off,9000)}}catch(e){}})();</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Shehab Shibli","alternateName":"שהאב שיבלי","url":"https://shehab6157-design.github.io/","email":"mailto:shehab6157@gmail.com","jobTitle":"Network Engineering and Computer Security Graduate","image":"https://shehab6157-design.github.io/shehab-shibli.jpg","alumniOf":{"@type":"CollegeOrUniversity","name":"Jordan University of Science and Technology"},"knowsLanguage":["Arabic","English","Hebrew"],"knowsAbout":["Network security","Anomaly detection","Lateral movement detection","AI agent security","AWS","Cisco networking"],"sameAs":["https://www.linkedin.com/in/shehab-shibli","https://github.com/shehab6157-design"]}
 </script>
@@ -632,7 +632,7 @@ html.intro-show{overflow:hidden;scrollbar-gutter:stable}
       <button class="btn primary ig-play" id="introPlay" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.6v10.8L13.2 8z" fill="currentColor"/></svg>Play the intro</button>
       <button class="ig-skip" id="introGateSkip" type="button">Skip to the portfolio</button>
     </div>
-    <p class="ig-note">A 19-second film with music<span class="ig-kbd"> · Esc to skip</span></p>
+    <p class="ig-note">A 33-second film with music<span class="ig-kbd"> · Esc to skip</span></p>
   </div>
   <div class="intro-hud" aria-hidden="true">
     <span class="ih-c tl"></span><span class="ih-c tr"></span><span class="ih-c bl"></span><span class="ih-c br"></span>
@@ -2466,7 +2466,7 @@ copyBtn.addEventListener("click", () => {
 {
   const api = {root, C, PC, MONO, LITE, TAU, clamp, lerp, eOut, eIO, rgb, rgba, glow, grain, rng, hexPath, rrect,
     setIntro(on){ if (introOn === on) return; introOn = on; applyMotion(); }, reduced: () => reduce, pending: null};
-  const SRC = "intro.js?v=a96d0859", replayBtn = document.getElementById("introReplay"), aud = document.getElementById("introAudio");
+  const SRC = "intro.js?v=b6f9f14b", replayBtn = document.getElementById("introReplay"), aud = document.getElementById("introAudio");
   const load = () => { if (window.__introInit || window.__introReady || document.querySelector('script[data-intro]')) return; const sc = document.createElement("script"); sc.src = SRC; sc.async = true; sc.dataset.intro = "1"; document.head.append(sc); };
   if (replayBtn){
     const warm = () => { load(); if (aud && aud.preload !== "auto"){ aud.preload = "auto"; try { aud.load(); } catch (e) {} } };

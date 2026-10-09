@@ -1,5 +1,5 @@
-/* Shehab Shibli · portfolio intro film. A 19-second title sequence drawn live on canvas,
-   cut to an original 128 BPM score (intro.mp3). Loaded by index.html only when it is needed. */
+/* Shehab Shibli · portfolio intro film. A 33-second title sequence drawn live on canvas,
+   cut to an original 124 BPM score (intro.mp3). Loaded by index.html only when it is needed. */
 (function(){
 "use strict";
 function init(api){
@@ -23,8 +23,12 @@ const heroName = $("name"), lensEl = $("lens"), lensWrap = $("lensWrap");
 const INERT = [document.querySelector(".skip"), $("nav"), $("top"), document.querySelector("body > footer"), $("exam")].filter(Boolean);
 const DEV = /[?&]introdev\b/.test(location.search);
 const INK = "#0A0E0D";
-const BPM = 128, B = 60 / BPM, BAR = 4 * B, END = 10 * BAR;
-const T = (bar, beat = 0) => bar * BAR + beat * B;
+const BPM = 124, B = 60 / BPM;
+// scene starts in beats: power on, thesis, APIS, lateral movement, measured, method, builds, credentials, the name, hand-off, end
+const SB = [0, 4, 10, 16, 22, 34, 40, 52, 58, 64, 68], ST = SB.map(x => x * B), END = ST[10];
+const TS = (i, beat = 0) => ST[i] + beat * B, DUR = i => ST[i + 1] - ST[i];
+const sceneAt = t => { let i = 0; while (i < 9 && t >= ST[i + 1]) i++; return i; };
+const KICKS = []; for (let b = 4; b < 64; b++) if (b < 35 || (b >= 40 && b < 56) || b >= 58) KICKS.push(b * B);
 
 /* ---------- easing and noise ---------- */
 const cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
@@ -158,16 +162,15 @@ function lensRing(x, y, R, p, t, a, idx = true){
 const HB = [[0, 1], [.17, .62], [2 * B, 1], [2 * B + .17, .62]];
 function heart(t){ let h = 0; for (const [ht, s] of HB) if (t >= ht) h += s * Math.exp(-(t - ht) * 8); return h; }
 function kickAge(t){
-  const bar = Math.floor(t / BAR); if (bar < 1 || bar > 7) return 9;
-  const lt = t - bar * BAR; if (bar === 5) return lt;
-  return lt - Math.floor(lt / B) * B;
+  let k = -1; for (let i = 0; i < KICKS.length && KICKS[i] <= t; i++) k = i;
+  return k < 0 ? 9 : t - KICKS[k];
 }
 
 /* ---------- 00 power on: a heartbeat, the lens draws itself, two stains merge ---------- */
 let G0 = null;   // the gate's ring, so the film starts where the gate left off
 const S0 = {world(t){
   const R = Math.min(S * .29, 290), x = CX, y = MY, h = heart(t);
-  const zt = t - 3 * B, z = zt > 0 ? cl(zt / (BAR - 3 * B)) : 0, zs = 1 + z * z * z * 18 + z * 1.2;
+  const zt = t - 3 * B, z = zt > 0 ? cl(zt / B) : 0, zs = 1 + z * z * z * 18 + z * 1.2;
   ctx.save(); ctx.translate(x, y); ctx.scale(zs, zs); ctx.translate(-x, -y);
   dust(t, eOut(ramp(t, 0, .8)) * (1 - z));
   const fa = eOut(ramp(t, .06, .5)), sp = eIO(ramp(t, .28, 1.15)), ang = .7 + t * 1.7, d = R * .42 * (1 - sp);
@@ -192,7 +195,7 @@ const S0 = {world(t){
   if (x + R * .72 + 16 + lay("40× · N.A. 0.65", MON, mp, .12).w < W - 12) txt("40× · N.A. 0.65", x + R * .72 + 16, y + R * .72 + 18, MON, mp, C.faint, la, "left", .12);
   if (x - R * .72 - 16 - lay("FIG. 00", MON, mp, .12).w > 12) txt("FIG. 00", x - R * .72 - 16, y - R * .72 - 10, MON, mp, C.faint, la, "right", .12);
   const cpx = clamp(S * .034, 17, 28);
-  word("a portfolio, in nineteen seconds", x, y + R + 34 + cpx, SER, cpx, C.mute, {anim: i => { const p = eOut(ramp(t, .5 + i * .016, .45)); return p > 0 ? {dy: (1 - p) * 8, a: p * (1 - z)} : null; }});
+  word("a portfolio, in thirty-three seconds", x, y + R + 34 + cpx, SER, cpx, C.mute, {anim: i => { const p = eOut(ramp(t, .5 + i * .016, .45)); return p > 0 ? {dy: (1 - p) * 8, a: p * (1 - z)} : null; }});
   ctx.restore();
   if (G0 && t < .32){
     const k = cl(t / .3), e = eOut(k);
@@ -220,9 +223,9 @@ function cells(t, a){
   }
 }
 const S1 = {world(t, b, tg){
-  const k = Math.min(3, Math.floor(b)), wt = t - k * B, w = WORDS[k], fl = !!w.flood, ser = !!w.serif;
+  const k = Math.min(3, Math.floor(b / 1.5)), wt = t - k * 1.5 * B, w = WORDS[k], fl = !!w.flood, ser = !!w.serif;
   if (fl){ fillA(C.lumen, 1); const wp = eOut(cl(wt / .07)); ctx.fillRect(-W, lerp(H * 1.2, -H, wp), 3 * W, 4 * H); }
-  const oe = 0, push = k === 3 && t > BAR - .34 ? eIn(cl((t - (BAR - .34)) / .34)) : 0;
+  const oe = 0, push = k === 3 && t > DUR(1) - .34 ? eIn(cl((t - (DUR(1) - .34)) / .34)) : 0;
   if (k === 3) cells(t, eOut(cl(wt / .16)));
   if (push > 0){ const ps = 1 + .07 * push; ctx.save(); ctx.translate(CX, MY); ctx.scale(ps, ps); ctx.translate(-CX, -MY); }
   const ff = ser ? SER : GRO, tr = ser ? -.012 : -.03;
@@ -276,7 +279,7 @@ function hexGrid(){
     const s = clamp(S / 18, 20, 46), w = Math.sqrt(3) * s, h = 1.5 * s, cells = [], dmax = Math.hypot(W, H) / 2;
     const cols = Math.ceil(W / w) + 2, rows = Math.ceil(H / h) + 2;
     for (let r = -1; r < rows; r++) for (let c = -1; c < cols; c++){ const x = c * w + (r & 1 ? w / 2 : 0), y = r * h; cells.push({x, y, d: Math.hypot(x - CX, y - MY) / dmax, q: hsh(r + 50, c + 50, 7)}); }
-    const P = clamp(S * .26, 104, 240), anom = [], R = rng(9), on = [1, 3, 4, 6, 7];
+    const P = clamp(S * .26, 104, 240), anom = [], R = rng(9), on = [1, 3, 5, 7, 9];
     let tries = 0;
     while (anom.length < 5 && tries++ < 900){
       const c = cells[Math.floor(R() * cells.length)];
@@ -289,7 +292,7 @@ function hexGrid(){
   });
 }
 const S2 = {world(t, b){
-  const G = hexGrid(), P = G.P, x = CX, y = MY, nb = Math.min(3, Math.floor(b));
+  const G = hexGrid(), P = G.P, x = CX, y = MY, nb = Math.min(5, Math.floor(b));
   if (t < .22){ const e = eOut(cl(t / .22)); gl(C.net, 1, x, y, P * (.6 + 1.6 * e), .8 * (1 - e)); fillA(C.net, .55 * (1 - e)); ctx.beginPath(); ctx.arc(x, y, P * (.15 + 1.1 * e), 0, TAU); ctx.fill(); }
   for (const c of G.cells){
     const ap = eOut(cl((t - c.d * .42) / .3)); if (ap <= 0) continue;
@@ -312,7 +315,7 @@ const S2 = {world(t, b){
     }
   });
   // the plate: APIS slams in, then flips to its result
-  const kp = Math.exp(-kickAge(T(2) + t) * 9), fl = eIO(ramp(t, 2 * B - .05, .24)), sx = Math.cos(fl * Math.PI), back = fl > .5;
+  const kp = Math.exp(-kickAge(TS(2) + t) * 9), fl = eIO(ramp(t, 3 * B - .05, .26)), sx = Math.cos(fl * Math.PI), back = fl > .5;
   const slam = eOut(cl(t / .16)), sc0 = 1 + .55 * (1 - slam), pa = cl(t / .04);
   gl(PC.apis, 2, x, y, P * 1.7, (.22 + .2 * kp) * pa);
   for (let j = 0; j < 6; j++){
@@ -331,14 +334,14 @@ const S2 = {world(t, b){
     typed("ADAPTIVE PROTECTIVE", 0, apx * .2 + mp * 2.6, mp, C.lumen, k1, "center", .14);
     typed("IMMUNE SYSTEM", 0, apx * .2 + mp * 4.3, mp, C.lumen, k2, "center", .14);
   } else {
-    const v = 79.2 * eOut(ramp(t, 2 * B + .08, .5)), npx = fit("79.2%", GRO, P * 1.3, P * .5, -.03);
+    const v = 79.2 * eOut(ramp(t, 3 * B + .08, .6)), npx = fit("79.2%", GRO, P * 1.3, P * .5, -.03);
     word(v.toFixed(1) + "%", 0, npx * .3, GRO, npx, C.bone, {tr: -.03});
-    txt("FEWER FALSE POSITIVES", 0, npx * .3 + mp * 2.6, MON, mp, C.lumen, eOut(ramp(t, 2 * B + .15, .2)), "center", .14);
+    txt("FEWER FALSE POSITIVES", 0, npx * .3 + mp * 2.6, MON, mp, C.lumen, eOut(ramp(t, 3 * B + .15, .2)), "center", .14);
   }
   ctx.restore();
   if (fl > .3 && fl < .7){ const e = 1 - Math.abs(fl - .5) / .2; fillA(C.merge, .9 * e); ctx.fillRect(x - 1, y - P * sc0, 2, P * 2 * sc0); gl(C.merge, 1, x, y, P * .6, .5 * e); }
   const ub = y + P * 1.12 + 26, up = clamp(S * .015, 10, 12);
-  typed("ON LANL'S REAL NETWORK DATA · 2,896 → 603", x, ub, up, C.mute, ramp(t, 2.55 * B, .3), "center", .12);
+  typed("ON LANL'S REAL NETWORK DATA · 2,896 → 603", x, ub, up, C.mute, ramp(t, 3.6 * B, .35), "center", .12);
 }};
 
 /* ---------- 03 lateral movement: hops on the eighths, two signals agree ---------- */
@@ -493,8 +496,8 @@ function card(k, ct){
   const pad = W * (PORT ? .08 : .07), npx = PORT ? Math.min(W * .27, SH * .19) : Math.min(SH * .44, W * .17);
   const nb = PORT ? TOP + SH * .3 : MY + npx * .3 - SH * .06, mp = clamp(S * .012, 10, 11);
   txt(pad2(k + 1) + " / 04 · " + c.tag, pad, TOP + 16, MON, mp, rgba(INK, .72), 1, "left", .14);
-  if (W > 640) for (let s = 0; s < 16; s++){ const on = s === Math.floor((T(4) + k * B + ct - T(4)) / (B / 4)); fillA(INK, on ? .9 : .2); ctx.fillRect(W - pad - (16 - s) * 9, TOP + 7, 6, 6); }
-  const big = c.fmt(c.val * eOut(ramp(ct, .03, .32)));
+  if (W > 640) for (let s = 0; s < 12; s++){ const on = s === Math.floor((k * 3 * B + ct) / B); fillA(INK, on ? .9 : .2); ctx.fillRect(W - pad - (12 - s) * 10, TOP + 7, 7, 7); }
+  const big = c.fmt(c.val * eOut(ramp(ct, .03, .5)));
   const r = word(big, pad, nb, GRO, npx, INK, {tr: -.035, al: "left", anim: i => ({dy: (1 - eOut5(cl((ct - i * .018) / .2))) * npx * .22})});
   if (c.unit) txt(c.unit, pad + r.w + npx * .05, nb, GRO, npx * .42, INK, 1, "left", -.01);
   const lp = clamp(S * .017, 11, 15), L = lines(c.lab, MON, lp, .1, PORT ? W - pad * 2 : W * .42);
@@ -505,13 +508,13 @@ function card(k, ct){
   VIZ[c.viz](bx, ct);
 }
 const S4 = {world(t, b){
-  const k = Math.min(3, Math.floor(b)), ct = t - k * B, edge = W * eOut(cl(ct / .1));
-  if (edge < W && k > 0) card(k - 1, B + ct);
+  const k = Math.min(3, Math.floor(b / 3)), ct = t - k * 3 * B, edge = W * eOut(cl(ct / .12));
+  if (edge < W && k > 0) card(k - 1, 3 * B + ct);
   ctx.save(); if (edge < W){ ctx.beginPath(); ctx.rect(-W, -H, W + edge, 3 * H); ctx.clip(); }
   card(k, ct); ctx.restore();
   if (edge < W){ fillA(C.bone, .9); ctx.fillRect(edge - 1, -H, 2, 3 * H); }
-  if (t > BAR - .22){
-    const e = eIn(cl((t - (BAR - .22)) / .22)), r = Math.hypot(W, H) * .55 * (1 - e) + 1.5;
+  if (t > DUR(4) - .22){
+    const e = eIn(cl((t - (DUR(4) - .22)) / .22)), r = Math.hypot(W, H) * .55 * (1 - e) + 1.5;
     ctx.beginPath(); ctx.rect(-W, -H, 3 * W, 3 * H); ctx.arc(CX, MY, r, 0, TAU, true); fillA(C.ground, 1); ctx.fill("evenodd");
   }
 }};
@@ -520,7 +523,7 @@ const S4 = {world(t, b){
 function galaxy(){
   return cache("gal", () => {
     const N = LITE ? 700 : 1800, R = rng(77), P = [];
-    for (let i = 0; i < N; i++){ const arm = i % 3, rr = Math.pow(R(), .62); P.push({arm, rr, a0: arm * TAU / 3 + rr * 5.4 + (R() - .5) * (.55 - rr * .3), z: R(), s: .7 + R() * 1.3, ph: R() * TAU, tx: CX, ty: MY, d: .9375 + rr * .28 + R() * .06}); }
+    for (let i = 0; i < N; i++){ const arm = i % 3, rr = Math.pow(R(), .62); P.push({arm, rr, a0: arm * TAU / 3 + rr * 5.4 + (R() - .5) * (.55 - rr * .3), z: R(), s: .7 + R() * 1.3, ph: R() * TAU, tx: CX, ty: MY, d: 1.5 * B + rr * .3 + R() * .06}); }
     const px = fit("real data.", SER4, W * (PORT ? .9 : .66), Math.min(SH * .34, 230)), by = MY + px * .34;
     const oc = document.createElement("canvas"), ow = Math.ceil(W), oh = Math.ceil(H); oc.width = ow; oc.height = oh;
     const o = oc.getContext("2d"); o.font = SER4(px); o.textAlign = "center"; o.textBaseline = "alphabetic"; o.fillStyle = "#fff"; o.fillText("real data.", CX, by);
@@ -536,7 +539,7 @@ function galaxy(){
   });
 }
 const S5 = {world(t){
-  const G = galaxy(), RG = Math.hypot(W, H) * .36, burst = eOut(cl(t / .5)), ex = t > BAR - .32 ? eIn(cl((t - (BAR - .32)) / .32)) : 0;
+  const G = galaxy(), RG = Math.hypot(W, H) * .36, burst = eOut(cl(t / .5)), ex = t > DUR(5) - .32 ? eIn(cl((t - (DUR(5) - .32)) / .32)) : 0;
   const cols = [C.net, C.auth, C.merge];
   let settled = 0;
   ctx.globalCompositeOperation = "lighter";
@@ -555,10 +558,10 @@ const S5 = {world(t){
     }
   }
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
-  const ta = eOut(ramp(t, 1.42, .3)) * (1 - eOut(cl(ex * 2)));
+  const ta = eOut(ramp(t, 1.5 * B + .62, .3)) * (1 - eOut(cl(ex * 2)));
   if (ta > 0) word("real data.", CX, G.by, SER4, G.px, C.bone, {a: ta * .92, anim: (i, n) => i === n - 1 ? {c: C.net} : {}});
   const sp = G.px * .3;
-  word("tested on", CX, G.by - G.px * 1.0, SER, sp, C.mute, {anim: i => { const p = eOut(ramp(t, .98 + i * .03, .3)); return p > 0 ? {dy: (1 - p) * 10, a: p * (1 - ex)} : null; }});
+  word("tested on", CX, G.by - G.px * 1.0, SER, sp, C.mute, {anim: i => { const p = eOut(ramp(t, .62 + i * .03, .3)); return p > 0 ? {dy: (1 - p) * 10, a: p * (1 - ex)} : null; }});
 }};
 
 /* ---------- 06 builds: four projects, one per beat ---------- */
@@ -617,7 +620,7 @@ function pSolar(pt, c){
   for (let i = 0; i < 14; i++){ const a = i / 14 * TAU + pt * .8; ctx.moveTo(sx + Math.cos(a) * vh * .1, sy + Math.sin(a) * vh * .1); ctx.lineTo(sx + Math.cos(a) * vh * .16, sy + Math.sin(a) * vh * .16); }
   ctx.stroke();
   const pw = Math.min(vh * .36, 160), ph = pw * 2, px = v.x0 + vw * (PORT ? .66 : .68) - pw / 2, py = v.y0 + (vh - ph) / 2;
-  const refl = pt > .2, sw = eOut(ramp(pt, .2, .08));
+  const refl = pt > .55, sw = eOut(ramp(pt, .55, .1));
   ctx.setLineDash([6, 8]); ctx.lineDashOffset = -pt * 90; strokeA(C.lumen, .55, 1.4); ctx.beginPath();
   for (let i = 0; i < 4; i++){ const ty = py + ph * (.2 + i * .18); ctx.moveTo(sx, sy); ctx.lineTo(px + 4, ty); if (refl){ ctx.moveTo(px + 4, ty); ctx.lineTo(px + pw + 70, ty - 50 - i * 10); } }
   ctx.stroke(); ctx.setLineDash([]);
@@ -636,7 +639,7 @@ function pOrbit(pt, c){
   gl(C.host, 3, ex, ey - ER, ER * .5, .25); strokeA(C.host, .6, 2); ctx.beginPath(); ctx.arc(ex, ey, ER + 2, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
   const OR = ER + (v.y1 - v.y0) * .45;
   ctx.setLineDash([3, 6]); strokeA(c, .4, 1.2); ctx.beginPath(); ctx.arc(ex, ey, OR, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); ctx.setLineDash([]);
-  const a0 = Math.asin(Math.min(.95, W * .36 / OR)), sa = -Math.PI / 2 + lerp(-a0, a0 * .6, cl(pt / B)), satx = ex + Math.cos(sa) * OR, saty = ey + Math.sin(sa) * OR;
+  const a0 = Math.asin(Math.min(.95, W * .36 / OR)), sa = -Math.PI / 2 + lerp(-a0, a0 * .6, cl(pt / (3 * B))), satx = ex + Math.cos(sa) * OR, saty = ey + Math.sin(sa) * OR;
   for (let i = 0; i < 46; i++){
     const a1 = Math.asin(Math.min(.98, W * .55 / OR)), a = -Math.PI / 2 + (hsh(i, 1, 2) * 2 - 1) * a1 + pt * .05 * (hsh(i, 3, 2) - .3), r = OR + (hsh(i, 2, 2) - .5) * 60, x = ex + Math.cos(a) * r, y = ey + Math.sin(a) * r;
     const ahead = a - sa, caught = ahead > -.02 && ahead < .09 && Math.abs(r - OR) < 34;
@@ -672,22 +675,22 @@ function pProxy(pt, c){
   const cy = v.y1 - 4, bs = Math.max(12, Math.min(vw / 26, 20)), calls = 9;
   let logged = 0;
   for (let j = 0; j < calls; j++){
-    const st = j * .03, p = cl((pt - st) / .18); if (p <= 0) continue;
+    const st = j * .1, p = cl((pt - st) / .3); if (p <= 0) continue;
     const a = j % 3, tl = (j * 7) % 4, odd = j === 5, col = odd ? C.lumen : C.net;
     let x, y; if (p < .5){ const e = p / .5; x = lerp(ax, gx, e); y = lerp(ay(a), gy, e); } else { const e = (p - .5) / .5; x = lerp(gx, tx, e); y = lerp(gy, ty(tl), e); }
     if (p < 1){ gl(col, 0, x, y, 9, 1); }
     if (p >= .5) logged++;
   }
   const n = logged, chainW = n * bs * 1.6, x0 = gx - chainW / 2;
-  for (let i = 0; i < n; i++){ const x = x0 + i * bs * 1.6, e = i === n - 1 ? eOut(cl(((pt - (i * .03 + .09)) / .05))) : 1; ctx.save(); ctx.translate(x + bs / 2, cy - bs / 2); ctx.scale(e, e); fillA(C.ground, 1); ctx.fillRect(-bs / 2, -bs / 2, bs, bs); strokeA(C.lumen, .9, 1.2); ctx.strokeRect(-bs / 2, -bs / 2, bs, bs); fillA(C.lumen, .7); for (let q = 0; q < 3; q++) ctx.fillRect(-bs * .3, -bs * .25 + q * bs * .2, bs * (.25 + .35 * hsh(i, q, 6)), 1.5); ctx.restore(); if (i){ strokeA(C.lumen, .6, 1); ctx.beginPath(); ctx.moveTo(x - bs * .6, cy - bs / 2); ctx.lineTo(x, cy - bs / 2); ctx.stroke(); } }
+  for (let i = 0; i < n; i++){ const x = x0 + i * bs * 1.6, e = i === n - 1 ? eOut(cl(((pt - (i * .1 + .15)) / .06))) : 1; ctx.save(); ctx.translate(x + bs / 2, cy - bs / 2); ctx.scale(e, e); fillA(C.ground, 1); ctx.fillRect(-bs / 2, -bs / 2, bs, bs); strokeA(C.lumen, .9, 1.2); ctx.strokeRect(-bs / 2, -bs / 2, bs, bs); fillA(C.lumen, .7); for (let q = 0; q < 3; q++) ctx.fillRect(-bs * .3, -bs * .25 + q * bs * .2, bs * (.25 + .35 * hsh(i, q, 6)), 1.5); ctx.restore(); if (i){ strokeA(C.lumen, .6, 1); ctx.beginPath(); ctx.moveTo(x - bs * .6, cy - bs / 2); ctx.lineTo(x, cy - bs / 2); ctx.stroke(); } }
 }
 const LABEL6 = ["Animal detection", "Solar screen", "S.O.S", "MCP proxy"];
 const S6 = {world(t){
-  const k = Math.min(3, Math.floor(t / B)), pt = t - k * B, P = PANELS[k], zs = 1.07 - .07 * eOut(cl(pt / B));
+  const k = Math.min(3, Math.floor(t / (3 * B))), pt = t - k * 3 * B, P = PANELS[k], zs = 1.07 - .07 * eOut(cl(pt / (3 * B)));
   gl(P.c, 3, CX, MY, S * .95, .17);
   ctx.save(); ctx.translate(CX, MY); ctx.scale(zs, zs); ctx.translate(-CX, -MY); P.draw(pt, P.c); ctx.restore();
 }, ui(t){
-  const k = Math.min(3, Math.floor(t / B)), pt = t - k * B, P = PANELS[k];
+  const k = Math.min(3, Math.floor(t / (3 * B))), pt = t - k * 3 * B, P = PANELS[k];
   const tpx = fit(P.title, GRO, W * (PORT ? .88 : .62), PORT ? 44 : 84, -.03), sp = clamp(S * .014, 10, 12), mp = clamp(S * .012, 9, 11);
   const al = PORT ? "center" : "left", x = PORT ? CX : W * .07, sy = H - BOT - 14, ty = sy - sp - 18;
   ctx.drawImage(rampSpr(), 0, ty - tpx - 40, W, H - (ty - tpx - 40));
@@ -705,13 +708,13 @@ const CREDS = [
   {t: "NASA SPACE APPS", s: "3RD PLACE · 2025 · TEAM LEADER", c: C.host},
   {t: "TOP 100", s: "JORDAN'S 12TH NATIONAL TECHNOLOGY PARADE", c: C.lumen}
 ];
-const CT = [0, .75 * B, 1.5 * B, 2.25 * B, 3 * B];
+const CT = [0, B, 2 * B, 3 * B, 4 * B];
 function dotGrid(){
   return cache("dots", () => { const g = clamp(S / 13, 24, 58), cols = Math.ceil(W / g) + 1, rows = Math.ceil(H / g) + 1, ox = (W - (cols - 1) * g) / 2, oy = (H - (rows - 1) * g) / 2, cells = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push({x: ox + c * g, y: oy + r * g, c, r}); return {g, cells}; });
 }
 const PAL = [PC.apis, PC.solar, PC.scam, PC.mcp, PC.phish, PC.ai, PC.animal, PC.sos];
 const S7 = {world(t){
-  const G = dotGrid(), c1 = eIn(ramp(t, 3 * B, .2)), c2 = eIn(ramp(t, 3 * B + .21, .17)), sp = 2 + 9 * Math.pow(t / BAR, 2), ph = t * (5 + 16 * t / BAR);
+  const G = dotGrid(), c1 = eIn(ramp(t, 4 * B, .26)), c2 = eIn(ramp(t, 4 * B + .3, .24)), sp = 2 + 9 * Math.pow(t / DUR(7), 2), ph = t * (5 + 16 * t / DUR(7));
   if (c1 > 0) ctx.globalCompositeOperation = "lighter";
   for (const d of G.cells){
     const wv = .5 + .5 * Math.sin(d.c * .55 + d.r * .35 - ph), x = c2 > 0 ? lerp(d.x, CX, c2) : d.x, y = c1 > 0 ? lerp(d.y, MY, c1) : d.y;
@@ -720,7 +723,7 @@ const S7 = {world(t){
   }
   ctx.globalCompositeOperation = "source-over";
   if (c2 > .6){
-    const k = eOut(ramp(t, BAR - .16, .16)), sx = 26 * (1 - k);
+    const k = eOut(ramp(t, DUR(7) - .18, .18)), sx = 26 * (1 - k);
     ctx.globalCompositeOperation = "lighter";
     for (const [col, dx] of [[C.net, -1], [C.merge, 0], [C.auth, 1]]){ gl(col, 1, CX + dx * sx * 1.6, MY, 26, .9); fillA(col, 1); ctx.beginPath(); ctx.arc(CX + dx * sx * 1.6, MY, 4, 0, TAU); ctx.fill(); }
     ctx.globalCompositeOperation = "source-over";
@@ -770,7 +773,7 @@ function lensGeom(){
 }
 const S9 = {world(t){
   const fo = 1 - eOut(cl(t / .6));
-  if (fo > .01){ GA = fo; S8.world(BAR + t); GA = 1; }
+  if (fo > .01){ GA = fo; S8.world(DUR(8) + t); GA = 1; }
   const L = lensGeom(), hp = eIO(ramp(t, 1.05, .8)), R = lerp(L.r, L.rmax, hp), ra = 1 - eOut(ramp(t, 1.05, .8)) * .9;
   if (hp <= 0){
     const fa = eOut(ramp(t, .2, .5));
@@ -785,15 +788,15 @@ const SC = [S0, S1, S2, S3, S4, S5, S6, S7, S8, S9];
 const LABELS = ["Power on", "Thesis", "APIS", "Lateral movement", "Measured", "Method", "Builds", "Credentials", "Shehab Shibli", "Enter"];
 
 /* ---------- the cut: camera, flashes, glitches, whips ---------- */
-const FLASH = [[T(1), .85, .09, C.merge], [T(1, 1), .2, .05, C.bone], [T(1, 2), .26, .05, C.bone], [T(1, 3), .18, .06, C.bone], [T(2), .45, .08, C.net], [T(3), .26, .06, C.bone], [T(3, 2), .3, .08, C.merge], [T(5), .25, .12, PC.solar], [T(6), .3, .05, C.bone], [T(6, 1), .2, .05, C.bone], [T(6, 2), .2, .05, C.bone], [T(6, 3), .2, .05, C.bone], [T(7), .22, .06, C.bone], [T(8), .72, .12, C.merge], [T(9, 2) + .1, .12, .3, C.lumen]];
-const GLITCH = [[T(1, 1), .07, 1], [T(1, 2), .07, .8], [T(1, 3), .06, .6], [T(2), .08, .9], [T(3), .08, .9], [T(4, 1), .05, .6], [T(4, 2), .05, .6], [T(4, 3), .05, .6], [T(6), .08, 1], [T(6, 1), .08, 1], [T(6, 2), .08, 1], [T(6, 3), .08, 1], [T(7), .08, .8], [T(8), .12, 1.3]];
-const SHAKES = [[T(2), 7, .07], [T(3, 2), 4, .06], [T(8), 14, .12]];
+const FLASH = [[TS(1), .85, .09, C.merge], [TS(1, 1.5), .2, .05, C.bone], [TS(1, 3), .26, .05, C.bone], [TS(1, 4.5), .18, .06, C.bone], [TS(2), .45, .08, C.net], [TS(3), .26, .06, C.bone], [TS(3, 2), .3, .08, C.merge], [TS(5), .25, .12, PC.solar], [TS(6), .3, .05, C.bone], [TS(6, 3), .2, .05, C.bone], [TS(6, 6), .2, .05, C.bone], [TS(6, 9), .2, .05, C.bone], [TS(7), .22, .06, C.bone], [TS(8), .72, .12, C.merge], [TS(9) + 1.0, .12, .3, C.lumen]];
+const GLITCH = [[TS(1, 1.5), .07, 1], [TS(1, 3), .07, .8], [TS(1, 4.5), .06, .6], [TS(2), .08, .9], [TS(3), .08, .9], [TS(4, 3), .05, .6], [TS(4, 6), .05, .6], [TS(4, 9), .05, .6], [TS(6), .08, 1], [TS(6, 3), .08, 1], [TS(6, 6), .08, 1], [TS(6, 9), .08, 1], [TS(7), .08, .8], [TS(8), .12, 1.3]];
+const SHAKES = [[TS(2), 7, .07], [TS(3, 2), 4, .06], [TS(8), 14, .12]];
 const WOUT = new Set([2, 3, 6]), WIN = new Set([3, 4, 7]);
 function camera(t, bar, lt){
   let x = 0, y = 0, s = 1;
   const ka = kickAge(t); if (ka < .3) s += .016 * Math.exp(-ka * 16);
-  if (bar === 7) s += .05 * eIn2(lt / BAR);
-  if (WOUT.has(bar) && lt > BAR - .3) x -= eIn(cl((lt - (BAR - .3)) / .3)) * W * .22;
+  if (bar === 7) s += .05 * eIn2(lt / DUR(7));
+  if (WOUT.has(bar) && lt > DUR(bar) - .3) x -= eIn(cl((lt - (DUR(bar) - .3)) / .3)) * W * .22;
   if (WIN.has(bar) && lt < .16) x += (1 - eOut(lt / .16)) * W * .16;
   const f = Math.floor(t * 60);
   for (const [st, amp, dec] of SHAKES){ const age = t - st; if (age >= 0 && age < dec * 5){ const e = amp * Math.exp(-age / dec); x += (hsh(f, 1, st * 97) - .5) * 2 * e; y += (hsh(f, 2, st * 97) - .5) * 2 * e; } }
@@ -801,7 +804,7 @@ function camera(t, bar, lt){
 }
 function post(t, bar, lt){
   let sm = 0;
-  if (WOUT.has(bar) && lt > BAR - .3) sm = eIn(cl((lt - (BAR - .3)) / .3));
+  if (WOUT.has(bar) && lt > DUR(bar) - .3) sm = eIn(cl((lt - (DUR(bar) - .3)) / .3));
   if (WIN.has(bar) && lt < .16) sm = Math.max(sm, 1 - eOut(lt / .16));
   if (sm > .02 && !LITE){ ctx.globalAlpha = .36 * sm; ctx.drawImage(cv, 0, 0, cv.width, cv.height, 24 * sm, 0, W, H); ctx.globalAlpha = .2 * sm; ctx.drawImage(cv, 0, 0, cv.width, cv.height, 60 * sm, 0, W, H); ctx.globalAlpha = 1; }
   for (const g of GLITCH){
@@ -819,7 +822,7 @@ function post(t, bar, lt){
 function render(t){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; GA = 1;
   fillA(C.ground, 1); ctx.fillRect(0, 0, W, H);
-  const bar = Math.min(9, Math.max(0, Math.floor(t / BAR))), lt = t - bar * BAR, b = lt / B, sc = SC[bar], cam = camera(t, bar, lt);
+  const bar = sceneAt(t), lt = t - ST[bar], b = lt / B, sc = SC[bar], cam = camera(t, bar, lt);
   ctx.save(); ctx.translate(CX + cam.x, MY + cam.y); ctx.scale(cam.s, cam.s); ctx.translate(-CX, -MY);
   if (sc.world) sc.world(lt, b, t);
   ctx.restore(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); GA = 1;
@@ -884,28 +887,28 @@ function heroAnims(withName){
 function restartHero(withName){ heroAnims(withName).forEach(a => { try { a.cancel(); a.play(); } catch (e) {} }); }
 function release(){ root.classList.remove("intro-hold"); ov.classList.add("open"); restartHero(false); requestAnimationFrame(() => api.setIntro(false)); }
 function dom(t){
-  const bar = Math.min(9, Math.max(0, Math.floor(t / BAR))), sub = bar === 6 ? Math.min(3, Math.floor((t - T(6)) / B)) : -1, key = bar + ":" + sub;
+  const bar = sceneAt(t), sub = bar === 6 ? Math.min(3, Math.floor((t - TS(6)) / (3 * B))) : -1, key = bar + ":" + sub;
   if (key !== hudKey){ hudKey = key; hudNum.textContent = pad2(bar); hudTxt.textContent = LABELS[bar] + (sub >= 0 ? " · " + LABEL6[sub] : ""); }
   const fr = Math.floor(Math.max(0, t) * 24), tc = pad2(Math.floor(fr / 1440)) + ":" + pad2(Math.floor(fr / 24) % 60) + ":" + pad2(fr % 24);
   if (tc !== lastTc){ lastTc = tc; hudTc.textContent = tc; }
   hudFill.style.setProperty("--p", cl(t / END).toFixed(4));
-  ov.classList.toggle("ending", t >= T(9));
-  const nt = t - T(8);
+  ov.classList.toggle("ending", t >= TS(9));
+  const nt = t - TS(8);
   if (nt >= 0){
     if (!NM){ NM = measureName(); lensGeom(); }
     nameEl.classList.add("show");
     for (const a of nameAnims) a.currentTime = nt * 1000;
-    const f = eMove(ramp(t, T(9) + .1, .9)), lift = -Math.sin(f * Math.PI) * 10;
+    const f = eMove(ramp(t, TS(9) + .1, .9)), lift = -Math.sin(f * Math.PI) * 10;
     nameEl.style.transform = `translate(${lerp(NM.tx0, NM.tx1, f).toFixed(2)}px, ${(lerp(NM.ty0, NM.ty1, f) + lift).toFixed(2)}px) scale(${lerp(NM.s0, NM.s1, f).toFixed(4)})`;
-    const si = eOut(ramp(t, T(8, 2), .45)), sa = si * (1 - eOut(ramp(t, T(9), .3)));
+    const si = eOut(ramp(t, TS(8, 2), .45)), sa = si * (1 - eOut(ramp(t, TS(9), .3)));
     subEl.style.top = NM.subY.toFixed(1) + "px"; subEl.style.opacity = sa.toFixed(3); subEl.style.transform = `translateY(${((1 - si) * 10).toFixed(1)}px)`;
   } else if (nameEl.classList.contains("show") || nameAnims.length && nameAnims[0].currentTime){
     nameEl.classList.remove("show"); subEl.style.opacity = "0"; for (const a of nameAnims) a.currentTime = 0;
   }
-  const isLanded = t >= T(9) + .95;
+  const isLanded = t >= TS(9) + .95;
   if (isLanded !== landed){ landed = isLanded; root.classList.toggle("intro-landed", landed); }
-  if (t >= T(9) + 1.05 && !released){ released = true; release(); }
-  if (t < T(9) + 1.05 && ov.classList.contains("open")) ov.classList.remove("open");
+  if (t >= TS(9) + 1.05 && !released){ released = true; release(); }
+  if (t < TS(9) + 1.05 && ov.classList.contains("open")) ov.classList.remove("open");
 }
 
 /* ---------- playback: the music is the clock ---------- */
@@ -928,7 +931,7 @@ function frame(now){
   if (!stalled && !hidHold) ft += dt;
   if (audioLive && !stalled && !audio.paused){ const d = audio.currentTime - ft; if (Math.abs(d) > .3) ft = audio.currentTime; else ft += d * .1; }
   // build the heavier scene data a little before it is needed, in quieter moments
-  if (ft > T(1) && !CACHE.hex) hexGrid(); else if (ft > T(2, 2) && !CACHE.graph) graph(); else if (ft > T(4, 1) && !CACHE.gal) galaxy(); else if (ft > T(7, 1) && !CACHE.dots) dotGrid();
+  if (ft > TS(1) && !CACHE.hex) hexGrid(); else if (ft > TS(2, 3) && !CACHE.graph) graph(); else if (ft > TS(4, 2) && !CACHE.gal) galaxy(); else if (ft > TS(6, 6) && !CACHE.dots) dotGrid();
   render(ft); dom(ft);
   if (ft >= END) finish();
 }
@@ -1010,9 +1013,9 @@ document.addEventListener("visibilitychange", () => {
   else { hidHold = false; lastNow = performance.now(); if (resumeAudio){ resumeAudio = false; audio.play().catch(() => {}); } }
 });
 if (DEV) window.__intro = {
-  B, BAR, END,
+  B, END, ST,
   prep(){ capture = true; if (mode === "gate") ov.classList.add("playing"); begin(false); if (raf2){ cancelAnimationFrame(raf2); raf2 = 0; } },
-  renderAt(t){ ft = t; render(t); dom(t); if (released){ const ms = (t - T(9) - 1.05) * 1000; heroAnims(false).forEach(a => { a.pause(); a.currentTime = Math.max(0, ms); }); } return t; },
+  renderAt(t){ ft = t; render(t); dom(t); if (released){ const ms = (t - TS(9) - 1.05) * 1000; heroAnims(false).forEach(a => { a.pause(); a.currentTime = Math.max(0, ms); }); } return t; },
   done(){ capture = false; heroAnims(false).forEach(a => { try { a.play(); } catch (e) {} }); finish(); }
 };
 window.__introAPI = {replay};

@@ -11,7 +11,7 @@ The page is built like a darkfield microscope bench: the hero is a live "microsc
 ## About this repo
 
 - `index.html`: the whole site in one static page with inline CSS and JavaScript. No build step and no dependencies (fonts come from Google Fonts).
-- `intro.js` and `intro.mp3`: the 19-second intro film that opens the site (drawn live on canvas) and its original soundtrack. The film is loaded only when it plays; press **Play intro** in the navigation to watch it again.
+- `intro.js` and `intro.mp3`: the 33-second intro film that opens the site (drawn live on canvas) and its original soundtrack. The film is loaded only when it plays; press **Play intro** in the navigation to watch it again.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared on LinkedIn, X or WhatsApp.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.

@@ -52,7 +52,7 @@ The single source of truth for the visual and motion language of this portfolio.
 
 ## Intro film
 
-A 19-second title sequence plays on a visitor's first visit in a session, cut to an original 128 BPM soundtrack (`intro.mp3`, composed and rendered for the site). It is drawn live on one full-screen canvas, one scene per bar of music: power on, the thesis, APIS, lateral movement, measured results, method, builds, credentials, the name, and the hand-off.
+A 33-second title sequence plays on a visitor's first visit in a session, cut to an original 124 BPM soundtrack (`intro.mp3`, composed and rendered for the site): smooth melodic house with gliding bass, warm pads and electric-piano stabs, a breakdown under the galaxy, and a build that drops on the name. It is drawn live on one full-screen canvas, one scene per musical phrase, paced so every number and project stays on screen about 1.5 s: power on, the thesis, APIS, lateral movement, measured results, method, builds, credentials, the name, and the hand-off.
 
 - **Gate**: browsers only allow sound after a click, so the film opens on a quiet title card with **Play the intro** and **Skip to the portfolio**. Esc skips at any point.
 - **Clock**: the music drives the picture. The film reads the audio position every frame, so every cut lands on its beat; if sound is blocked or fails, it runs on its own clock.
