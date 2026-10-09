@@ -45,6 +45,8 @@ The single source of truth for the visual and motion language of this portfolio.
 - **Readout**: mono label over a serif number with tabular figures.
 - **Examine dialog**: native `<dialog>` with a live full-size copy of a specimen, a color legend and numbered steps (the steps are a real sequence). Opens with `@starting-style` fade and lift, closes on Esc or backdrop click.
 - **Attack control**: clicking a host in the hero lens (or the Launch button) restarts the APIS cycle with that host as the intruder.
+- **Skills key**: six project buttons (one per fluorophore). Each skill carries a dot for every project that uses it in code you can read; picking a project lights its skills and fades the rest to `--faint`. Networking carries a CCNA tag instead.
+- **Brand mark**: the lens with two stains (network and auth). The stains drift toward each other every 6 s, the cream "merged" dot brightens when they meet, and they merge on hover, the APIS idea in 22 px.
 - **Print**: a white, two-column CV layout; canvases, navigation and buttons are hidden and link URLs are printed.
 - **404**: `404.html`, an empty microscope slide in the same tokens.
 
@@ -53,12 +55,18 @@ The single source of truth for the visual and motion language of this portfolio.
 - **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms (peak alpha .12, so small labels keep 4.5:1) take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
 - **Section sweep**: a short line of the section's color (`--sc`) travels along each section's top border every 9 s.
 - **Glass highlight**: a specular spot follows the pointer across each slide.
-- **Focus pull**: on load the name and intro come into focus (blur 14px → 0) as the lens iris opens.
+- **Focus pull**: on load each letter of the name rises into focus (blur 12px → 0, 45 ms apart, left to right) as the lens iris opens. Once it settles, one pass of lamp light crosses the name (1.6 s, once).
+- **Navigation**: a single lamp-colored line glides between links (340 ms, `--e-move`) to the section in view, and previews the link under the pointer or keyboard focus.
+- **Headings**: section titles wipe in from the left and clear a 6 px blur as they go, tied to scroll.
+- **Examine**: the specimen grows out of its slide into the dialog and shrinks back on close (View Transitions, 480 ms expo-out); without support, or with reduced motion, the dialog simply fades.
+- **Cards**: the pointer light used on the glass slides also lights the smaller cards and the certificate cards.
+- **Certificates**: each validity bar fills to the real share of time used when it comes into view (1.4 s).
+- **Timeline**: only the current role pulses; past roles hold a steady dot.
 - **Scroll progress**: a 2px line under the navigation in the six project colors, scaled by scroll position.
 - **APIS honeycomb**: the nine layers light up in order, 0.6 s apart, on a 7.2 s loop.
 
 - All canvases run on one `requestAnimationFrame` loop, only while on screen, and stop when the tab is hidden. A scene is warmed up and first drawn only when it scrolls near the viewport.
-- **Lite mode** (phones, touch screens, ≤4 CPU cores): canvas resolution capped at 1.5×, drawing at ~30 fps, no film grain, the hero's background bubbles baked into a cached layer, and no backdrop blur on the menu bar.
+- **Lite mode** (phones, touch screens, ≤4 CPU cores): canvas resolution capped at 1.5×, drawing at ~30 fps, no film grain, the hero's background bubbles baked into a cached layer, no backdrop blur on the menu bar, and the animation loop starts only once the page has loaded and is idle.
 - While the Examine dialog is open, only its specimen animates.
 - `prefers-reduced-motion` or the "Pause motion" button draws one still frame per specimen and disables reveals.
 - Only `transform`, `opacity` and `clip-path` are animated in CSS.
