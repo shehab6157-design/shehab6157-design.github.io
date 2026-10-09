@@ -25,9 +25,10 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" media="print" id="fontcss">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"></noscript>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap" media="print" id="fontcss">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..900&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap"></noscript>
 <script>(function(){var l=document.getElementById("fontcss");if(l){if(l.sheet)l.media="all";else l.addEventListener("load",function(){l.media="all"});}})();</script>
+<script>(function(){try{var d=document.documentElement,q=location.search,n=navigator,seen=false,still=false;try{seen=sessionStorage.getItem("ss-intro")==="seen"}catch(e){}try{still=localStorage.getItem("ss-motion")==="off"}catch(e){}var bot=/bot|crawl|spider|lighthouse|slurp|bingpreview|facebookexternalhit|embedly|whatsapp|telegram|linkedinbot|twitterbot|headless/i.test(n.userAgent||"")||n.webdriver;var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;if(/[?&]intro=1\b/.test(q)||(!/[?&]intro=0\b/.test(q)&&!seen&&!still&&!bot&&!rm&&!location.hash)){d.classList.add("intro-hold","intro-show");var s=document.createElement("script");s.src="intro.js?v=a96d0859";s.async=true;s.setAttribute("data-intro","1");document.head.appendChild(s);var off=function(){if(!window.__introReady&&d.classList.contains("intro-show")){d.classList.remove("intro-hold","intro-show");dispatchEvent(new Event("intro-off"))}};addEventListener("load",function(){setTimeout(off,300)});setTimeout(off,9000)}}catch(e){}})();</script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Shehab Shibli","alternateName":"שהאב שיבלי","url":"https://shehab6157-design.github.io/","email":"mailto:shehab6157@gmail.com","jobTitle":"Network Engineering and Computer Security Graduate","image":"https://shehab6157-design.github.io/shehab-shibli.jpg","alumniOf":{"@type":"CollegeOrUniversity","name":"Jordan University of Science and Technology"},"knowsLanguage":["Arabic","English","Hebrew"],"knowsAbout":["Network security","Anomaly detection","Lateral movement detection","AI agent security","AWS","Cisco networking"],"sameAs":["https://www.linkedin.com/in/shehab-shibli","https://github.com/shehab6157-design"]}
 </script>
@@ -552,9 +553,99 @@ html{scrollbar-gutter:stable}
 .still .brand circle,.still .job.now .node::before,.still .name .ch{animation:none}
 .still .sheen{display:none}
 .still .job.now .node::before{display:none}
+/* ---------- intro film ---------- */
+.intro-hold main .name{visibility:hidden}
+.intro-hold main .in,.intro-hold .lens-wrap,.intro-hold .lens canvas,.intro-hold main .sheen,.intro-hold main .name .ch{animation-play-state:paused}
+.intro-landed main .name{visibility:visible}
+.intro-landed main .name .ch{animation:none}
+.intro{position:fixed;inset:0;z-index:200;display:none;overflow:hidden;background:var(--ground);color:var(--bone);opacity:1;touch-action:none;transition:opacity 420ms var(--e-out)}
+.intro-show .intro{display:block}
+html.intro-show{overflow:hidden;scrollbar-gutter:stable}
+.name:focus{outline:none}
+.intro.out{opacity:0;pointer-events:none}
+.intro.open{background:transparent;pointer-events:none}
+.intro-cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.intro-gate{position:absolute;inset:0;display:grid;justify-items:center;align-content:center;gap:12px;padding:24px;text-align:center;transition:opacity 320ms var(--e-out),transform 320ms var(--e-out)}
+.intro.playing .intro-gate{opacity:0;transform:scale(.985);pointer-events:none}
+.ig-ring{width:min(40vmin,280px);aspect-ratio:1/1;margin-bottom:10px}
+.ig-kicker{font:500 12px/1.4 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.ig-name{font:300 clamp(38px,6.4vw,64px)/1 var(--f-display);font-variation-settings:"opsz" 72;letter-spacing:-.025em;color:var(--bone)}
+.ig-name i{font-weight:300}
+.ig-actions{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 18px;margin-top:22px}
+.ig-play{min-height:48px;padding-inline:22px;font-size:16px}
+.ig-play svg{width:18px;height:18px}
+.ig-skip{appearance:none;min-height:44px;padding:0 6px;border:0;background:none;color:var(--mute);font:500 15px/1 var(--f-body);text-decoration:underline;text-decoration-color:var(--hair-2);text-underline-offset:5px;cursor:pointer;transition:color var(--d-micro) ease-out,text-decoration-color var(--d-micro) ease-out}
+.ig-skip:hover{color:var(--bone);text-decoration-color:var(--lumen)}
+.ig-note{margin-top:6px;font:500 11px/1.5 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.intro-hud{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 360ms ease-out;font:500 11px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.intro.playing .intro-hud{opacity:1}
+.intro.ending .intro-hud{opacity:0;transition-duration:700ms}
+.ih-c{position:absolute;display:block;width:20px;height:20px;border:0 solid color-mix(in srgb,var(--bone) 42%,transparent)}
+.ih-c.tl{top:16px;left:16px;border-width:1px 0 0 1px}.ih-c.tr{top:16px;right:16px;border-width:1px 1px 0 0}
+.ih-c.bl{bottom:16px;left:16px;border-width:0 0 1px 1px}.ih-c.br{bottom:16px;right:16px;border-width:0 1px 1px 0}
+.ih-label{position:absolute;top:24px;left:46px;right:46%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ih-label b{font-weight:500;color:var(--lumen)}
+.ih-rec{position:absolute;top:24px;right:46px;display:flex;align-items:center;gap:9px;font-variant-numeric:tabular-nums}
+.ih-rec::before{content:"";width:7px;height:7px;border-radius:50%;background:#FF4D5E;box-shadow:0 0 10px #FF4D5E;animation:rec 1s steps(2,jump-none) infinite}
+@keyframes rec{50%{opacity:.25}}
+.ih-bar{position:absolute;left:46px;right:46px;bottom:26px;height:2px;background:color-mix(in srgb,var(--bone) 12%,transparent)}
+.ih-fill{position:absolute;inset:0;background:linear-gradient(90deg,var(--c-apis),var(--c-solar),var(--c-scam),var(--c-mcp),var(--c-phish),var(--c-ai));transform-origin:left center;transform:scaleX(var(--p,0))}
+.ih-bar .tk{position:absolute;top:-3px;width:1px;height:8px;background:color-mix(in srgb,var(--bone) 30%,transparent)}
+.intro-ctrl{position:absolute;left:46px;right:46px;bottom:42px;display:flex;justify-content:space-between;gap:12px;opacity:0;pointer-events:none;transition:opacity 360ms ease-out}
+.intro.playing .intro-ctrl{opacity:1;pointer-events:auto}
+.intro.ending .intro-ctrl{opacity:0;pointer-events:none}
+.ic-btn{display:inline-flex;align-items:center;gap:9px;min-height:40px;padding:0 14px;border:1px solid color-mix(in srgb,var(--bone) 22%,transparent);border-radius:999px;background:color-mix(in srgb,var(--ground) 55%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:var(--bone);font:500 11px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:border-color var(--d-micro) ease-out,background-color var(--d-micro) ease-out,color var(--d-micro) ease-out}
+.ic-btn:hover{border-color:var(--lumen);background:var(--lumen);color:var(--lumen-ink)}
+.ic-btn svg{width:14px;height:14px}
+.ic-btn .i-off{display:none}
+.ic-btn[aria-pressed="false"] .i-on{display:none}
+.ic-btn[aria-pressed="false"] .i-off{display:block}
+.ic-btn[disabled]{opacity:.45;pointer-events:none}
+.intro-name{position:absolute;left:0;top:0;margin:0;font-family:var(--f-display);color:var(--bone);transform-origin:0 0;opacity:0;pointer-events:none;will-change:transform;white-space:nowrap}
+.intro-name.show{opacity:1}
+.intro-name .ch{animation:none}
+.intro-sub{position:absolute;left:16px;right:16px;margin:0;text-align:center;font:500 clamp(10px,1.1vw,13px)/1.6 var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--mute);opacity:0;pointer-events:none}
+.intro-sub b{color:var(--lumen);font-weight:500}
+@media (max-height:540px){.ig-ring{width:min(26vmin,170px);margin-bottom:0}.intro-gate{gap:6px}.ig-actions{margin-top:10px}}
+@media (max-width:600px){
+  .ih-label{left:42px;right:40%}.ih-rec{right:42px}
+  .ih-bar{left:24px;right:24px;bottom:22px}
+  .intro-ctrl{left:16px;right:16px;bottom:36px}
+}
+@media (hover:none){.ig-kbd{display:none}}
+@media (prefers-reduced-motion: reduce){.intro,.intro-gate,.intro-hud,.intro-ctrl{transition:none}}
+.replay{width:auto;gap:8px;padding:0 12px;display:inline-flex;align-items:center;font:500 13px/1 var(--f-body)}
+@media (max-width:1100px){.replay{width:40px;padding:0;justify-content:center}.replay .rl{display:none}}
+@media print{.intro{display:none!important}.intro-hold main .name{visibility:visible!important}}
 </style>
 </head>
 <body>
+<div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="Intro film">
+  <canvas class="intro-cv" id="introCv" aria-hidden="true"></canvas>
+  <div class="name intro-name" id="introName" aria-hidden="true"><span class="ln"><span class="w"><span class="ch">S</span><span class="ch">h</span><span class="ch">e</span><span class="ch">h</span><span class="ch">a</span><span class="ch">b</span></span></span><span class="ln"><span class="w"><span class="ch">S</span><span class="ch">h</span><span class="ch">i</span><span class="ch">b</span><span class="ch">l</span><span class="ch">i</span></span></span></div>
+  <p class="intro-sub" id="introSub" aria-hidden="true">Network engineering &amp; computer security · <b>Portfolio 2026</b></p>
+  <div class="intro-gate" id="introGate">
+    <div class="ig-ring" aria-hidden="true"></div>
+    <p class="ig-kicker">Portfolio 2026</p>
+    <p class="ig-name">Shehab <i>Shibli</i></p>
+    <div class="ig-actions">
+      <button class="btn primary ig-play" id="introPlay" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.6v10.8L13.2 8z" fill="currentColor"/></svg>Play the intro</button>
+      <button class="ig-skip" id="introGateSkip" type="button">Skip to the portfolio</button>
+    </div>
+    <p class="ig-note">A 19-second film with music<span class="ig-kbd"> · Esc to skip</span></p>
+  </div>
+  <div class="intro-hud" aria-hidden="true">
+    <span class="ih-c tl"></span><span class="ih-c tr"></span><span class="ih-c bl"></span><span class="ih-c br"></span>
+    <span class="ih-label"><b id="ihNum">00</b> · <span id="ihTxt">Power on</span></span>
+    <span class="ih-rec" id="ihTc">00:00:00</span>
+    <span class="ih-bar"><span class="ih-fill" id="ihFill"></span><span class="tk" style="left:10%"></span><span class="tk" style="left:20%"></span><span class="tk" style="left:30%"></span><span class="tk" style="left:40%"></span><span class="tk" style="left:50%"></span><span class="tk" style="left:60%"></span><span class="tk" style="left:70%"></span><span class="tk" style="left:80%"></span><span class="tk" style="left:90%"></span></span>
+  </div>
+  <div class="intro-ctrl">
+    <button class="ic-btn" id="introSkip" type="button"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5 7.5 8 2 12.5zM8 3.5 13.5 8 8 12.5z" fill="currentColor"/></svg>Skip intro</button>
+    <button class="ic-btn" id="introSound" type="button" aria-pressed="true"><svg class="i-on" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h2.6L8 3v10L4.6 10H2z" fill="currentColor"/><path d="M10.4 5.6a3.4 3.4 0 0 1 0 4.8M12.3 3.8a6 6 0 0 1 0 8.4" stroke="currentColor" stroke-width="1.3" fill="none"/></svg><svg class="i-off" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 6h2.6L8 3v10L4.6 10H2z" fill="currentColor"/><path d="M10.5 6l4 4M14.5 6l-4 4" stroke="currentColor" stroke-width="1.3"/></svg>Sound</button>
+  </div>
+  <audio id="introAudio" src="intro.mp3" preload="none"></audio>
+</div>
 <a class="skip" href="#work">Skip to projects</a>
 <canvas id="ambient" aria-hidden="true"></canvas>
 
@@ -573,6 +664,7 @@ html{scrollbar-gutter:stable}
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-tools">
+      <button class="icon-btn replay" id="introReplay" type="button" title="Play the intro film"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 8.6A5.3 5.3 0 1 1 11.6 4" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M12.6 1.6v3.2H9.4" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6.6 5.7v4.6L10.4 8z" fill="currentColor"/></svg><span class="rl" aria-hidden="true">Play intro</span><span class="sr">Play the intro film</span></button>
       <button class="icon-btn" id="motionBtn" type="button" aria-pressed="false" title="Pause the animations">
         <svg class="i-pause" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3v10M11 3v10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
         <svg class="i-play" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3l8 5-8 5z" fill="currentColor"/></svg>
@@ -1024,7 +1116,7 @@ html{scrollbar-gutter:stable}
 <footer>
   <div class="wrap foot">
     <span>© 2026 Shehab Shibli</span>
-    <span>Hand-built in one HTML file. Every animation is a live canvas simulation, not a recording.</span>
+    <span>Hand-built, no frameworks. Every animation, the intro film included, is drawn live in the browser, not a recording.</span>
     <a href="#top">Back to top</a>
   </div>
 </footer>
@@ -2045,7 +2137,8 @@ const FACTORIES = {lens:sceneLens, trace:sceneTrace, proxy:sceneProxy, camera:sc
 const stages = [];
 let raf = 0, last = 0, ambAcc = 0, frameAcc = 0;
 let booted = !LITE;
-const motionOn = () => booted && !reduce && !paused && !document.hidden;
+let introOn = root.classList.contains("intro-hold");   // the intro film owns the screen
+const motionOn = () => booted && !reduce && !paused && !document.hidden && !introOn;
 const FRAME = LITE ? 1 / 30 : 0;
 
 function sizeStage(st, rect){
@@ -2086,6 +2179,7 @@ function startLoop(){ if (!raf && motionOn()){ last = performance.now(); raf = r
 function stopLoop(){ if (raf){ cancelAnimationFrame(raf); raf = 0; } }
 function applyMotion(){
   root.classList.toggle("still", paused || reduce);
+  if (introOn){ stopLoop(); return; }
   if (motionOn()) startLoop();
   else { stopLoop(); if (amb){ amb.snap(); amb.draw(); } for (const st of stages){ if (!st.warmed){ st.warmed = true; const s = st.scene.still ? st.scene.still() : 6; if (st.t < s) warm(st, s); } drawNow(st); } }
 }
@@ -2368,6 +2462,24 @@ copyBtn.addEventListener("click", () => {
   const fallback = () => { const r = document.createRange(); r.selectNodeContents(mail); const s = getSelection(); s.removeAllRanges(); s.addRange(r); done("Selected"); };
   if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText("shehab6157@gmail.com").then(() => done("Copied"), fallback); else fallback();
 });
+/* ---------------- intro film hook-up (the film itself is intro.js) ---------------- */
+{
+  const api = {root, C, PC, MONO, LITE, TAU, clamp, lerp, eOut, eIO, rgb, rgba, glow, grain, rng, hexPath, rrect,
+    setIntro(on){ if (introOn === on) return; introOn = on; applyMotion(); }, reduced: () => reduce, pending: null};
+  const SRC = "intro.js?v=a96d0859", replayBtn = document.getElementById("introReplay"), aud = document.getElementById("introAudio");
+  const load = () => { if (window.__introInit || window.__introReady || document.querySelector('script[data-intro]')) return; const sc = document.createElement("script"); sc.src = SRC; sc.async = true; sc.dataset.intro = "1"; document.head.append(sc); };
+  if (replayBtn){
+    const warm = () => { load(); if (aud && aud.preload !== "auto"){ aud.preload = "auto"; try { aud.load(); } catch (e) {} } };
+    replayBtn.addEventListener("pointerenter", warm, {once:true}); replayBtn.addEventListener("focus", warm, {once:true});
+    replayBtn.addEventListener("click", () => {
+      if (window.__introAPI) return;                       // the film is loaded and handles the click itself
+      if (aud){ try { aud.muted = true; const p = aud.play(); if (p && p.then) p.then(() => { if (api.pending){ aud.pause(); aud.muted = false; } }, () => { if (api.pending) aud.muted = false; }); } catch (e) {} }   // unlock audio inside the click
+      api.pending = "replay"; warm();
+    });
+  }
+  addEventListener("intro-off", () => api.setIntro(false));   // intro.js never arrived: the head script gave up on it
+  if (window.__introInit) window.__introInit(api); else window.__site = api;
+}
 })();
 </script>
 </body>

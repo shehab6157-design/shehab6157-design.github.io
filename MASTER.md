@@ -50,6 +50,18 @@ The single source of truth for the visual and motion language of this portfolio.
 - **Print**: a white, two-column CV layout; canvases, navigation and buttons are hidden and link URLs are printed.
 - **404**: `404.html`, an empty microscope slide in the same tokens.
 
+## Intro film
+
+A 19-second title sequence plays on a visitor's first visit in a session, cut to an original 128 BPM soundtrack (`intro.mp3`, composed and rendered for the site). It is drawn live on one full-screen canvas, one scene per bar of music: power on, the thesis, APIS, lateral movement, measured results, method, builds, credentials, the name, and the hand-off.
+
+- **Gate**: browsers only allow sound after a click, so the film opens on a quiet title card with **Play the intro** and **Skip to the portfolio**. Esc skips at any point.
+- **Clock**: the music drives the picture. The film reads the audio position every frame, so every cut lands on its beat; if sound is blocked or fails, it runs on its own clock.
+- **Hand-off**: the name flies into the hero heading (900 ms, `--e-move`) while a lens ring draws over the real hero lens, then the page opens from that lens like an iris and the hero's normal entrance plays.
+- **Replay**: the **Play intro** button in the navigation plays it again (it scrolls to the top first).
+- **Honesty**: every number in the film is one the site already states (79.2%, 96% · 166 of 173, 236 tests, 9/12 with 0 false alarms, ~340 ms per frame, 6,300 J → 2,004 J simulated).
+- **Who sees it**: not shown with reduced motion, after "Pause motion", to links with a `#section`, to crawlers and test tools, or again in the same browser session. `?intro=1` forces it and `?intro=0` turns it off.
+- **Loading**: the film is `intro.js`, fetched only when the intro shows or when someone presses Play intro, so a normal page load does not pay for it.
+
 ## Motion rules in code
 
 - **Ambient field**: a fixed canvas behind the page, drawn at half resolution and 30 fps. Four slow color blooms (peak alpha .12, so small labels keep 4.5:1) take three channels from the `data-tint` of the section in view and blend over ~1 s; drifting particles move with a little scroll parallax.
