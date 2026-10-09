@@ -5,8 +5,8 @@
 function init(api){
 const {root, C, PC, MONO, LITE, TAU, clamp, lerp, eOut, eIO, rgb, rgba, glow, grain, rng, hexPath, rrect} = api;
 /* =========================================================
-   INTRO FILM — a 19-second title sequence cut to an original
-   128 BPM score (intro.mp3). One scene per bar. It ends by
+   INTRO FILM — a 33-second title sequence cut to an original
+   124 BPM score (intro.mp3). One scene per phrase. It ends by
    flying the name into the hero and opening the page from the
    lens. Everything is drawn live, and every number is real.
    ========================================================= */
@@ -28,7 +28,8 @@ const BPM = 124, B = 60 / BPM;
 const SB = [0, 4, 10, 16, 22, 34, 40, 52, 58, 64, 68], ST = SB.map(x => x * B), END = ST[10];
 const TS = (i, beat = 0) => ST[i] + beat * B, DUR = i => ST[i + 1] - ST[i];
 const sceneAt = t => { let i = 0; while (i < 9 && t >= ST[i + 1]) i++; return i; };
-const KICKS = []; for (let b = 4; b < 64; b++) if (b < 35 || (b >= 40 && b < 56) || b >= 58) KICKS.push(b * B);
+// the score's accents (booms, chord changes, the credential notes); the picture breathes with them
+const KICKS = [4, 7, 10, 13, 16, 18 + .08 / B, 19, 22, 25, 28, 31, 34, 34 + 1.35 / B, 40, 43, 46, 49, 52, 53, 54, 55, 58, 61].map(b => b * B);
 
 /* ---------- easing and noise ---------- */
 const cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
