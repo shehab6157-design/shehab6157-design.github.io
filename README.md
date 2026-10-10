@@ -6,11 +6,11 @@ Shehab Shibli, Network Engineering and Computer Security graduate (CCNA, AWS Cer
 
 ## Design
 
-The page is built like a darkfield microscope bench: the hero is a live "microscope view" of a network where APIS-style network and login signals are drawn as two stains, and each project is shown as a glass slide running its own live simulation. The full design system (colors, type, spacing, motion rules) is in [`MASTER.md`](MASTER.md).
+The page is built like a microscope bench lit by soft colored lamps: the hero is a glass objective lens looking at a live network where APIS-style network and login signals are drawn as two stains, and each project is a glass slide running its own live simulation. Surfaces are glass that catches the light from the pointer, slides and cards tilt toward it in 3D, and the lamps behind the page take the colors of the section you are reading. The full design system (colors, glass, type, spacing, motion rules) is in [`MASTER.md`](MASTER.md).
 
 ## About this repo
 
-- `index.html`: the whole site in one static page with inline CSS and JavaScript. No build step and no dependencies (fonts come from Google Fonts).
+- `index.html`: the whole site in one static page with inline CSS and JavaScript. No frameworks and no dependencies (fonts come from Google Fonts).
 - `intro.js` and `intro.mp3`: the 33-second intro film that opens the site (drawn live on canvas) and its original soundtrack. The film is loaded only when it plays; press **Play intro** in the navigation to watch it again.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared on LinkedIn, X or WhatsApp.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
@@ -18,7 +18,7 @@ The page is built like a darkfield microscope bench: the hero is a live "microsc
 - `shehab-shibli.webp`: the About portrait. `shehab-shibli.jpg` is the same photo for search-engine data.
 - `404.html`: custom "Specimen not found" page that GitHub Pages shows for missing URLs.
 - `MASTER.md`: design system and motion rules.
-- Every animation is drawn live with the Canvas 2D API, runs only while it is on screen, and stops when the tab is hidden. Visitors with "reduce motion" turned on (or who press the pause button) see still frames instead.
+- Every animation is drawn live in the browser (Canvas 2D, plus WebGL for the light field and the glass lens when the device has a GPU), runs only while it is on screen, and stops when the tab is hidden. Visitors with "reduce motion" turned on (or who press the pause button) see still frames instead.
 - Hosted with GitHub Pages straight from the `main` branch. To run it locally, open `index.html` in a browser.
 
 ## Links

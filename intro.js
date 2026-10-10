@@ -22,7 +22,7 @@ const nameEl = $("introName"), subEl = $("introSub"), ringEl = ov.querySelector(
 const heroName = $("name"), lensEl = $("lens"), lensWrap = $("lensWrap");
 const INERT = [document.querySelector(".skip"), $("nav"), $("top"), document.querySelector("body > footer"), $("exam")].filter(Boolean);
 const DEV = /[?&]introdev\b/.test(location.search);
-const INK = "#0A0E0D";
+const INK = "#0A0B14";
 const BPM = 124, B = 60 / BPM;
 // scene starts in beats: power on, thesis, APIS, lateral movement, measured, method, builds, credentials, the name, hand-off, end
 const SB = [0, 4, 10, 16, 22, 34, 40, 52, 58, 64, 68], ST = SB.map(x => x * B), END = ST[10];
@@ -79,8 +79,8 @@ function vig(){
 const SPRITES = {};
 function sprite(k, fn){ return SPRITES[k] || (SPRITES[k] = fn()); }
 // a soft radial disc (for scrims) and a vertical ramp (for title backdrops), drawn once and scaled
-const discSpr = () => sprite("disc", () => { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, "rgba(6,9,8,.82)"); gr.addColorStop(1, "rgba(6,9,8,0)"); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); return c; });
-const rampSpr = () => sprite("ramp", () => { const c = document.createElement("canvas"); c.width = 4; c.height = 256; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "rgba(6,9,8,0)"); gr.addColorStop(.45, "rgba(6,9,8,.82)"); gr.addColorStop(1, "rgba(6,9,8,.9)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 256); return c; });
+const discSpr = () => sprite("disc", () => { const c = document.createElement("canvas"); c.width = c.height = 256; const g = c.getContext("2d"), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, "rgba(5,6,12,.82)"); gr.addColorStop(1, "rgba(5,6,12,0)"); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); return c; });
+const rampSpr = () => sprite("ramp", () => { const c = document.createElement("canvas"); c.width = 4; c.height = 256; const g = c.getContext("2d"), gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, "rgba(5,6,12,0)"); gr.addColorStop(.45, "rgba(5,6,12,.82)"); gr.addColorStop(1, "rgba(5,6,12,.9)"); g.fillStyle = gr; g.fillRect(0, 0, 4, 256); return c; });
 const gl = (hex, soft, x, y, r, a) => glow(ctx, hex, soft, x, y, r, a * GA);
 const fillA = (hex, a) => { ctx.fillStyle = rgba(hex, a * GA); };
 const strokeA = (hex, a, w = 1) => { ctx.strokeStyle = rgba(hex, a * GA); ctx.lineWidth = w; };
@@ -167,6 +167,113 @@ function kickAge(t){
   return k < 0 ? 9 : t - KICKS[k];
 }
 
+/* ---------- light and glass: the field behind every scene, panes of glass, depth ---------- */
+// the same lamp-lit field as the page behind the film, rendered per frame at the film's own clock
+// made on first use, and only when the page found a real GPU (otherwise the lamps below are drawn in 2D)
+let FLD = null, fldTried = false;
+function fieldGL(){
+  if (FLD || fldTried) return FLD;
+  const ok = api.gpu ? api.gpu() : true; if (ok === null) return null;
+  fldTried = true;
+  if (ok && api.makeField) FLD = api.makeField(document.createElement("canvas"), {detached: true, keep: true, scale: LITE ? .32 : .42, intensity: .8});
+  return FLD;
+}
+const lin3 = hex => { const c = rgb(hex); return [c[0] / 255, c[1] / 255, c[2] / 255]; };
+// the colours of the light, cut by cut; each change eases in over a third of a second
+const TINT = [
+  [TS(0), [C.net, C.auth, PC.mcp]],
+  [TS(1), [PC.scam, PC.mcp, C.net]], [TS(1, 1.5), [PC.ai, PC.animal, PC.mcp]], [TS(1, 3), [PC.mcp, PC.phish, PC.scam]], [TS(1, 4.5), [C.net, PC.solar, PC.mcp]],
+  [TS(2), [PC.apis, PC.solar, PC.scam]],
+  [TS(3), [C.auth, C.host, C.net]],
+  [TS(4), [PC.scam, PC.mcp, PC.solar]], [TS(4, 3), [PC.phish, PC.mcp, PC.scam]], [TS(4, 6), [PC.animal, PC.sos, PC.mcp]], [TS(4, 9), [PC.solar, PC.scam, PC.apis]],
+  [TS(5), [C.net, C.auth, PC.mcp]],
+  [TS(6), [PC.animal, PC.mcp, PC.solar]], [TS(6, 3), [PC.solar, PC.scam, PC.mcp]], [TS(6, 6), [PC.sos, PC.mcp, PC.scam]], [TS(6, 9), [PC.mcp, PC.phish, PC.scam]],
+  [TS(7), [C.net, PC.mcp, PC.phish]], [TS(7, 1), [PC.animal, PC.mcp, PC.scam]], [TS(7, 2), [C.host, PC.mcp, PC.solar]], [TS(7, 3), [C.lumen, PC.phish, PC.mcp]],
+  [TS(8), [C.net, C.auth, PC.ai]]
+].map(([t, cs]) => [t, cs.map(lin3)]);
+const TMIX = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+function tintsAt(t){
+  let i = 0; while (i + 1 < TINT.length && t >= TINT[i + 1][0]) i++;
+  const cur = TINT[i][1], prev = i ? TINT[i - 1][1] : cur, k = i ? eOut(cl((t - TINT[i][0]) / .35)) : 1;
+  for (let j = 0; j < 3; j++) for (let c = 0; c < 3; c++) TMIX[j][c] = lerp(prev[j][c], cur[j][c], k);
+  return TMIX;
+}
+function backdrop(t, k){
+  k = k == null ? .8 : k;
+  const F = fieldGL(); if (F){ try { const fc = F.frame(28 + t * 2.4, W, H, tintsAt(t), k); ctx.drawImage(fc, 0, 0, W, H); return; } catch (e) {} }
+  // without a GPU: the same three lamps on the same orbits, as plain gradients
+  fillA(C.ground, 1); ctx.fillRect(0, 0, W, H);
+  const T = (28 + t * 2.4) * .04, asp = W / H, cs = tintsAt(t);
+  const L3 = [[-.42 * asp + .16 * Math.sin(T * .9 + 1), .18 + .16 * Math.sin(T * .7)], [.38 * asp + .15 * Math.sin(T * .6 + 3), .24 + .14 * Math.cos(T * .8 + 1)], [.05 * asp + .22 * Math.cos(T * .5 + 2), -.32 + .12 * Math.sin(T * .4 + 4)]];
+  ctx.globalCompositeOperation = "lighter";
+  for (let i = 0; i < 3; i++){
+    const c = cs[i], x = W / 2 + L3[i][0] * H, y = H / 2 - L3[i][1] * H, r = H * .6, lum = .2126 * c[0] + .7152 * c[1] + .0722 * c[2], a = Math.min(.4, .17 / Math.max(.05, lum)) * k;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, `rgba(${c[0] * 255 | 0},${c[1] * 255 | 0},${c[2] * 255 | 0},${a.toFixed(3)})`); g.addColorStop(.5, `rgba(${c[0] * 255 | 0},${c[1] * 255 | 0},${c[2] * 255 | 0},${(a * .35).toFixed(3)})`); g.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = g; ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
+  }
+  ctx.globalCompositeOperation = "source-over";
+}
+const WHITE = "#FFFFFF", BLACK = "#000000";
+/* a pane of glass: a tinted body, a sheen, light inside from its tint, a bevel lit from the top left */
+function glassBox(x, y, w, h, r, tint, a, o){
+  o = o || {}; a *= GA;
+  if (a <= .01 || w < 2 || h < 2) return;
+  const body = o.body || C.stage, al = o.alpha == null ? .62 : o.alpha;
+  if (o.shadow !== false && !LITE){
+    ctx.save(); ctx.shadowColor = rgba(BLACK, .6 * a); ctx.shadowBlur = Math.min(60, h * .3); ctx.shadowOffsetY = Math.min(28, h * .08);
+    rrect(ctx, x, y, w, h, r); ctx.fillStyle = rgba(body, al * a); ctx.fill(); ctx.restore();
+  } else { rrect(ctx, x, y, w, h, r); ctx.fillStyle = rgba(body, al * a); ctx.fill(); }
+  const g = ctx.createLinearGradient(x, y, x + w * .35, y + h);
+  g.addColorStop(0, rgba(WHITE, .12 * a)); g.addColorStop(.42, rgba(WHITE, .02 * a)); g.addColorStop(1, rgba(WHITE, .05 * a));
+  rrect(ctx, x, y, w, h, r); ctx.fillStyle = g; ctx.fill();
+  const ig = ctx.createLinearGradient(0, y + h * .4, 0, y + h);
+  ig.addColorStop(0, rgba(tint, 0)); ig.addColorStop(1, rgba(tint, (o.glow == null ? .22 : o.glow) * a));
+  rrect(ctx, x, y, w, h, r); ctx.fillStyle = ig; ctx.fill();
+  const rg = ctx.createLinearGradient(x, y, x + w, y + h);
+  rg.addColorStop(0, rgba(WHITE, .65 * a)); rg.addColorStop(.36, rgba(WHITE, .1 * a)); rg.addColorStop(.7, rgba(tint, .3 * a)); rg.addColorStop(1, rgba(tint, .9 * a));
+  ctx.lineWidth = 1.3; ctx.strokeStyle = rg; rrect(ctx, x + .65, y + .65, w - 1.3, h - 1.3, Math.max(0, r - .65)); ctx.stroke();
+  if (o.sweep > 0 && o.sweep < 1) sweepBand(x, y, w, h, r, o.sweep, a);
+}
+/* a glint crossing a pane: a bright diagonal band, clipped to the glass */
+function sweepBand(x, y, w, h, r, p, a){
+  ctx.save(); rrect(ctx, x, y, w, h, r); ctx.clip();
+  const bw = Math.max(w, h) * .3, cx = lerp(x - bw, x + w + bw, eIO(p));
+  const g = ctx.createLinearGradient(cx - bw, y, cx + bw, y + h * .35);
+  g.addColorStop(0, rgba(WHITE, 0)); g.addColorStop(.44, rgba(WHITE, .14 * a)); g.addColorStop(.5, rgba(WHITE, .34 * a)); g.addColorStop(.56, rgba(WHITE, .14 * a)); g.addColorStop(1, rgba(WHITE, 0));
+  ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.restore();
+}
+/* a lens body inside a ring: faint glass, an iridescent rim, the window glint at the upper left */
+const IRI = [PC.solar, PC.mcp, PC.phish, C.lumen, PC.solar];
+function lensBody(x, y, R, a, t){
+  a *= GA; if (a <= .01 || R < 6) return;
+  const g = ctx.createRadialGradient(x - R * .2, y - R * .25, R * .1, x, y, R);
+  g.addColorStop(0, rgba(WHITE, .025 * a)); g.addColorStop(.72, rgba(WHITE, .012 * a)); g.addColorStop(.93, rgba(PC.mcp, .08 * a)); g.addColorStop(1, rgba(PC.solar, .14 * a));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.fill();
+  if (ctx.createConicGradient){
+    const cg = ctx.createConicGradient(-1.2 + t * .35, x, y), lw = Math.max(1.6, R * .014);
+    IRI.forEach((c, i) => cg.addColorStop(i / (IRI.length - 1), rgba(c, .6 * a)));
+    ctx.strokeStyle = cg; ctx.lineWidth = lw; ctx.beginPath(); ctx.arc(x, y, R - lw, 0, TAU); ctx.stroke();
+  }
+  ctx.save(); ctx.translate(x - R * .38, y - R * .44); ctx.rotate(-.62); ctx.scale(1, .42);
+  const sg = ctx.createRadialGradient(0, 0, 0, 0, 0, R * .32); sg.addColorStop(0, rgba(WHITE, .28 * a)); sg.addColorStop(1, rgba(WHITE, 0));
+  ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, 0, R * .32, 0, TAU); ctx.fill(); ctx.restore();
+}
+/* depth: a floor tilted away from the viewer about a horizontal axis at height cy (points above it recede) */
+function onPlane(u, v, th, cy, fk = 1.05){ const F = Math.max(W, H) * fk, z = -v * Math.sin(th), f = F / Math.max(F * .2, F + z); return [CX + u * f, cy + v * Math.cos(th) * f, f]; }
+/* a turn about the vertical axis through (x, y): narrower as it turns, with a shear for the near edge */
+function turnY(x, y, ang){ const c = Math.cos(ang), s = Math.sin(ang); ctx.translate(x, y); ctx.transform(Math.abs(c) < .004 ? .004 : c, s * .2, 0, 1, 0, 0); ctx.translate(-x, -y); }
+/* the cut: a pane of glass sweeps across the frame and bends what is under it */
+function glassPass(p, k){
+  const bw = W * .2, sk = H * .2, x = lerp(-bw, W + sk, eIO(p));
+  ctx.save(); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + bw, 0); ctx.lineTo(x + bw - sk, H); ctx.lineTo(x - sk, H); ctx.closePath(); ctx.clip();
+  ctx.globalAlpha = .95; ctx.drawImage(cv, 0, 0, cv.width, cv.height, -16 * k, 0, W * (1 + .02 * k), H);
+  const g = ctx.createLinearGradient(x - sk * .5, 0, x + bw - sk * .5, 0);
+  g.addColorStop(0, rgba(PC.solar, .28 * k)); g.addColorStop(.14, rgba(WHITE, 0)); g.addColorStop(.5, rgba(WHITE, .07 * k)); g.addColorStop(.86, rgba(WHITE, 0)); g.addColorStop(1, rgba(PC.phish, .28 * k));
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = "lighter"; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = .75 * k; ctx.strokeStyle = WHITE; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x - sk, H); ctx.moveTo(x + bw, 0); ctx.lineTo(x + bw - sk, H); ctx.stroke(); ctx.restore();
+}
+
 /* ---------- 00 power on: a heartbeat, the lens draws itself, two stains merge ---------- */
 let G0 = null;   // the gate's ring, so the film starts where the gate left off
 const S0 = {world(t){
@@ -192,6 +299,7 @@ const S0 = {world(t){
     ctx.stroke();
   }
   lensRing(x, y, R, eOut(ramp(t, .06, 1.0)), t, 1);
+  lensBody(x, y, R, eOut(ramp(t, .2, .9)) * (1 - z), t);
   const la = eOut(ramp(t, .55, .4)) * (1 - z), mp = clamp(S * .014, 9, 11);
   if (x + R * .72 + 16 + lay("40× · N.A. 0.65", MON, mp, .12).w < W - 12) txt("40× · N.A. 0.65", x + R * .72 + 16, y + R * .72 + 18, MON, mp, C.faint, la, "left", .12);
   if (x - R * .72 - 16 - lay("FIG. 00", MON, mp, .12).w > 12) txt("FIG. 00", x - R * .72 - 16, y - R * .72 - 10, MON, mp, C.faint, la, "right", .12);
@@ -225,7 +333,15 @@ function cells(t, a){
 }
 const S1 = {world(t, b, tg){
   const k = Math.min(3, Math.floor(b / 1.5)), wt = t - k * 1.5 * B, w = WORDS[k], fl = !!w.flood, ser = !!w.serif;
-  if (fl){ fillA(C.lumen, 1); const wp = eOut(cl(wt / .07)); ctx.fillRect(-W, lerp(H * 1.2, -H, wp), 3 * W, 4 * H); }
+  if (fl){
+    const wp = eOut(cl(wt / .07)), top = lerp(H * 1.2, -H, wp), gg = ctx.createLinearGradient(0, top, W * .35, top + H * 1.6);
+    gg.addColorStop(0, "#FFF2D2"); gg.addColorStop(.38, "#F6D490"); gg.addColorStop(1, "#D6A250");
+    ctx.fillStyle = gg; ctx.fillRect(-W, top, 3 * W, 4 * H);
+    ctx.save(); ctx.globalCompositeOperation = "lighter";   // two slow reflections cross the gold glass
+    for (let i = 0; i < 2; i++){ const sx = W * (.16 + i * .52) + wt * W * .2, sg = ctx.createLinearGradient(sx - W * .12, 0, sx + W * .12, H * .3); sg.addColorStop(0, rgba(WHITE, 0)); sg.addColorStop(.5, rgba(WHITE, .17 - i * .06)); sg.addColorStop(1, rgba(WHITE, 0)); ctx.fillStyle = sg; ctx.fillRect(-W, top, 3 * W, 4 * H); }
+    ctx.restore();
+    if (wp < 1){ fillA(WHITE, .9 * (1 - wp)); ctx.fillRect(-W, top, 3 * W, 2.5); }
+  }
   const oe = 0, push = k === 3 && t > DUR(1) - .34 ? eIn(cl((t - (DUR(1) - .34)) / .34)) : 0;
   if (k === 3) cells(t, eOut(cl(wt / .16)));
   if (push > 0){ const ps = 1 + .07 * push; ctx.save(); ctx.translate(CX, MY); ctx.scale(ps, ps); ctx.translate(-CX, -MY); }
@@ -260,7 +376,13 @@ const S1 = {world(t, b, tg){
     for (let j = 9; j >= 1; j--){ const c = rgb(C.lumen), m = .78 - j * .025; word(w.t, x0 + j * 1.25, by + j * 1.25, ff, px, `rgb(${c[0] * m | 0},${c[1] * m | 0},${c[2] * m | 0})`, {tr, al: "left", anim}); }
     word(w.t, x0, by, ff, px, INK, {tr, al: "left", anim});
     ctx.restore();
-  } else word(w.t, x0, by, ff, px, C.bone, {tr, al: "left", anim});
+  } else {
+    if (!ser){
+      const ec = k === 0 ? PC.scam : PC.mcp, ea = (i, nn, c) => { const q = anim(i, nn, c); return q ? {dx: q.dx, dy: q.dy, a: q.a, r: q.r, ch: q.ch} : null; };
+      for (let j = 7; j >= 1; j--) word(w.t, x0 + j * .9, by + j * .9, ff, px, rgba(ec, .1 + .05 * (7 - j)), {tr, al: "left", anim: ea});
+    }
+    word(w.t, x0, by, ff, px, C.bone, {tr, al: "left", anim});
+  }
   if (ser){
     const cw = L1.w - L1.xs[n - 1];
     let dx = x0 + L1.xs[n - 1] + cw * .3, dy = by - px * .06, dr = px * .058;
@@ -277,19 +399,23 @@ const S1 = {world(t, b, tg){
 /* ---------- 02 APIS: the hive grid, a plate that flips to the measured result ---------- */
 function hexGrid(){
   return cache("hex", () => {
-    const s = clamp(S / 18, 20, 46), w = Math.sqrt(3) * s, h = 1.5 * s, cells = [], dmax = Math.hypot(W, H) / 2;
-    const cols = Math.ceil(W / w) + 2, rows = Math.ceil(H / h) + 2;
-    for (let r = -1; r < rows; r++) for (let c = -1; c < cols; c++){ const x = c * w + (r & 1 ? w / 2 : 0), y = r * h; cells.push({x, y, d: Math.hypot(x - CX, y - MY) / dmax, q: hsh(r + 50, c + 50, 7)}); }
+    // a honeycomb floor tilted away from the viewer: near cells large at the bottom, far cells small toward the top
+    const s = clamp(S / 18, 20, 46) * (LITE ? 1.3 : 1.1), w = Math.sqrt(3) * s, h = 1.5 * s, cells = [], th = .9, cy = MY + SH * .1, dmax = Math.hypot(W, H) * .9;
+    for (let r = Math.floor(-H * 3 / h); r <= Math.ceil(H * .9 / h); r++) for (let c = Math.floor(-W * 2.2 / w); c <= Math.ceil(W * 2.2 / w); c++){
+      const u = c * w + (r & 1 ? w / 2 : 0), v = r * h, pr = onPlane(u, v, th, cy);
+      if (pr[2] < .32 || pr[0] < -s * 2 || pr[0] > W + s * 2 || pr[1] < -s * 2 || pr[1] > H + s * 2) continue;
+      cells.push({x: pr[0], y: pr[1], f: pr[2], d: Math.hypot(u, v) / dmax, q: hsh(r + 50, c + 50, 7)});
+    }
     const P = clamp(S * .26, 104, 240), anom = [], R = rng(9), on = [1, 3, 5, 7, 9];
     let tries = 0;
     while (anom.length < 5 && tries++ < 900){
       const c = cells[Math.floor(R() * cells.length)];
-      if (c.d < .28 || c.d > .85 || c.y < TOP + 30 || c.y > H - BOT - 20 || c.x < 30 || c.x > W - 30) continue;
+      if (c.d < .2 || c.f < .7 || c.y < TOP + 30 || c.y > H - BOT - 20 || c.x < 30 || c.x > W - 30) continue;
       if (Math.abs(c.x - CX) < P * 1.25 && Math.abs(c.y - MY) < P * 1.35) continue;
       if (anom.some(a => Math.hypot(a.x - c.x, a.y - c.y) < s * 5)) continue;
-      anom.push({x: c.x, y: c.y, on: on[anom.length] * B / 2});
+      anom.push({x: c.x, y: c.y, f: c.f, on: on[anom.length] * B / 2});
     }
-    return {s, cells, anom, P};
+    return {s, cells, anom, P, ct: Math.cos(th)};
   });
 }
 const S2 = {world(t, b){
@@ -299,15 +425,16 @@ const S2 = {world(t, b){
     const ap = eOut(cl((t - c.d * .42) / .3)); if (ap <= 0) continue;
     let wv = 0;
     for (let k = 0; k <= nb; k++){ const age = t - k * B; if (age < 0) continue; wv += Math.exp(-Math.pow((c.d - age * 1.6) / .06, 2)) * Math.exp(-age * 1.1); }
-    hexPath(ctx, c.x, c.y, G.s * .9 * ap);
-    if (c.q < .2 || wv > .05){ fillA(PC.apis, .04 + wv * .22); ctx.fill(); }
-    strokeA(PC.apis, (.12 + .5 * wv) * ap, 1); ctx.stroke();
+    ctx.save(); ctx.translate(c.x, c.y); ctx.scale(c.f, c.f * G.ct); hexPath(ctx, 0, 0, G.s * .9 * ap); ctx.restore();
+    const fog = cl((c.f - .32) / .55);   // far cells fade into the light
+    if (c.q < .2 || wv > .05){ fillA(PC.apis, (.04 + wv * .22) * fog); ctx.fill(); }
+    strokeA(PC.apis, (.12 + .5 * wv) * ap * fog, Math.max(.5, c.f)); ctx.stroke();
   }
   const fr = Math.floor(t * 60);
   G.anom.forEach((a, i) => {
     const age = t - a.on; if (age < 0 || age > .62) return;
     const al = (age < .08 ? (hsh(fr, i, 3) > .45 ? 1 : .2) : 1) * (1 - eIn(cl((age - .3) / .32)));
-    hexPath(ctx, a.x, a.y, G.s * .88); fillA(C.auth, .36 * al); ctx.fill(); strokeA(C.auth, .9 * al, 1.4); ctx.stroke();
+    ctx.save(); ctx.translate(a.x, a.y); ctx.scale(a.f, a.f * G.ct); hexPath(ctx, 0, 0, G.s * .88); ctx.restore(); fillA(C.auth, .36 * al); ctx.fill(); strokeA(C.auth, .9 * al, 1.4); ctx.stroke();
     gl(C.auth, 1, a.x, a.y, G.s * 1.9, .5 * al);
     if (i === 0 || i === 3){
       const lx = a.x + (a.x < CX ? -1 : 1) * G.s * 1.6, ly = a.y - G.s * 1.3, mp = clamp(S * .013, 9, 11);
@@ -324,8 +451,12 @@ const S2 = {world(t, b){
     const gx = x + lerp(Math.cos(a1), Math.cos(a2), f) * rr, gy = y + lerp(Math.sin(a1), Math.sin(a2), f) * rr;
     gl(C.lumen, 0, gx, gy, 7, .7 * pa); fillA(C.lumen, pa); ctx.fillRect(gx - 1.2, gy - 1.2, 2.4, 2.4);
   }
-  ctx.save(); ctx.translate(x, y); ctx.scale(Math.max(.004, Math.abs(sx)) * sc0, sc0);
-  hexPath(ctx, 0, 0, P); fillA(C.ground, pa); ctx.fill(); strokeA(C.lumen, pa, (1.6 + kp * 1.2) / sc0); ctx.stroke();
+  ctx.save(); ctx.translate(x, y); ctx.transform(1, Math.sin(fl * Math.PI) * .16 * (back ? 1 : -1), 0, 1, 0, 0); ctx.scale(Math.max(.004, Math.abs(sx)) * sc0, sc0);
+  hexPath(ctx, 0, 0, P); fillA(C.stage, .8 * pa); ctx.fill();
+  const pgr = ctx.createLinearGradient(-P, -P, P * .6, P); pgr.addColorStop(0, rgba(WHITE, .13 * pa)); pgr.addColorStop(.45, rgba(WHITE, .02 * pa)); pgr.addColorStop(1, rgba(PC.apis, .18 * pa));
+  hexPath(ctx, 0, 0, P); ctx.fillStyle = pgr; ctx.fill();
+  const prg = ctx.createLinearGradient(-P, -P, P, P); prg.addColorStop(0, rgba(WHITE, .95 * pa)); prg.addColorStop(.42, rgba(C.lumen, .8 * pa)); prg.addColorStop(1, rgba(PC.apis, .95 * pa));
+  hexPath(ctx, 0, 0, P); ctx.strokeStyle = prg; ctx.lineWidth = (1.8 + kp * 1.2) / sc0; ctx.stroke();
   hexPath(ctx, 0, 0, P * .9); strokeA(C.bone, .14 * pa, 1); ctx.stroke();
   const mp = clamp(P * .062, 9, 13);
   if (!back){
@@ -339,6 +470,8 @@ const S2 = {world(t, b){
     word(v.toFixed(1) + "%", 0, npx * .3, GRO, npx, C.bone, {tr: -.03});
     txt("FEWER FALSE POSITIVES", 0, npx * .3 + mp * 2.6, MON, mp, C.lumen, eOut(ramp(t, 3 * B + .15, .2)), "center", .14);
   }
+  const gp = back ? ramp(t, 3 * B + .2, .5) : ramp(t, .06, .45);   // a glint crosses the glass as it lands and after it turns
+  if (gp > 0 && gp < 1){ ctx.save(); hexPath(ctx, 0, 0, P); ctx.clip(); const bw = P * .5, gx = lerp(-P - bw, P + bw, eIO(gp)), sg = ctx.createLinearGradient(gx - bw, -P, gx + bw, -P * .4); sg.addColorStop(0, rgba(WHITE, 0)); sg.addColorStop(.5, rgba(WHITE, .3 * pa)); sg.addColorStop(1, rgba(WHITE, 0)); ctx.fillStyle = sg; ctx.fillRect(-P, -P, 2 * P, 2 * P); ctx.restore(); }
   ctx.restore();
   if (fl > .3 && fl < .7){ const e = 1 - Math.abs(fl - .5) / .2; fillA(C.merge, .9 * e); ctx.fillRect(x - 1, y - P * sc0, 2, P * 2 * sc0); gl(C.merge, 1, x, y, P * .6, .5 * e); }
   const ub = y + P * 1.12 + 26, up = clamp(S * .015, 10, 12);
@@ -368,9 +501,14 @@ function graph(){
     return {pts, edges, path, app: pts.map(p => .02 + (p.x - x0) / (x1 - x0) * .2)};
   });
 }
+// each host sits at its own depth; a slow swing of the camera makes near and far hosts slide past each other
+function swing(pts, t){
+  const yaw = .3 * Math.sin(t * .55 + .6), cy = Math.cos(yaw), sy = Math.sin(yaw), F = Math.max(W, H) * 1.2;
+  return pts.map((p, i) => { const zz = (hsh(i, 9, 3) * 2 - 1) * S * .4, dx = p.x - CX, x1 = dx * cy + zz * sy, z1 = -dx * sy + zz * cy, f = F / (F + z1); return {x: CX + x1 * f, y: MY + (p.y - MY) * f, f}; });
+}
 const S3 = {
   world(t){
-    const G = graph(), P = G.pts, path = G.path, hops = Math.max(1, path.length - 1), hopT = h => h * 2 * B / hops;
+    const G = graph(), P = swing(G.pts, t), path = G.path, hops = Math.max(1, path.length - 1), hopT = h => h * 2 * B / hops;
     const last = P[path[path.length - 1]], zc = eIO(ramp(t, 2 * B, .45)), dim = 1 - .55 * zc;
     ctx.save(); ctx.translate(last.x, last.y); ctx.scale(1 + .2 * zc, 1 + .2 * zc); ctx.translate(-last.x, -last.y);
     for (const [i, j] of G.edges){
@@ -400,15 +538,15 @@ const S3 = {
       const p = eBack(cl((t - G.app[i]) / .18), 2); if (p <= 0) return;
       const hit = onPath.has(i) && t >= (path.indexOf(i) ? hopT(path.indexOf(i)) : .06), isLast = i === path[path.length - 1] && t >= 2 * B;
       const col = isLast ? C.merge : hit ? C.auth : C.host;
-      if (!hit) gl(C.host, 1, v.x, v.y, 14, .35 * dim);
-      ctx.beginPath(); ctx.arc(v.x, v.y, 4 * p, 0, TAU); fillA(C.stage, 1); ctx.fill(); strokeA(col, (hit ? 1 : .8 * dim), 1.6); ctx.stroke();
+      if (!hit) gl(C.host, 1, v.x, v.y, 14 * v.f, .35 * dim * cl(v.f - .2));
+      ctx.beginPath(); ctx.arc(v.x, v.y, 4 * p * v.f, 0, TAU); fillA(C.stage, 1); ctx.fill(); strokeA(col, (hit ? 1 : .8 * dim), 1.6 * v.f); ctx.stroke();
       if (hit){ fillA(col, 1); ctx.beginPath(); ctx.arc(v.x, v.y, 2, 0, TAU); ctx.fill(); }
     });
     if (t >= 2 * B){
       const st = t - 2 * B, sp = eOut(cl(st / .14)), sc = 1.7 - .7 * sp, sw = clamp(S * .016, 10, 13);
       ctx.save(); ctx.translate(last.x, last.y - 34); ctx.rotate(-.06); ctx.scale(sc, sc);
       const L1 = lay("CONFIRMED", MON, sw, .2), bw = L1.w + 22, bh = sw + 16;
-      fillA(C.ground, .85 * sp); ctx.fillRect(-bw / 2, -bh / 2, bw, bh); strokeA(C.merge, sp, 1.6); ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
+      glassBox(-bw / 2, -bh / 2, bw, bh, 8, C.merge, sp, {alpha: .82, shadow: false, glow: .32, sweep: ramp(st, .04, .4)});
       txt("CONFIRMED", 0, sw * .36, MON, sw, C.merge, sp, "center", .2);
       ctx.restore();
     }
@@ -424,9 +562,9 @@ const S3 = {
     const k = eOut(ramp(t, 1, .3)), v = Math.round(96 * eOut(ramp(t, 1.02, .4)));
     const npx = PORT ? Math.min(W * .3, SH * .2) : Math.min(SH * .4, W * .17);
     const bx = PORT ? W * .08 : W * .07, nb = PORT ? TOP + SH * .82 : MY + npx * .22;
-    const gr = PORT ? ctx.createLinearGradient(0, H, 0, H * .35) : ctx.createLinearGradient(0, 0, W * .62, 0);
-    gr.addColorStop(0, rgba(C.ground, .97 * k)); gr.addColorStop(.62, rgba(C.ground, .9 * k)); gr.addColorStop(1, rgba(C.ground, 0));
-    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+    const lp0 = clamp(S * .017, 11, 15), mw = PORT ? W * .84 : W * .4, nl = lines("OF THE RED TEAM'S STOLEN-CREDENTIAL LOGINS CAUGHT", MON, lp0, .1, mw).length;
+    const pw = Math.max(lay("96%", GRO, npx, -.035).w, mw) + 64, py0 = nb - npx * .86 - 34, ph = npx * .86 + 30 + nl * lp0 * 1.55 + 10 + 34 + 26;
+    glassBox(bx - 32, py0, Math.min(pw, W - bx + 32 - 16), ph, 28, C.auth, k, {alpha: .6, sweep: ramp(t, 1, .55)});
     const r = word(v + "%", bx, nb, GRO, npx, C.bone, {tr: -.035, al: "left", anim: i => ({dy: (1 - eOut5(cl((t - 1 - i * .03) / .22))) * npx * .25, a: k})});
     const lp = clamp(S * .017, 11, 15), maxW = PORT ? W * .84 : W * .4;
     const L = lines("OF THE RED TEAM'S STOLEN-CREDENTIAL LOGINS CAUGHT", MON, lp, .1, maxW);
@@ -491,9 +629,22 @@ const VIZ = {
     strokeA(INK, .5, 1); ctx.setLineDash([3, 4]); ctx.beginPath(); ctx.moveTo(bx.x + w * 2004 / 6300, bx.y + mp + 6); ctx.lineTo(bx.x + w * 2004 / 6300, bx.y + mp * 2 + bh * 2 + 44); ctx.stroke(); ctx.setLineDash([]);
   }
 };
+const mixHex = (a, b, k) => { const x = rgb(a), y = rgb(b), h = v => Math.round(v).toString(16).padStart(2, "0"); return "#" + h(lerp(x[0], y[0], k)) + h(lerp(x[1], y[1], k)) + h(lerp(x[2], y[2], k)); };
 function card(k, ct){
-  const c = CARDS[k]; fillA(c.c, 1); ctx.fillRect(-W, -H, 3 * W, 3 * H);
+  const c = CARDS[k];
+  fillA(c.c, .22); ctx.fillRect(-W, -H, 3 * W, 3 * H);   // the light behind takes the card's colour
+  const m = PORT ? W * .035 : Math.min(W, H) * .045, cx0 = m, cy0 = Math.max(10, TOP - 22), cw = W - 2 * m, ch = H - BOT + 34 - cy0, cr = 30;
+  const cg = ctx.createLinearGradient(cx0, cy0, cx0 + cw * .6, cy0 + ch);
+  cg.addColorStop(0, mixHex(c.c, WHITE, .3)); cg.addColorStop(.55, c.c); cg.addColorStop(1, mixHex(c.c, BLACK, .28));
+  ctx.save(); if (!LITE){ ctx.shadowColor = rgba(BLACK, .55 * GA); ctx.shadowBlur = 54; ctx.shadowOffsetY = 26; }
+  rrect(ctx, cx0, cy0, cw, ch, cr); ctx.globalAlpha = GA * .97; ctx.fillStyle = cg; ctx.fill(); ctx.restore();
+  ctx.save(); rrect(ctx, cx0, cy0, cw, ch, cr); ctx.clip();
   strokeA(INK, .05, 1); ctx.beginPath(); for (let x = -H; x < W; x += 18){ ctx.moveTo(x, H); ctx.lineTo(x + H, 0); } ctx.stroke();
+  const sh = ctx.createLinearGradient(cx0, cy0, cx0 + cw * .5, cy0 + ch * .7); sh.addColorStop(0, rgba(WHITE, .22 * GA)); sh.addColorStop(.35, rgba(WHITE, 0)); ctx.fillStyle = sh; ctx.fillRect(cx0, cy0, cw, ch);
+  ctx.restore();
+  const brg = ctx.createLinearGradient(cx0, cy0, cx0 + cw, cy0 + ch); brg.addColorStop(0, rgba(WHITE, .85 * GA)); brg.addColorStop(.4, rgba(WHITE, .18 * GA)); brg.addColorStop(1, rgba(mixHex(c.c, BLACK, .45), .9 * GA));
+  ctx.strokeStyle = brg; ctx.lineWidth = 1.5; rrect(ctx, cx0 + .75, cy0 + .75, cw - 1.5, ch - 1.5, cr - .75); ctx.stroke();
+  if (ct < .6) sweepBand(cx0, cy0, cw, ch, cr, ramp(ct, .05, .5), GA * .9);
   const pad = W * (PORT ? .08 : .07), npx = PORT ? Math.min(W * .27, SH * .19) : Math.min(SH * .44, W * .17);
   const nb = PORT ? TOP + SH * .3 : MY + npx * .3 - SH * .06, mp = clamp(S * .012, 10, 11);
   txt(pad2(k + 1) + " / 04 · " + c.tag, pad, TOP + 16, MON, mp, rgba(INK, .72), 1, "left", .14);
@@ -509,11 +660,9 @@ function card(k, ct){
   VIZ[c.viz](bx, ct);
 }
 const S4 = {world(t, b){
-  const k = Math.min(3, Math.floor(b / 3)), ct = t - k * 3 * B, edge = W * eOut(cl(ct / .12));
-  if (edge < W && k > 0) card(k - 1, 3 * B + ct);
-  ctx.save(); if (edge < W){ ctx.beginPath(); ctx.rect(-W, -H, W + edge, 3 * H); ctx.clip(); }
-  card(k, ct); ctx.restore();
-  if (edge < W){ fillA(C.bone, .9); ctx.fillRect(edge - 1, -H, 2, 3 * H); }
+  const k = Math.min(3, Math.floor(b / 3)), ct = t - k * 3 * B, e = eOut(cl(ct / .36));
+  if (e < 1 && k > 0){ const ga = GA; ctx.save(); GA = ga * (1 - e); ctx.translate(-e * W * .38, 0); turnY(CX, MY, -e * .6); card(k - 1, 3 * B + ct); GA = ga; ctx.restore(); }
+  ctx.save(); if (e < 1 && k > 0){ ctx.translate((1 - e) * W * .78, 0); turnY(CX, MY, (1 - e) * .75); } card(k, ct); ctx.restore();
   if (t > DUR(4) - .22){
     const e = eIn(cl((t - (DUR(4) - .22)) / .22)), r = Math.hypot(W, H) * .55 * (1 - e) + 1.5;
     ctx.beginPath(); ctx.rect(-W, -H, 3 * W, 3 * H); ctx.arc(CX, MY, r, 0, TAU, true); fillA(C.ground, 1); ctx.fill("evenodd");
@@ -541,7 +690,7 @@ function galaxy(){
 }
 const S5 = {world(t){
   const G = galaxy(), RG = Math.hypot(W, H) * .36, burst = eOut(cl(t / .5)), ex = t > DUR(5) - .32 ? eIn(cl((t - (DUR(5) - .32)) / .32)) : 0;
-  const cols = [C.net, C.auth, C.merge];
+  const cols = [C.net, C.auth, C.merge], tilt = lerp(.28, .74, eIO(ramp(t, 0, 1.2)));
   let settled = 0;
   ctx.globalCompositeOperation = "lighter";
   gl(C.lumen, 1, CX, MY, RG * .2 * burst, .45 * (1 - eOut(ramp(t, 1, .5))) * (1 - ex));
@@ -550,12 +699,13 @@ const S5 = {world(t){
     ctx.fillStyle = cols[c];
     for (let i = c; i < G.P.length; i += 3){
       const p = G.P[i], an = p.a0 + t * (.9 / (p.rr + .3)) + .2, rad = p.rr * RG * burst;
-      let x = CX + Math.cos(an) * rad, y = MY + Math.sin(an) * rad * .72;
+      const fz = 1 + .32 * Math.sin(an) * (1 - tilt * .6);   // the near side of the disc is bigger and brighter
+      let x = CX + Math.cos(an) * rad * fz, y = MY + Math.sin(an) * rad * tilt * fz + (p.z - .5) * RG * .07 * (1 - tilt);
       const e = eIO(cl((t - p.d) / .5));
       if (e > 0){ const sw = Math.sin(e * Math.PI) * 24 * (p.arm - 1); x = lerp(x, p.tx, e) - sw * .6; y = lerp(y, p.ty, e) + sw; if (e >= 1){ x += Math.sin(t * 3 + p.ph) * .6; y += Math.cos(t * 2.6 + p.ph) * .6; settled++; } }
       if (ex > 0){ x += (x - CX) * ex * 1.8; y += (y - MY) * ex * 1.8; }
       const a = (.5 + .5 * p.z) * (1 - ex) * GA; if (a <= .01) continue;
-      ctx.globalAlpha = a; const s = p.s * (1.25 + .8 * (1 - e)); ctx.fillRect(x - s / 2, y - s / 2, s, s);
+      const s = p.s * (1.25 + .8 * (1 - e)) * (e < 1 ? lerp(fz, 1, e) : 1); ctx.globalAlpha = Math.min(1, a * (e < 1 ? lerp(fz, 1, e) : 1)); ctx.fillRect(x - s / 2, y - s / 2, s, s);
     }
   }
   ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over";
@@ -689,12 +839,15 @@ const LABEL6 = ["Animal detection", "Solar screen", "S.O.S", "MCP proxy"];
 const S6 = {world(t){
   const k = Math.min(3, Math.floor(t / (3 * B))), pt = t - k * 3 * B, P = PANELS[k], zs = 1.07 - .07 * eOut(cl(pt / (3 * B)));
   gl(P.c, 3, CX, MY, S * .95, .17);
-  ctx.save(); ctx.translate(CX, MY); ctx.scale(zs, zs); ctx.translate(-CX, -MY); P.draw(pt, P.c); ctx.restore();
+  ctx.save(); ctx.translate(CX, MY); ctx.scale(zs, zs); ctx.translate(-CX, -MY);
+  if (pt < .42){ const e = eOut(pt / .42); ctx.translate((1 - e) * W * .32, 0); turnY(CX, MY, (1 - e) * .62); }
+  P.draw(pt, P.c); ctx.restore();
 }, ui(t){
   const k = Math.min(3, Math.floor(t / (3 * B))), pt = t - k * 3 * B, P = PANELS[k];
   const tpx = fit(P.title, GRO, W * (PORT ? .88 : .62), PORT ? 44 : 84, -.03), sp = clamp(S * .014, 10, 12), mp = clamp(S * .012, 9, 11);
   const al = PORT ? "center" : "left", x = PORT ? CX : W * .07, sy = H - BOT - 14, ty = sy - sp - 18;
-  ctx.drawImage(rampSpr(), 0, ty - tpx - 40, W, H - (ty - tpx - 40));
+  const tw = Math.max(lay(P.title, GRO, tpx, -.03).w, lay(P.sub, MON, sp, .12).w), pw = Math.min(W - 24, tw + 60), px0 = PORT ? CX - pw / 2 : x - 30, py0 = ty - tpx - 46;
+  glassBox(px0, py0, pw, sy - py0 + 24, 24, P.c, eOut(cl(pt / .12)), {alpha: .64, sweep: ramp(pt, .03, .55)});
   txt(pad2(k + 1) + " / 04 · " + P.tag, x, ty - tpx - 14, MON, mp, P.c, eOut(cl(pt / .04)), al, .14);
   ctx.save(); ctx.beginPath(); ctx.rect(0, ty - tpx * 1.05, W, tpx * 1.2); ctx.clip();
   word(P.title, x, ty, GRO, tpx, C.bone, {tr: -.03, al, anim: i => ({dy: (1 - eOut5(cl((pt - i * .004) / .12))) * tpx})});
@@ -711,7 +864,14 @@ const CREDS = [
 ];
 const CT = [0, B, 2 * B, 3 * B, 4 * B];
 function dotGrid(){
-  return cache("dots", () => { const g = clamp(S / 13, 24, 58), cols = Math.ceil(W / g) + 1, rows = Math.ceil(H / g) + 1, ox = (W - (cols - 1) * g) / 2, oy = (H - (rows - 1) * g) / 2, cells = []; for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) cells.push({x: ox + c * g, y: oy + r * g, c, r}); return {g, cells}; });
+  return cache("dots", () => {
+    const g = clamp(S / 13, 24, 58), th = .78, cy = MY + SH * .06, cells = [];
+    for (let r = Math.floor(-H * 2.6 / g); r <= Math.ceil(H / g); r++) for (let c = Math.floor(-W * 1.8 / g); c <= Math.ceil(W * 1.8 / g); c++){
+      const pr = onPlane(c * g, r * g, th, cy); if (pr[2] < .34 || pr[0] < -g || pr[0] > W + g || pr[1] < -g || pr[1] > H + g) continue;
+      cells.push({x: pr[0], y: pr[1], f: pr[2], c: c + 200, r: r + 200});
+    }
+    return {g, cells, ct: Math.cos(th)};
+  });
 }
 const PAL = [PC.apis, PC.solar, PC.scam, PC.mcp, PC.phish, PC.ai, PC.animal, PC.sos];
 const S7 = {world(t){
@@ -719,8 +879,8 @@ const S7 = {world(t){
   if (c1 > 0) ctx.globalCompositeOperation = "lighter";
   for (const d of G.cells){
     const wv = .5 + .5 * Math.sin(d.c * .55 + d.r * .35 - ph), x = c2 > 0 ? lerp(d.x, CX, c2) : d.x, y = c1 > 0 ? lerp(d.y, MY, c1) : d.y;
-    const q = G.g * .56 * (.55 + .45 * wv) * (1 - c2 * .75) * (1 - c1 * .35), idx = (Math.floor((d.c + d.r) * .22 + t * sp) % 8 + 8) % 8;
-    fillA(PAL[idx], (.16 + .62 * wv) * (1 - c2 * .5)); ctx.fillRect(x - q / 2, y - q / 2 * (1 - c1 * .7), q, q * (1 - c1 * .7));
+    const q = G.g * .56 * (.55 + .45 * wv) * (1 - c2 * .75) * (1 - c1 * .35) * d.f, idx = (Math.floor((d.c + d.r) * .22 + t * sp) % 8 + 8) % 8, qh = q * G.ct * (1 - c1 * .7), fog = cl((d.f - .34) / .5);
+    fillA(PAL[idx], (.16 + .62 * wv) * (1 - c2 * .5) * fog); ctx.fillRect(x - q / 2, y - qh / 2, q, qh);
   }
   ctx.globalCompositeOperation = "source-over";
   if (c2 > .6){
@@ -736,7 +896,7 @@ const S7 = {world(t){
   const bpx = fit(cr.t, GRO, Math.min(W * (PORT ? .8 : .6), W - 120), PORT ? 52 : 110, -.03), sp = clamp(S * .014, 10, 12);
   const sl = lines(cr.s, MON, sp, .14, Math.min(W * (PORT ? .78 : .56), W - 110)), bw = Math.min(W - 24, Math.max(lay(cr.t, GRO, bpx, -.03).w, ...sl.map(z => lay(z, MON, sp, .14).w)) + 72), bh = bpx * .9 + sl.length * sp * 1.6 + 60;
   ctx.save(); ctx.translate(CX, MY); ctx.scale(s, s);
-  fillA(C.ground, .93); ctx.fillRect(-bw / 2, -bh / 2, bw, bh); strokeA(cr.c, 1, 1.5); ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
+  glassBox(-bw / 2, -bh / 2, bw, bh, 22, cr.c, 1, {alpha: .74, glow: .3, sweep: ramp(pt, .02, .45)});
   fillA(cr.c, 1); for (const [x, y] of [[-bw / 2, -bh / 2], [bw / 2, -bh / 2], [-bw / 2, bh / 2], [bw / 2, bh / 2]]) ctx.fillRect(x - 3, y - 3, 6, 6);
   txt(pad2(k + 1) + " / 04", -bw / 2 + 14, -bh / 2 + 22, MON, clamp(S * .012, 9, 10), C.faint, 1, "left", .14);
   word(cr.t, 0, -bh / 2 + 34 + bpx * .74, GRO, bpx, C.bone, {tr: -.03, anim: i => ({dy: (1 - eOut5(cl((pt - i * .01) / .14))) * bpx * .3})});
@@ -756,6 +916,7 @@ const S8 = {world(t){
   ctx.globalCompositeOperation = "source-over";
   for (let i = 0; i < 3; i++){ const age = t - i * .07; if (age < 0 || age > 1.1) continue; strokeA(i === 1 ? C.lumen : C.merge, .5 * (1 - age / 1.1), 1.4); ctx.beginPath(); ctx.arc(CX, MY, S * (.06 + 1.3 * eOut(age / 1.1)), 0, TAU); ctx.stroke(); }
   ctx.globalAlpha = GA; ctx.drawImage(discSpr(), CX - S * .62, MY - S * .62, S * 1.24, S * 1.24); ctx.globalAlpha = 1;
+  if (ctx.createConicGradient && k0 > .01){ const cg = ctx.createConicGradient(t * .5, CX, MY); IRI.forEach((c, i) => cg.addColorStop(i / (IRI.length - 1), rgba(c, .42 * k0 * GA))); ctx.strokeStyle = cg; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(CX, MY, S * .47 * (.94 + .06 * k0), 0, TAU); ctx.stroke(); }
   dust(t + 12, .9);
 }};
 
@@ -783,14 +944,15 @@ const S9 = {world(t){
     ctx.globalCompositeOperation = "source-over";
   }
   lensRing(L.x, L.y, R + (hp > 0 ? 3 : 0), eOut(ramp(t, .15, .8)), t, ra, hp <= 0);
+  if (hp <= 0) lensBody(L.x, L.y, L.r, eOut(ramp(t, .3, .6)), t);
   if (hp > 0){ strokeA(C.lumen, .8 * (1 - hp), 2); ctx.beginPath(); ctx.arc(L.x, L.y, R + 1.5, 0, TAU); ctx.stroke(); gl(C.lumen, 2, L.x, L.y - R, 60, .4 * (1 - hp)); }
 }};
 const SC = [S0, S1, S2, S3, S4, S5, S6, S7, S8, S9];
 const LABELS = ["Power on", "Thesis", "APIS", "Lateral movement", "Measured", "Method", "Builds", "Credentials", "Shehab Shibli", "Enter"];
 
-/* ---------- the cut: camera, flashes, glitches, whips ---------- */
+/* ---------- the cut: camera, flashes, panes of glass, whips ---------- */
 const FLASH = [[TS(1), .85, .09, C.merge], [TS(1, 1.5), .2, .05, C.bone], [TS(1, 3), .26, .05, C.bone], [TS(1, 4.5), .18, .06, C.bone], [TS(2), .45, .08, C.net], [TS(3), .26, .06, C.bone], [TS(3, 2), .3, .08, C.merge], [TS(5), .25, .12, PC.solar], [TS(6), .3, .05, C.bone], [TS(6, 3), .2, .05, C.bone], [TS(6, 6), .2, .05, C.bone], [TS(6, 9), .2, .05, C.bone], [TS(7), .22, .06, C.bone], [TS(8), .72, .12, C.merge], [TS(9) + 1.0, .12, .3, C.lumen]];
-const GLITCH = [[TS(1, 1.5), .07, 1], [TS(1, 3), .07, .8], [TS(1, 4.5), .06, .6], [TS(2), .08, .9], [TS(3), .08, .9], [TS(4, 3), .05, .6], [TS(4, 6), .05, .6], [TS(4, 9), .05, .6], [TS(6), .08, 1], [TS(6, 3), .08, 1], [TS(6, 6), .08, 1], [TS(6, 9), .08, 1], [TS(7), .08, .8], [TS(8), .12, 1.3]];
+const GLITCH = [[TS(1, 1.5), .34, 1], [TS(1, 3), .34, .8], [TS(1, 4.5), .34, .6], [TS(2), .34, .9], [TS(3), .34, .9], [TS(4, 3), .34, .6], [TS(4, 6), .34, .6], [TS(4, 9), .34, .6], [TS(6), .34, 1], [TS(6, 3), .34, 1], [TS(6, 6), .34, 1], [TS(6, 9), .34, 1], [TS(7), .34, .8], [TS(8), .34, 1.3]];
 const SHAKES = [[TS(2), 7, .07], [TS(3, 2), 4, .06], [TS(8), 14, .12]];
 const WOUT = new Set([2, 3, 6]), WIN = new Set([3, 4, 7]);
 function camera(t, bar, lt){
@@ -810,19 +972,18 @@ function post(t, bar, lt){
   if (sm > .02 && !LITE){ ctx.globalAlpha = .36 * sm; ctx.drawImage(cv, 0, 0, cv.width, cv.height, 24 * sm, 0, W, H); ctx.globalAlpha = .2 * sm; ctx.drawImage(cv, 0, 0, cv.width, cv.height, 60 * sm, 0, W, H); ctx.globalAlpha = 1; }
   for (const g of GLITCH){
     const age = t - g[0]; if (age < 0 || age > g[1]) continue;
-    const k = g[2] * (1 - age / g[1]), f = Math.floor(t * 60), n = LITE ? 3 : 7;
-    for (let i = 0; i < n; i++){ const y = hsh(f, i, 11) * H, h = 3 + hsh(f, i, 12) * H * .07, dx = (hsh(f, i, 13) - .5) * 90 * k; ctx.drawImage(cv, 0, Math.floor(y * DPR), cv.width, Math.max(1, Math.floor(h * DPR)), dx, y, W, h); }
-    ctx.globalCompositeOperation = "lighter"; fillA(C.auth, .12 * k); ctx.fillRect(0, hsh(f, 1, 14) * H, W, 2 + 6 * k); fillA(C.net, .12 * k); ctx.fillRect(0, hsh(f, 2, 14) * H, W, 2 + 6 * k); ctx.globalCompositeOperation = "source-over";
+    glassPass(age / g[1], Math.min(1, g[2]) * (1 - .35 * age / g[1]));
     break;
   }
   let fa = 0, fc = C.merge;
   for (const f of FLASH){ const age = t - f[0]; if (age < 0 || age > f[2] * 6) continue; const a = f[1] * Math.exp(-age / f[2]); if (a > fa){ fa = a; fc = f[3]; } }
+  fa *= .75;   // a glint off the glass, not a strobe
   if (fa > .01){ ctx.globalAlpha = Math.min(1, fa); ctx.fillStyle = fc; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
   grain(ctx, W, H, .05);
 }
 function render(t){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; GA = 1;
-  fillA(C.ground, 1); ctx.fillRect(0, 0, W, H);
+  backdrop(t);
   const bar = sceneAt(t), lt = t - ST[bar], b = lt / B, sc = SC[bar], cam = camera(t, bar, lt);
   ctx.save(); ctx.translate(CX + cam.x, MY + cam.y); ctx.scale(cam.s, cam.s); ctx.translate(-CX, -MY);
   if (sc.world) sc.world(lt, b, t);
@@ -840,7 +1001,7 @@ function gateGeom(){
 }
 function drawGate(gt){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; GA = 1;
-  fillA(C.ground, 1); ctx.fillRect(0, 0, W, H);
+  backdrop(gt * .35 - 1, .62);
   dust(gt, eOut(cl(gt / 1.2)));
   const g = gateGeom(), R = g.r, ph = (gt % 6) / 6, m = .5 - .5 * Math.cos(ph * TAU), ang = gt * .5, d = R * .4 * (1 - m * .85), fi = eOut(cl(gt / .8));
   const hp = gt % 2, h = Math.exp(-hp * 8) + (hp > .17 ? .6 * Math.exp(-(hp - .17) * 8) : 0);
@@ -852,6 +1013,7 @@ function drawGate(gt){
   ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(gt * .05); ctx.translate(-g.x, -g.y);
   lensRing(g.x, g.y, R, eOut(cl(gt / 1.1)), gt, 1, false);
   ctx.restore();
+  lensBody(g.x, g.y, R, eOut(cl((gt - .3) / 1.2)), gt);
   fillA(C.lumen, fi); ctx.fillRect(g.x - .5, g.y - R - 19, 1, 16);
   strokeA(C.bone, .2 * fi, 1); ctx.beginPath(); ctx.moveTo(g.x - R * .8, g.y); ctx.lineTo(g.x - 9, g.y); ctx.moveTo(g.x + 9, g.y); ctx.lineTo(g.x + R * .8, g.y); ctx.moveTo(g.x, g.y - R * .8); ctx.lineTo(g.x, g.y - 9); ctx.moveTo(g.x, g.y + 9); ctx.lineTo(g.x, g.y + R * .8); ctx.stroke();
   ctx.drawImage(vig(), 0, 0, W, H);
@@ -861,7 +1023,7 @@ function drawGate(gt){
 const nameAnims = [];
 if (nameEl && nameEl.animate){
   nameEl.querySelectorAll(".ch").forEach((c, k) => {
-    const a = c.animate([{transform: "translateY(96%)", filter: LITE ? "blur(6px)" : "blur(12px)", easing: "cubic-bezier(.16,1,.3,1)"}, {filter: "blur(2px)", offset: .55, easing: "cubic-bezier(.16,1,.3,1)"}, {transform: "none", filter: "blur(0px)"}], {duration: 1000, delay: 120 + k * 45, fill: "both"});
+    const a = c.animate([{transform: "perspective(520px) translateY(96%) rotateX(-75deg)", filter: LITE ? "blur(6px)" : "blur(12px)", easing: "cubic-bezier(.16,1,.3,1)"}, {filter: "blur(2px)", offset: .55, easing: "cubic-bezier(.16,1,.3,1)"}, {transform: "perspective(520px) translateY(0) rotateX(0deg)", filter: "blur(0px)"}], {duration: 1000, delay: 120 + k * 45, fill: "both"});
     a.pause(); a.currentTime = 0; nameAnims.push(a);
   });
 }
