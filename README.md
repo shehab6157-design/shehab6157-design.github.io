@@ -6,12 +6,13 @@ Shehab Shibli, Network Engineering and Computer Security graduate (CCNA, AWS Cer
 
 ## Design
 
-My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. The full design system is in [`MASTER.md`](MASTER.md).
+My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. When you reach another project, the camera dives into its cell and that project's own 3D world opens out of the honeycomb, showing how it works: the MCP proxy's audit trail, the roadside camera alerting cars within 1 km, the solar screen's layers saving energy step by step, the S.O.S sweeper netting debris over Earth, and ScamShield, the phishing detector and the AI assistant on one line of messages. The full design system is in [`MASTER.md`](MASTER.md).
 
 ## About this repo
 
 - `index.html`: the page, with inline CSS and JavaScript (fonts come from Google Fonts).
-- `hive.js`: the 3D honeycomb, built with [three.js](https://threejs.org) (MIT) and a small film pipeline (bloom, depth of field, tone mapping). It loads after the page, and only on devices with a GPU; everyone else sees `hive-*.webp`, a still render of the same scene.
+- `hive.js` and its `c-*.js` chunks: the 3D honeycomb and the project worlds, built with [three.js](https://threejs.org) (MIT) and a small film pipeline (bloom, depth of field, tone mapping). They load after the page, the worlds only as you near them, and only on devices with a GPU; everyone else sees `hive-*.webp` and `world-*.webp`, still renders of the same scenes.
+- `tex-earth-*.webp`: Earth imagery for the S.O.S world, from NASA's Blue Marble (public domain), as packaged in the three.js examples.
 - `intro.js` and `intro.mp3`: the 33-second intro film, rendered live in the same hive, and its original soundtrack. Loaded only when the film plays; press **Play intro** in the navigation to watch it again.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.

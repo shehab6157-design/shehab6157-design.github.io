@@ -45,7 +45,25 @@ three.js (WebGL2) with a small film pipeline of its own, built from `hive/src/hi
 - **Pipeline**: HDR render, multisampled; bright-pass bloom; depth of field; a dual-filter "haze" for defocused backgrounds; AgX tone mapping with a warm grade, vignette and fine grain.
 - **Events**: everything that moves is a function of time (waves, packets hopping cell to cell, glows, seals), so the film can render any frame exactly. The page drives persistent lights (each project's cell, the hovered cell) on top.
 - **Quality**: `high` on desktops (refractive honey, shadows, MSAA), `low` on phones and touch screens. Frames that come slower than about 45 fps lower the render resolution, and it climbs back when there is room. The hive renders only when something moves: it rests under the haze.
-- **Fallbacks**: no WebGL2, or only a software renderer: the page shows a still render of the hero (`hive-*.webp`), softened behind the reading sections. Reduced motion or Pause motion: still frames, one per section, no camera travel.
+- **Fallbacks**: no WebGL2, or only a software renderer: the page shows a still render of the hero (`hive-*.webp`), softened behind the reading sections, and a still of each project's world in its chapter. Reduced motion or Pause motion: still frames, one per section, no camera travel.
+
+## Project worlds
+
+APIS keeps the hive: the comb is its world and the page's home. Every other project has a world of its own, staged in the same dark studio and rendered through the same film pipeline, and each one shows how that project actually works. Reaching a project's chapter, the camera dives into the project's lit cell and the world opens out of the honeycomb, cell by cell behind a thin gold rim; leaving, it closes back into the cell; between two projects the honeycomb sweeps straight from one world to the next.
+
+| Chapter | Gem | What the world shows |
+|---|---|---|
+| MCP Security Proxy | amethyst | Three agents call six tools through a machined ring. Every call is written to a hash-chained audit log; one unusual signal is a gold observation, two correlated signals a red alert narrated to Telegram. Calls are never blocked. |
+| Animal detection | emerald | A night road. The camera on the streetlight pole sees a deer (YOLOv5 on a Raspberry Pi 5) and publishes over MQTT/TLS to AWS IoT Core; Lambda finds the cars within 1 km (DynamoDB) and they get the alert and brake. |
+| Bio-inspired solar screen | aquamarine | A phone with its nature layers floating above it. One by one they come down into the screen and the office day's energy steps down in a glass column: 6,300, 4,530, 3,438, 2,530, 2,004 J; then the hive sends messages to the best-placed screen and 73 phone wake-ups become 3. |
+| S.O.S | sunstone | A sweeper in low orbit nets a cluster of small debris and draws it in, and lasers a larger fragment down toward the atmosphere. |
+| More builds | sapphire, rose, peridot | One gold line through three stations; the camera moves to the card being read. ScamShield: a Matrix room, my Dendrite homeserver (with its Postgres), my client scanning each message before it shows and warning on likely scams, never blocking. Phishing Detector: the content model (0.85 line), behavioral signals and simulated sender history, the real flagging rule, and a calm lure that gets through. Personal AI Assistant: the prompt built from every saved fact and the last 20 messages, the Claude API, and `save_memory` keeping a new fact in SQLite. |
+
+- **Design**: the same studio as the hive (glossy dark floor with real reflections on desktops, warm key light, soft fog), gold and glass, the project's gem as light, hexagons where they belong. Text in the worlds is set in the page's own faces and stays in focus.
+- **Honesty**: every number shown in a world is one the project states (its README or its card).
+- **Loading**: the worlds are a separate chunk, built one at a time while the page is idle near them; three.js is shared with the hive. Each is a loop of 10 to 24 seconds, a pure function of time.
+- **Screens**: worlds are composed beside the card on wide screens and above it on narrow ones, where the lens widens a little and steps back so the whole piece fits.
+- **Fallbacks**: without the live 3D, each chapter cross-fades to a still of its world (`world-*.webp`, landscape and portrait). Reduced motion or Pause motion: the world appears as a still, cut in, with no dive.
 
 ## Components
 
@@ -68,6 +86,6 @@ A 33-second film plays on a first visit, rendered live in the same hive and cut 
 
 ## Performance
 
-- The page and its poster paint first; `hive.js` (three.js, ~156 KB gzipped) loads when the page is idle, or at once when the film plays.
+- The page and its poster paint first; `hive.js` and three.js (~165 KB gzipped) load when the page is idle, or at once when the film plays. The project worlds (~50 KB gzipped, plus a few textures for S.O.S) load only as you near them.
 - One `requestAnimationFrame` loop drives the hive and the sketches; sketches run only on screen; everything stops when the tab is hidden.
 - Panels don't use backdrop blur over the 3D (it would re-blur every frame); only the nav, the hero console and dialogs do. `?glforce` forces WebGL on a software renderer for testing.

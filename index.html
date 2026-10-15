@@ -82,6 +82,17 @@ p{text-wrap:pretty}
 /* without the live hive the poster stays; below the hero it softens and dims, like the camera's haze */
 html:not(.hive-live) .stage3d.deep .poster img{filter:blur(22px) brightness(.62) saturate(1.1)}
 html:not(.hive-live) .stage3d.deep .veil{opacity:.35}
+/* ...and inside a project's chapter, a still of that project's world takes over, sharp and undimmed */
+.wposters{position:absolute;inset:0}
+.wposter,.wposter img{position:absolute;inset:0;width:100%;height:100%}
+.wposter{opacity:0;transition:opacity 1100ms var(--e-out)}
+.wposter.on{opacity:1}
+.wposter img{object-fit:cover;object-position:50% 50%}
+.wposter[data-side="left"] img{object-position:68% 50%}
+.wposter[data-side="right"] img{object-position:32% 50%}
+@media (max-aspect-ratio:1/1){.wposter[data-side] img{object-position:50% 50%}}
+html:not(.hive-live) .stage3d.deep.wp .veil{opacity:0}
+.hive-live .wposter{opacity:0;transition-delay:600ms}
 main,footer{position:relative;z-index:1}
 /* over the live hive: a soft shadow under running text keeps it readable when a bright cell drifts behind it */
 .hive-live .sec :is(p,li,dd,dt,.when,.org,.lt,.channels span,.channels b){text-shadow:0 1px 16px rgb(8 5 2 / .9),0 0 2px rgb(8 5 2 / .6)}
@@ -234,10 +245,14 @@ html:not(.hive-live) .pick-hint{display:none}
 .layers b{color:var(--wax);font-size:15px;font-weight:600;line-height:1.3}
 .layers li > span:last-child{color:var(--wax-3);font-size:13.5px;line-height:1.35}
 
-.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2.2vw,30px);margin-top:clamp(18px,2.2vw,30px)}
-.more{margin-top:clamp(80px,11vh,120px)}
-.more-title{margin:0 0 28px;font:500 clamp(30px,3vw,42px)/1.05 var(--f-display);letter-spacing:-.01em}
-.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(18px,2vw,26px)}
+/* project chapters: each card beside its project's live world (the 3D stage behind the page changes to it);
+   the space between cards is where the camera moves from one world to the next */
+.chapters{margin-top:clamp(30px,6vh,70px)}
+.chap{position:relative;display:flex;align-items:center;min-height:100svh;padding-block:clamp(110px,26vh,260px)}
+.chap > .cell,.chap > .minis{width:min(100%,540px)}
+.chap[data-side="right"]{justify-content:flex-end}
+.minis{display:grid;gap:clamp(22px,3.4vh,36px)}
+.more-title{margin:0 0 4px;font:500 clamp(34px,3.4vw,48px)/1.05 var(--f-display);letter-spacing:-.01em;text-shadow:0 2px 30px rgb(0 0 0 / .5)}
 .mini .specimen{aspect-ratio:16/10}
 .mini .body h3{font-size:26px}
 .mini .kicker .gem{margin-right:2px}
@@ -373,7 +388,10 @@ footer{padding:28px 0 34px;border-top:1px solid rgb(227 176 75 / .12);background
   .ledger{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:34px}
   .ledger li:nth-child(4){padding-left:0;border-left:0}
   .sec-head{grid-template-columns:minmax(0,1fr)}
-  .grid-2,.grid-3{grid-template-columns:minmax(0,1fr)}
+  /* stacked: a window onto each project's world opens above its card */
+  .chap{display:block;min-height:0;padding-block:0 clamp(40px,8vh,80px)}
+  .chap::before{content:"";display:block;height:min(64svh,560px)}
+  .chap > .cell,.chap > .minis{width:100%}
   .about-grid{grid-template-columns:minmax(0,1fr)}
   .about-side{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:28px;align-items:start}
   .about-side .dl{margin-top:0}
@@ -456,7 +474,9 @@ footer{padding:28px 0 34px;border-top:1px solid rgb(227 176 75 / .12);background
   .btn{border:0;padding:0;min-height:0;color:#111;background:none!important;box-shadow:none!important}
   .btn.gold{color:#111}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:11px;color:#555;word-break:break-all}
-  .grid-2,.grid-3,.certs,.skills{grid-template-columns:1fr 1fr}
+  .certs,.skills{grid-template-columns:1fr 1fr}
+  .chap{display:block;min-height:0;padding:0 0 18px}.chap::before{display:none}
+  .chap > .cell,.chap > .minis{width:100%}
   .cell{break-inside:avoid}
   .portrait{max-width:220px}
 }
@@ -561,6 +581,7 @@ html.intro-show{overflow:hidden;scrollbar-gutter:stable}
     <source srcset="hive-1280.webp 1280w, hive-1920.webp 1920w, hive-2560.webp 2560w" sizes="100vw" type="image/webp">
     <img src="hive-1920.jpg" alt="" width="1920" height="1080" decoding="async" fetchpriority="high">
   </picture>
+  <div class="wposters" id="wposters"></div>
   <canvas id="hive"></canvas>
   <div class="veil" id="veil"></div>
 </div>
@@ -695,126 +716,130 @@ html.intro-show{overflow:hidden;scrollbar-gutter:stable}
       </div>
     </article>
 
-    <div class="grid-2">
-      <!-- MCP proxy -->
-      <article class="cell" data-host data-cam="mcp" style="--c:var(--c-mcp)">
-        <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">MCP Proxy</span><span class="after">the APIS method, for AI agents</span><span class="meta">2026, Python</span></header>
-        <div class="specimen"><canvas data-scene="proxy" aria-hidden="true"></canvas></div>
-        <p class="cap">Illustration</p>
-        <div class="body">
-          <p class="kicker"><span class="tag">Public repo</span><span>AI agent security</span></p>
-          <h3>MCP Security Proxy: behavior monitoring for AI agents</h3>
-          <p>Sits between an AI agent and its tools. It logs every call to a hash-chained audit trail, learns each agent's normal pattern (tools, hours, payload size, fan-out) and flags what doesn't fit.</p>
-          <ul class="facts">
-            <li>Tiered like APIS: one signal is logged as an observation; two or more correlated signals become an alert, narrated live to Telegram</li>
-            <li>Signals: <span class="sig">NEW_TOOL</span> <span class="sig">OFF_PATTERN</span> <span class="sig">PAYLOAD_OUTLIER</span> <span class="sig">SEQUENCE_SPIKE</span> <span class="sig">UNKNOWN_AGENT</span> <span class="sig">BASELINE_DRIFT</span></li>
-            <li>Purple-team loop: a scope-gated red engine (fail-closed allowlist) runs simulated attack rounds, and every round is scored as alert, observation, suppressed or missed. A separate mode launches real MITRE Caldera operations against my lab VM</li>
-          </ul>
-          <ul class="chips"><li>Python</li><li>MCP</li><li>MITRE Caldera</li><li>Telegram</li><li>Anomaly detection</li></ul>
-          <div class="links"><a class="btn" href="https://github.com/shehab6157-design/mcp-security-proxy" target="_blank" rel="noopener">View the code</a></div>
-        </div>
-      </article>
-
-      <!-- Animal detection -->
-      <article class="cell" data-host data-cam="animal" style="--c:var(--c-animal)">
-        <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">Animal alert</span><span class="after">edge camera to cloud</span><span class="meta">2024 to 2025, team lead</span></header>
-        <div class="specimen"><canvas data-scene="camera" aria-hidden="true"></canvas></div>
-        <p class="cap">Roadside camera, illustration</p>
-        <div class="body">
-          <p class="kicker"><span class="tag">Graduation project</span><span>I led the team</span></p>
-          <h3>Real-Time Animal Detection &amp; Alert System</h3>
-          <p>An edge-to-cloud system on a Raspberry Pi 5 that spots animals near the road and warns vehicles within 1 km.</p>
-          <div class="metrics">
-            <div class="metric"><b><span data-count="83">83</span>%</b><span>mAP with YOLOv5</span></div>
-            <div class="metric"><b>~<span data-count="340">340</span> ms</b><span>per frame on the Pi 5</span></div>
-          </div>
-          <ul class="facts">
-            <li>MQTT over TLS to AWS IoT Core; Lambda finds vehicles within 1 km (DynamoDB keeps their locations) and alerts them</li>
-            <li>Top 100 at Jordan's 12th National Technology Parade</li>
-          </ul>
-          <ul class="chips"><li>YOLOv5</li><li>Raspberry Pi 5</li><li>MQTT/TLS</li><li>AWS IoT</li></ul>
-          <div class="links"><a class="btn" href="https://github.com/shehab6157-design/on-road-animal-detection-system" target="_blank" rel="noopener">View the code</a></div>
-        </div>
-      </article>
-
-      <!-- Solar screen -->
-      <article class="cell" data-host data-cam="solar" style="--c:var(--c-solar)">
-        <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">Bio screen</span><span class="after">ten mechanisms from nature</span><span class="meta">2026, 89 tests</span></header>
-        <div class="specimen"><canvas data-scene="solar" aria-hidden="true"></canvas></div>
-        <p class="cap">One simulated day, illustration</p>
-        <div class="body">
-          <p class="kicker"><span class="tag">Public repo, MIT license</span><span>Bio-inspired design</span></p>
-          <h3>Bio-Inspired Solar Screen</h3>
-          <p>An open simulation model of how screens use energy. It models ten mechanisms borrowed from nature, from moth-eye anti-glare and firefly light extraction to hummingbird torpor and a honeybee-style household colony, and stacks them device by device.</p>
-          <div class="metrics">
-            <div class="metric"><b><span data-count="68">68</span>%</b><span>less energy for a phone over one office day (6,300 → 2,004 J)</span></div>
-            <div class="metric"><b>5.5 → 31.3</b><span>days per charge for an e-reader</span></div>
-          </div>
-          <ul class="facts">
-            <li>Results are Monte Carlo simulations over assumed material ranges and a year of real sunlight data (PVGIS), not hardware measurements</li>
-            <li>Negative findings are published too: harvesting light on a glowing screen is a net loss, and a sky-cooling layer makes a phone hotter</li>
-          </ul>
-          <ul class="chips"><li>Python</li><li>Monte Carlo</li><li>PVGIS data</li><li>Bio-inspired design</li></ul>
-          <div class="links"><a class="btn" href="https://github.com/shehab6157-design/bio-inspired-solar-screen" target="_blank" rel="noopener">View the code</a></div>
-        </div>
-      </article>
-
-      <!-- S.O.S -->
-      <article class="cell" data-host data-cam="sos" style="--c:var(--c-sos)">
-        <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">S.O.S</span><span class="after">a sweeper for low Earth orbit</span><span class="meta">2025, Team Orion</span></header>
-        <div class="specimen"><canvas data-scene="orbit" aria-hidden="true"></canvas></div>
-        <p class="cap">Mission concept, illustration</p>
-        <div class="body">
-          <p class="kicker"><span class="tag">3rd place, NASA Space Apps 2025</span><span>Team leader</span></p>
-          <h3>S.O.S: Sustainable Orbit Sweeper</h3>
-          <p>With Team Orion I co-designed a modular satellite concept that cleans debris from low Earth orbit. I led the concept documentation and the mission architecture presentation.</p>
-          <ul class="facts">
-            <li>Net-and-gel capture for small debris, a laser array for larger fragments</li>
-            <li>Onboard recycling unit and research core</li>
-          </ul>
-          <ul class="chips"><li>Mission architecture</li><li>Systems design</li><li>Technical writing</li></ul>
-          <div class="links"><a class="btn" href="https://github.com/shehab6157-design/sos-sustainable-orbit-sweeper" target="_blank" rel="noopener">Read the concept</a></div>
-        </div>
-      </article>
-    </div>
-
-    <div class="more" data-cam="more">
-      <h3 class="more-title">More builds</h3>
-      <div class="grid-3">
-        <article class="cell mini" data-host style="--c:var(--c-scam)">
-          <div class="specimen"><canvas data-scene="chat" aria-hidden="true"></canvas></div>
+    <div class="chapters">
+      <div class="chap" data-world="mcp" data-side="left">
+        <!-- MCP proxy -->
+        <article class="cell" data-host style="--c:var(--c-mcp)">
+          <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">MCP Proxy</span><span class="after">the APIS method, for AI agents</span><span class="meta">2026, Python</span></header>
+          <div class="specimen"><canvas data-scene="proxy" aria-hidden="true"></canvas></div>
+          <p class="cap">Illustration</p>
           <div class="body">
-            <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">In development</span></p>
-            <h3>ScamShield</h3>
-            <p>A messenger prototype on the Matrix protocol with my own self-hosted Dendrite homeserver. My client checks every incoming message for scam signals and flags likely scams with a warning instead of blocking them. Next: end-to-end encryption and my phishing detector's engine.</p>
-            <ul class="chips"><li>Matrix</li><li>Dendrite</li><li>Node.js</li></ul>
-            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/scamshield" target="_blank" rel="noopener">View the code</a></div>
+            <p class="kicker"><span class="tag">Public repo</span><span>AI agent security</span></p>
+            <h3>MCP Security Proxy: behavior monitoring for AI agents</h3>
+            <p>Sits between an AI agent and its tools. It logs every call to a hash-chained audit trail, learns each agent's normal pattern (tools, hours, payload size, fan-out) and flags what doesn't fit.</p>
+            <ul class="facts">
+              <li>Tiered like APIS: one signal is logged as an observation; two or more correlated signals become an alert, narrated live to Telegram</li>
+              <li>Signals: <span class="sig">NEW_TOOL</span> <span class="sig">OFF_PATTERN</span> <span class="sig">PAYLOAD_OUTLIER</span> <span class="sig">SEQUENCE_SPIKE</span> <span class="sig">UNKNOWN_AGENT</span> <span class="sig">BASELINE_DRIFT</span></li>
+              <li>Purple-team loop: a scope-gated red engine (fail-closed allowlist) runs simulated attack rounds, and every round is scored as alert, observation, suppressed or missed. A separate mode launches real MITRE Caldera operations against my lab VM</li>
+            </ul>
+            <ul class="chips"><li>Python</li><li>MCP</li><li>MITRE Caldera</li><li>Telegram</li><li>Anomaly detection</li></ul>
+            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/mcp-security-proxy" target="_blank" rel="noopener">View the code</a></div>
           </div>
         </article>
-        <article class="cell mini" data-host style="--c:var(--c-phish)">
-          <div class="specimen"><canvas data-scene="inbox" aria-hidden="true"></canvas></div>
+      </div>
+      <div class="chap" data-world="animal" data-side="right">
+        <!-- Animal detection -->
+        <article class="cell" data-host style="--c:var(--c-animal)">
+          <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">Animal alert</span><span class="after">edge camera to cloud</span><span class="meta">2024 to 2025, team lead</span></header>
+          <div class="specimen"><canvas data-scene="camera" aria-hidden="true"></canvas></div>
+          <p class="cap">Roadside camera, illustration</p>
           <div class="body">
-            <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">Finished</span></p>
-            <h3>Phishing Detector</h3>
-            <p>Flags phishing and scam messages by combining three signals: a TF-IDF text model, regex-based behavioral signals and simulated sender history.</p>
+            <p class="kicker"><span class="tag">Graduation project</span><span>I led the team</span></p>
+            <h3>Real-Time Animal Detection &amp; Alert System</h3>
+            <p>An edge-to-cloud system on a Raspberry Pi 5 that spots animals near the road and warns vehicles within 1 km.</p>
             <div class="metrics">
-              <div class="metric"><b>9/12</b><span>phishing caught on my test set</span></div>
-              <div class="metric"><b>0/12</b><span>false positives on my test set</span></div>
+              <div class="metric"><b><span data-count="83">83</span>%</b><span>mAP with YOLOv5</span></div>
+              <div class="metric"><b>~<span data-count="340">340</span> ms</b><span>per frame on the Pi 5</span></div>
             </div>
-            <ul class="chips"><li>TF-IDF + LogReg</li><li>Regex signals</li></ul>
-            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/ai-phishing-detector" target="_blank" rel="noopener">View the code</a></div>
+            <ul class="facts">
+              <li>MQTT over TLS to AWS IoT Core; Lambda finds vehicles within 1 km (DynamoDB keeps their locations) and alerts them</li>
+              <li>Top 100 at Jordan's 12th National Technology Parade</li>
+            </ul>
+            <ul class="chips"><li>YOLOv5</li><li>Raspberry Pi 5</li><li>MQTT/TLS</li><li>AWS IoT</li></ul>
+            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/on-road-animal-detection-system" target="_blank" rel="noopener">View the code</a></div>
           </div>
         </article>
-        <article class="cell mini" data-host style="--c:var(--c-ai)">
-          <div class="specimen"><canvas data-scene="memory" aria-hidden="true"></canvas></div>
+      </div>
+      <div class="chap" data-world="solar" data-side="left">
+        <!-- Solar screen -->
+        <article class="cell" data-host style="--c:var(--c-solar)">
+          <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">Bio screen</span><span class="after">ten mechanisms from nature</span><span class="meta">2026, 89 tests</span></header>
+          <div class="specimen"><canvas data-scene="solar" aria-hidden="true"></canvas></div>
+          <p class="cap">One simulated day, illustration</p>
           <div class="body">
-            <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">Full-stack build</span></p>
-            <h3>Personal AI Assistant</h3>
-            <p>An AI assistant web app with persistent memory, built on the Claude API, FastAPI and SQLite. Every chat includes my saved facts and the last 20 messages, and Claude decides which new facts to save through a tool call.</p>
-            <ul class="chips"><li>Claude API</li><li>FastAPI</li><li>SQLite</li><li>Tool use</li></ul>
-            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/personal-assistant" target="_blank" rel="noopener">View the code</a></div>
+            <p class="kicker"><span class="tag">Public repo, MIT license</span><span>Bio-inspired design</span></p>
+            <h3>Bio-Inspired Solar Screen</h3>
+            <p>An open simulation model of how screens use energy. It models ten mechanisms borrowed from nature, from moth-eye anti-glare and firefly light extraction to hummingbird torpor and a honeybee-style household colony, and stacks them device by device.</p>
+            <div class="metrics">
+              <div class="metric"><b><span data-count="68">68</span>%</b><span>less energy for a phone over one office day (6,300 → 2,004 J)</span></div>
+              <div class="metric"><b>5.5 → 31.3</b><span>days per charge for an e-reader</span></div>
+            </div>
+            <ul class="facts">
+              <li>Results are Monte Carlo simulations over assumed material ranges and a year of real sunlight data (PVGIS), not hardware measurements</li>
+              <li>Negative findings are published too: harvesting light on a glowing screen is a net loss, and a sky-cooling layer makes a phone hotter</li>
+            </ul>
+            <ul class="chips"><li>Python</li><li>Monte Carlo</li><li>PVGIS data</li><li>Bio-inspired design</li></ul>
+            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/bio-inspired-solar-screen" target="_blank" rel="noopener">View the code</a></div>
           </div>
         </article>
+      </div>
+      <div class="chap" data-world="sos" data-side="right">
+        <!-- S.O.S -->
+        <article class="cell" data-host style="--c:var(--c-sos)">
+          <header class="cell-head"><span class="gem" aria-hidden="true"></span><span class="nm">S.O.S</span><span class="after">a sweeper for low Earth orbit</span><span class="meta">2025, Team Orion</span></header>
+          <div class="specimen"><canvas data-scene="orbit" aria-hidden="true"></canvas></div>
+          <p class="cap">Mission concept, illustration</p>
+          <div class="body">
+            <p class="kicker"><span class="tag">3rd place, NASA Space Apps 2025</span><span>Team leader</span></p>
+            <h3>S.O.S: Sustainable Orbit Sweeper</h3>
+            <p>With Team Orion I co-designed a modular satellite concept that cleans debris from low Earth orbit. I led the concept documentation and the mission architecture presentation.</p>
+            <ul class="facts">
+              <li>Net-and-gel capture for small debris, a laser array for larger fragments</li>
+              <li>Onboard recycling unit and research core</li>
+            </ul>
+            <ul class="chips"><li>Mission architecture</li><li>Systems design</li><li>Technical writing</li></ul>
+            <div class="links"><a class="btn" href="https://github.com/shehab6157-design/sos-sustainable-orbit-sweeper" target="_blank" rel="noopener">Read the concept</a></div>
+          </div>
+        </article>
+      </div>
+      <div class="chap chap-more" data-world="relay" data-side="left">
+        <div class="minis">
+          <h3 class="more-title">More builds</h3>
+          <article class="cell mini" data-host data-focus="0" style="--c:var(--c-scam)">
+            <div class="specimen"><canvas data-scene="chat" aria-hidden="true"></canvas></div>
+            <div class="body">
+              <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">In development</span></p>
+              <h3>ScamShield</h3>
+              <p>A messenger prototype on the Matrix protocol with my own self-hosted Dendrite homeserver. My client checks every incoming message for scam signals and flags likely scams with a warning instead of blocking them. Next: end-to-end encryption and my phishing detector's engine.</p>
+              <ul class="chips"><li>Matrix</li><li>Dendrite</li><li>Node.js</li></ul>
+              <div class="links"><a class="btn" href="https://github.com/shehab6157-design/scamshield" target="_blank" rel="noopener">View the code</a></div>
+            </div>
+          </article>
+          <article class="cell mini" data-host data-focus="1" style="--c:var(--c-phish)">
+            <div class="specimen"><canvas data-scene="inbox" aria-hidden="true"></canvas></div>
+            <div class="body">
+              <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">Finished</span></p>
+              <h3>Phishing Detector</h3>
+              <p>Flags phishing and scam messages by combining three signals: a TF-IDF text model, regex-based behavioral signals and simulated sender history.</p>
+              <div class="metrics">
+                <div class="metric"><b>9/12</b><span>phishing caught on my test set</span></div>
+                <div class="metric"><b>0/12</b><span>false positives on my test set</span></div>
+              </div>
+              <ul class="chips"><li>TF-IDF + LogReg</li><li>Regex signals</li></ul>
+              <div class="links"><a class="btn" href="https://github.com/shehab6157-design/ai-phishing-detector" target="_blank" rel="noopener">View the code</a></div>
+            </div>
+          </article>
+          <article class="cell mini" data-host data-focus="2" style="--c:var(--c-ai)">
+            <div class="specimen"><canvas data-scene="memory" aria-hidden="true"></canvas></div>
+            <div class="body">
+              <p class="kicker"><span class="gem" aria-hidden="true"></span><span class="tag">Full-stack build</span></p>
+              <h3>Personal AI Assistant</h3>
+              <p>An AI assistant web app with persistent memory, built on the Claude API, FastAPI and SQLite. Every chat includes my saved facts and the last 20 messages, and Claude decides which new facts to save through a tool call.</p>
+              <ul class="chips"><li>Claude API</li><li>FastAPI</li><li>SQLite</li><li>Tool use</li></ul>
+              <div class="links"><a class="btn" href="https://github.com/shehab6157-design/personal-assistant" target="_blank" rel="noopener">View the code</a></div>
+            </div>
+          </article>
+        </div>
       </div>
     </div>
   </div>
@@ -1779,7 +1804,7 @@ if (!ro) addEventListener("resize", () => stages.forEach(st => { sizeStage(st); 
    each project lights its own cell in its gem colour; in the hero the
    comb turns toward the pointer and any cell can be attacked.
    ========================================================= */
-const HIVE_SRC = "./hive.js?v=a6ecdaca";
+const HIVE_SRC = "./hive.js?v=28c45fd8";
 const stageEl = document.getElementById("stage3d"), hiveCv = document.getElementById("hive");
 const heroEl = document.getElementById("hero"), phaseEl = document.getElementById("phase"), phaseTxt = document.getElementById("phaseTxt");
 const FINE = matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -1816,20 +1841,21 @@ const ST = {
 const STP = {hero:{pos:[5,-26,40], tgt:[0,2,0], fov:42, sx:0, sy:.42, focus:48, range:18}, contact:{pos:[2,-40,30], tgt:[1,4,0], fov:36, sx:0, sy:-.52, focus:50, range:18, haze:.34, exp:.52}};
 // the cell each project lights (comb coordinates)
 const SPOTS = [
-  {sel:".feature", key:"apis", at:[-4,-2]}, {sel:'[data-cam="mcp"]', key:"mcp", at:[-.9,1.6]}, {sel:'[data-cam="animal"]', key:"animal", at:[4.5,-2.4]},
-  {sel:'[data-cam="solar"]', key:"solar", at:[1.8,4.4]}, {sel:'[data-cam="sos"]', key:"sos", at:[6.9,1.2]},
-  {sel:".mini:nth-child(1)", key:"scam", at:[6,6.2]}, {sel:".mini:nth-child(2)", key:"phish", at:[8.9,3.6]}, {sel:".mini:nth-child(3)", key:"ai", at:[10.4,6.8]}
+  {sel:".feature", key:"apis", at:[-4,-2]}, {sel:'.chap[data-world="mcp"] > .cell', key:"mcp", at:[-.9,1.6]}, {sel:'.chap[data-world="animal"] > .cell', key:"animal", at:[4.5,-2.4]},
+  {sel:'.chap[data-world="solar"] > .cell', key:"solar", at:[1.8,4.4]}, {sel:'.chap[data-world="sos"] > .cell', key:"sos", at:[6.9,1.2]},
+  {sel:'.mini[data-focus="0"]', key:"scam", at:[6,6.2]}, {sel:'.mini[data-focus="1"]', key:"phish", at:[8.9,3.6]}, {sel:'.mini[data-focus="2"]', key:"ai", at:[10.4,6.8]}
 ];
 let anchors = [];   // {key, k (doc y of the centre), hold}
 function measureAnchors(){
   const y0 = window.scrollY || 0, vh = innerHeight;
   anchors = [...document.querySelectorAll("[data-cam]")].map(el => {
-    let key = el.dataset.cam; if (key === "mcp" || key === "animal" || key === "solar" || key === "sos") return null;
+    const key = el.dataset.cam;
     const r = el.getBoundingClientRect(); if (!r.height) return null;
     return {key, k: r.top + y0 + r.height / 2, hold: Math.max(0, r.height / 2 - vh * .32)};
   }).filter(Boolean);
-  const g = document.querySelector(".grid-2"); if (g){ const r = g.getBoundingClientRect(); anchors.push({key:"builds", k:r.top + y0 + r.height / 2, hold:Math.max(0, r.height / 2 - vh * .32)}); }
+  const g = document.querySelector(".chapters"); if (g){ const r = g.getBoundingClientRect(); anchors.push({key:"builds", k:r.top + y0 + r.height / 2, hold:Math.max(0, r.height / 2 - vh * .32)}); }
   anchors.sort((a, b) => a.k - b.k);
+  measureChaps();
 }
 function station(key){ const s = ST[key] || ST.hero; if (PORTRAIT()){ const p = STP[key]; return p ? Object.assign({}, s, p) : Object.assign({}, s, {sx:0, fov:s.fov + 6}); } return s; }
 const POSE_KEYS = ["fov", "sx", "sy", "focus", "range", "haze", "exp", "roll"];
@@ -1854,6 +1880,7 @@ function goalPose(){
   }
   mixPose(station(a.key), station(b.key), u, goal);
   heroW = (a.key === "hero" ? 1 - u : 0) + (b.key === "hero" ? u : 0);
+  if (WS.to && WS.dive){ const e = WS.from === "hive" ? eIO(clamp(WS.p / .78)) : 1 - eIO(clamp(WS.p / .9)); mixPose(goal, WS.dive, e, goal); heroW *= 1 - e; }
   return goal;
 }
 function copyPose(src, dst){ for (let i = 0; i < 3; i++){ dst.pos[i] = src.pos[i]; dst.tgt[i] = src.tgt[i]; } for (const k of POSE_KEYS) dst[k] = src[k]; }
@@ -1877,7 +1904,9 @@ function applyPose(){
   v.fov = cur.fov; v.shiftX = cur.sx; v.shiftY = cur.sy; v.focus = cur.focus; v.range = cur.range; v.roll = cur.roll;
   const amp = .35 + .65 * heroW;
   v.yaw = pointer.x * .1 * amp; v.pitch = -pointer.y * .05 * amp;
-  p.exposure = cur.exp; p.haze = clamp(cur.haze); p.motes = 1 - clamp(cur.haze * 1.4);
+  // a world on screen is seen clearly: the hive's haze and dimming belong to the hive alone
+  const wk = !WS.to ? (WS.shown !== "hive" ? 1 : 0) : WS.from === "hive" ? sstep(.16, 1, WS.p) : WS.to === "hive" ? 1 - sstep(0, .86, WS.p) : 1;
+  p.exposure = lerp(cur.exp, 1, wk); p.haze = clamp(cur.haze) * (1 - wk); p.motes = 1 - clamp(cur.haze * 1.4);
   if (HV.fadeFrom){ p.fade = clamp((performance.now() - HV.fadeFrom) / 700); if (p.fade >= 1) HV.fadeFrom = 0; }
 }
 // project lights
@@ -1888,7 +1917,7 @@ function setupSpots(){
     const el = document.querySelector(s.sel); if (!el) continue;
     const cell = h.nearest(s.at[0], s.at[1]);
     const sp = h.spot(s.key, cell, PC[s.key], {k:0, inner:1.3, edge:.9});
-    spotSt.push({el, sp, tk:0, on:false});
+    spotSt.push({el, sp, key:s.key, tk:0, on:false});
   }
   if ("IntersectionObserver" in window){
     const sio = new IntersectionObserver(es => es.forEach(e => { const s = spotSt.find(x => x.el === e.target); if (s){ s.on = e.isIntersecting; s.el.classList.toggle("lit", e.isIntersecting); HV.dirty = true; startLoop(); } }), {rootMargin:"-22% 0px -22% 0px"});
@@ -1897,7 +1926,8 @@ function setupSpots(){
 }
 function stepSpots(dt){
   let moving = false;
-  for (const s of spotSt){ const tk = s.on ? 6.5 : 0, k = s.sp.k; if (Math.abs(tk - k) < .01){ s.sp.k = tk; continue; } s.sp.k = k + (tk - k) * Math.min(1, dt * 3.2); moving = true; }
+  const dk = WS.to && WS.dive ? WSPOT[WS.from === "hive" ? WS.to : WS.from] : null;
+  for (const s of spotSt){ const tk = s.key === dk ? 11 : s.on ? 6.5 : 0, k = s.sp.k; if (Math.abs(tk - k) < .01){ s.sp.k = tk; continue; } s.sp.k = k + (tk - k) * Math.min(1, dt * 3.2); moving = true; }
   return moving;
 }
 /* the attack: one host turns red, the infection hops to its neighbours, the hive raises the alarm,
@@ -1954,6 +1984,111 @@ function hoverPick(x, y){
 }
 function stepHover(dt){ const s = HV.h.spots.get("hover"); if (!s) return false; const tk = s.tk || 0; if (Math.abs(tk - s.k) < .01){ s.k = tk; return false; } s.k += (tk - s.k) * Math.min(1, dt * 10); return true; }
 
+/* ---------- worlds: each project's own live 3D world (worlds.js). Reaching a project's chapter, the camera dives into
+   that project's cell and its world opens out of it through the honeycomb; leaving, the world closes back into the cell.
+   Between two projects the honeycomb sweeps straight from one world to the next. ---------- */
+const chaps = [...document.querySelectorAll(".chap[data-world]")].map(el => ({el, key:el.dataset.world, side:el.dataset.side || "left", top:0, bot:0,
+  foci:[...el.querySelectorAll("[data-focus]")].map(f => ({el:f, top:0, bot:0}))}));
+const WSPOT = {mcp:"mcp", animal:"animal", solar:"solar", sos:"sos", relay:"scam"};
+const WS = {shown:"hive", from:null, to:null, p:0, dur:1.6, ox:.5, oy:.5, dive:null, arrive:{}, focus:0, focusS:0};
+const WL = {mod:null, built:new Set(), building:new Map(), failed:new Set()};
+function measureChaps(){ const y0 = window.scrollY || 0;
+  for (const c of chaps){ const r = c.el.getBoundingClientRect(); c.top = r.top + y0; c.bot = r.bottom + y0;
+    for (const f of c.foci){ const q = f.el.getBoundingClientRect(); f.top = q.top + y0; f.bot = q.bottom + y0; } } }
+function chapAt(cur = WS.to || WS.shown){   // the chapter under the middle of the screen; a little hysteresis keeps the current one
+  const c = (window.scrollY || 0) + innerHeight * .5, m = innerHeight * .05;
+  for (const ch of chaps){ const e = ch.key === cur ? m : -m; if (c > ch.top - e && c < ch.bot + e) return ch; }
+  return null; }
+function focusIn(ch){   // inside a chapter of several builds: the one nearest the middle of the screen
+  const c = (window.scrollY || 0) + innerHeight * .5; let fi = 0, bd = 1e9;
+  ch.foci.forEach((f, i) => { const d = Math.abs((f.top + f.bot) / 2 - c); if (d < bd){ bd = d; fi = i; } }); return fi; }
+function ensureWorld(key){
+  if (key === "hive" || WL.built.has(key)) return Promise.resolve(true);
+  if (WL.building.has(key)) return WL.building.get(key);
+  const pr = (async () => {
+    if (!WL.mod) WL.mod = await HV.h.loadWorlds();
+    const w = WL.mod.buildWorld(key, HV.h.kit); if (!w) throw new Error("no world");
+    HV.h.addWorld(key, w); await HV.h.compileWorld(key); if (w.ready) await w.ready; WL.built.add(key); HV.dirty = true; startLoop(); if (!motionOn()) hiveStill(); return true;
+  })().catch(() => { WL.failed.add(key); return false; });
+  WL.building.set(key, pr); return pr; }
+const idle = f => ("requestIdleCallback" in window) ? requestIdleCallback(f, {timeout:1200}) : setTimeout(f, 200);
+function prefetchWorlds(){   // build the worlds near the reader, one at a time, while the page is quiet
+  if (!HV.live || HV.dead) return; const y = window.scrollY || 0, vh = innerHeight;
+  const next = chaps.find(ch => ch.top - y < vh * 2.4 && ch.bot - y > -vh * 1.4 && !WL.built.has(ch.key) && !WL.building.has(ch.key) && !WL.failed.has(ch.key));
+  if (next) idle(() => ensureWorld(next.key).then(() => prefetchWorlds())); }
+function worldCell(key){ const s = spotSt.find(x => x.key === WSPOT[key]); return s ? s.sp.cell : HV.h.nearest(0, 0); }
+function divePose(cell, from){
+  const c = HV.h.cells[cell], tgt = [c.x, c.y, c.h + .2], D = 6.2;
+  const dx = from.pos[0] - from.tgt[0], dy = from.pos[1] - from.tgt[1], dz = from.pos[2] - from.tgt[2], L = Math.hypot(dx, dy, dz) || 1;
+  return {pos:[tgt[0] + dx / L * D, tgt[1] + dy / L * D, tgt[2] + dz / L * D], tgt, fov:26, sx:0, sy:0, focus:D, range:3.5, haze:0, exp:.9, roll:from.roll}; }
+function startTransition(to){
+  const from = WS.shown; WS.from = from; WS.to = to; WS.p = 0;
+  if (from === "hive" || to === "hive"){
+    const cell = worldCell(to === "hive" ? from : to); goalPose(); WS.dive = null; WS.dive = divePose(cell, goal);
+    if (to === "hive"){ copyPose(WS.dive, cur); for (let i = 0; i < 3; i++){ vel.pos[i] = vel.tgt[i] = 0; } for (const k of POSE_KEYS) vel[k] = 0; }
+    WS.dur = to === "hive" ? 1.5 : 1.8;
+  } else {
+    const ch = chaps.find(c => c.key === to), stack = PORTRAIT() || innerWidth < 980;
+    WS.dive = null; WS.ox = stack ? .5 : (ch && ch.side === "right" ? .3 : .7); WS.oy = stack ? .66 : .5; WS.dur = 1.35;
+  }
+  if (to !== "hive") WS.arrive[to] = 0;
+  HV.dirty = true; }
+function originAtCell(key){ const pr = HV.h.project(worldCell(key)), m = HV.h.mix; m.ox = clamp(pr.x / innerWidth, .02, .98); m.oy = clamp(1 - pr.y / innerHeight, .02, .98); }
+function stepWorlds(dt){
+  const ch = chapAt(), target = ch && !WL.failed.has(ch.key) ? ch.key : "hive";
+  if (ch && ch.foci.length) WS.focus = focusIn(ch);
+  const fm = Math.abs(WS.focus - WS.focusS) > .001; WS.focusS += (WS.focus - WS.focusS) * Math.min(1, dt * 1.8);
+  if (WS.to){
+    if (target === WS.from){ const f = WS.from; WS.from = WS.to; WS.to = f; WS.p = 1 - WS.p; if (WS.to !== "hive") WS.arrive[WS.to] = Math.min(WS.arrive[WS.to] || 0, .3); }   // turned back: run it in reverse
+    WS.p = Math.min(1, WS.p + dt / WS.dur * (target !== WS.to ? 1.8 : 1));
+    if (WS.p >= 1){ WS.shown = WS.to; WS.from = WS.to = null; WS.dive = null; }
+  }
+  if (!WS.to && target !== WS.shown){ if (WL.built.has(target) || target === "hive") startTransition(target); else ensureWorld(target); }
+  for (const k in WS.arrive) if (WS.arrive[k] < 1) WS.arrive[k] = Math.min(1, WS.arrive[k] + dt / 2.6);
+  return !!WS.to || fm || WS.shown !== "hive"; }
+function writeMix(){
+  const m = HV.h.mix;
+  if (!WS.to){ m.a = WS.shown; m.b = null; m.p = 0; return; }
+  if (WS.to === "hive"){ m.a = "hive"; m.b = WS.from; m.p = 1 - sstep(0, .86, WS.p); originAtCell(WS.from); }
+  else if (WS.from === "hive"){ m.a = "hive"; m.b = WS.to; m.p = sstep(.16, 1, WS.p); originAtCell(WS.to); }
+  else { m.a = WS.from; m.b = WS.to; m.p = sstep(0, 1, WS.p); m.ox = WS.ox; m.oy = WS.oy; } }
+function worldView(key, t){
+  const w = HV.h.worlds.get(key); if (!w || !w.shot) return;
+  const ch = chaps.find(c => c.key === key), mid = (window.scrollY || 0) + innerHeight * .5;
+  const u = ch ? clamp((mid - ch.top) / Math.max(1, ch.bot - ch.top)) : .5;
+  w.shot(t, w.view, u, WS.focusS);
+  const stack = PORTRAIT() || innerWidth < 980, v = w.view;
+  v.shiftX = stack ? 0 : (ch && ch.side === "right" ? -.2 : .2); v.shiftY = stack ? .17 : 0;
+  v.yaw = pointer.x * .05; v.pitch = -pointer.y * .025;
+  const a = WS.arrive[key] == null ? 1 : WS.arrive[key];
+  if (a < 1){ const k = (1 - eOut(a)) * 2.4, dx = v.pos.x - v.target.x, dy = v.pos.y - v.target.y, dz = v.pos.z - v.target.z, L = Math.hypot(dx, dy, dz) || 1;
+    v.pos.x += dx / L * k; v.pos.y += dy / L * k; v.pos.z += dz / L * k; } }
+function worldsFrame(t){ const keys = new Set([WS.shown, WS.from, WS.to]); keys.delete(null); keys.delete("hive"); for (const k of keys) worldView(k, t); writeMix(); }
+// without the live 3D (no fast GPU, or before it has started) each chapter shows a still of its world, rendered from the same camera
+const wpBox = document.getElementById("wposters");
+const WP = {key:null, ch:null, els:new Map(), z:1, raf:0};
+const posterKey = ch => ch ? (ch.foci.length ? ch.key + "-" + focusIn(ch) : ch.key) : null;
+function posterEl(key, side){
+  let el = WP.els.get(key); if (el) return el;
+  el = document.createElement("picture"); el.className = "wposter"; el.dataset.k = key; el.dataset.side = side;
+  el.innerHTML = `<source media="(max-aspect-ratio: 1/1)" srcset="world-${key}-p.webp" type="image/webp"><img src="world-${key}.webp" alt="" decoding="async">`;
+  wpBox.appendChild(el); WP.els.set(key, el); return el; }
+function showPoster(ch){
+  const key = posterKey(ch); WP.ch = ch ? ch.key : null; if (key === WP.key) return;
+  const prev = WP.key ? WP.els.get(WP.key) : null; WP.key = key; stageEl.classList.toggle("wp", !!key);
+  if (!key){ if (prev) prev.classList.remove("on"); return; }
+  const el = posterEl(key, ch.side), img = el.querySelector("img");
+  // the new still fades in over the old one, which leaves only once it is covered
+  const go = () => { if (WP.key !== key) return; el.style.zIndex = ++WP.z; el.classList.add("on");
+    if (prev && prev !== el) setTimeout(() => { if (WP.key !== prev.dataset.k) prev.classList.remove("on"); }, 1150); };
+  (img.decode ? img.decode() : Promise.resolve()).then(go, go); }
+function updatePosters(){
+  WP.raf = 0; if (!wpBox || HV.live) return;
+  showPoster(chapAt(WP.ch));
+  const y = window.scrollY || 0, vh = innerHeight;   // load the stills of the chapters just ahead and behind
+  for (const ch of chaps) if (ch.top - y < vh * 1.6 && ch.bot - y > -vh * .8){ if (ch.foci.length) ch.foci.forEach((f, i) => posterEl(ch.key + "-" + i, ch.side)); else posterEl(ch.key, ch.side); } }
+const queuePosters = () => { if (!WP.raf) WP.raf = requestAnimationFrame(updatePosters); };
+
 function dprFor(){ return Math.min(window.devicePixelRatio || 1, LITE ? 1.5 : 1.5) * HV.scale; }
 let vw0 = 0, vh0 = 0;
 function sizeHive(force){
@@ -1976,15 +2111,26 @@ async function bootHive(){
   sizeHive(true); measureAnchors(); goalPose(); copyPose(goal, cur); applyPose(); setupSpots();
   await h.ready;
   if (HV.dead) return;
+  // arriving inside a project (a reload keeps the scroll): open straight into its world, the still standing in until it is ready
+  const ch0 = HV.owner === "site" ? chapAt() : null;
+  if (ch0){ const ok = await Promise.race([ensureWorld(ch0.key), new Promise(r => setTimeout(() => r(false), 6000))]);
+    if (HV.dead) return;
+    if (ok && WL.built.has(ch0.key)){ WS.shown = ch0.key; WS.arrive[ch0.key] = 1; if (ch0.foci.length) WS.focus = WS.focusS = focusIn(ch0); } }
   HV.t0 = performance.now() - 2000;   // start mid-breath
-  if (HV.owner === "site"){ h.render(clock()); HV.dirty = false; }
-  requestAnimationFrame(() => { root.classList.add("hive-live"); HV.live = true; dispatchEvent(new Event("hive-ready")); });
+  if (HV.owner === "site"){ const t = clock(); goalPose(); copyPose(goal, cur); applyPose(); worldsFrame(t); h.render(t); HV.dirty = false; }
+  requestAnimationFrame(() => { root.classList.add("hive-live"); HV.live = true; dispatchEvent(new Event("hive-ready")); prefetchWorlds(); });
   startLoop(); if (!motionOn()) hiveStill();
 }
-function failHive(){ HV.dead = true; HV.live = false; root.classList.remove("hive-live"); root.classList.add("hive-off"); dispatchEvent(new Event("hive-failed")); }
+function failHive(){ HV.dead = true; HV.live = false; root.classList.remove("hive-live"); root.classList.add("hive-off"); WP.key = null; updatePosters(); dispatchEvent(new Event("hive-failed")); }
 // one frame of the hive inside the shared loop; returns true while it wants more frames
 const MANUAL = /[?&]hivemanual\b/.test(location.search);   // test hook: frames are rendered on request only
-if (MANUAL) window.__hiveDbg = {HV, goalPose, copyPose, goal, cur, applyPose, clock, attack, randomCell, frame(t){ goalPose(); copyPose(goal, cur); applyPose(); const tt = t == null ? clock() : t; HV.h.prune(tt); HV.h.render(tt); }};
+if (MANUAL) window.__hiveDbg = {HV, WS, WL, goalPose, copyPose, goal, cur, applyPose, clock, attack, randomCell, ensureWorld, chapAt, measureChaps, startTransition,
+  frame(t, o = {}){ const tt = t == null ? clock() : t;
+    if (o.world !== undefined){ WS.from = WS.to = null; WS.dive = null; WS.shown = o.world; WS.arrive[o.world] = o.arrive == null ? 1 : o.arrive; }
+    if (o.trans){ WS.shown = o.trans[0]; startTransition(o.trans[1]); WS.p = o.trans[2]; }
+    else if (o.world === undefined){ const ch = chapAt(); WS.from = WS.to = null; WS.dive = null; WS.shown = ch && WL.built.has(ch.key) ? ch.key : "hive"; }
+    { const ch = chapAt(); if (ch && ch.foci.length) WS.focus = WS.focusS = focusIn(ch); }
+    goalPose(); copyPose(goal, cur); applyPose(); worldsFrame(tt); HV.h.prune(tt); HV.h.render(tt); }};
 function hiveTick(dt, now){
   const h = HV.h; if (!h || !HV.live || HV.owner !== "site" || HV.dead || MANUAL) return false;
   goalPose();
@@ -1992,11 +2138,11 @@ function hiveTick(dt, now){
   pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 3); pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 3);
   const pmove = Math.abs(pointer.tx - pointer.x) + Math.abs(pointer.ty - pointer.y) > .002;
   const sp = stepSpots(dt) | stepHover(dt);
-  const t = clock(), busy = t < (HV.busyUntil || 0);
-  // the comb breathes in the hero; under the haze nobody sees it, so the hive rests unless something moves
-  const need = HV.dirty || moving || pmove || sp || busy || HV.fadeFrom || (heroW > .02 && cur.haze < .3);
+  const t = clock(), busy = t < (HV.busyUntil || 0), wb = stepWorlds(dt);
+  // the comb breathes in the hero; under the haze nobody sees it, so the hive rests unless something moves; worlds always move
+  const need = HV.dirty || moving || pmove || sp || busy || wb || HV.fadeFrom || (heroW > .02 && cur.haze < .3);
   if (!need) return false;
-  applyPose(); h.prune(t); h.render(t); HV.dirty = false;
+  applyPose(); worldsFrame(t); h.prune(t); h.render(t); HV.dirty = false;
   adapt(now);
   return true;
 }
@@ -2012,12 +2158,21 @@ function adapt(now){
 let stillRaf = 0;
 function hiveStill(){
   if (stillRaf || !HV.h || !HV.live || HV.owner !== "site") return;
-  stillRaf = requestAnimationFrame(() => { stillRaf = 0; if (motionOn()) return; goalPose(); copyPose(goal, cur); pointer.x = pointer.y = 0; applyPose(); const t = clock(); HV.h.prune(t); HV.h.render(t); HV.dirty = false; });
+  stillRaf = requestAnimationFrame(() => { stillRaf = 0; if (motionOn()) return;
+    const ch = chapAt(), want = ch && !WL.failed.has(ch.key) ? ch.key : "hive";
+    if (want !== "hive" && !WL.built.has(want)){ ensureWorld(want); }
+    WS.from = WS.to = null; WS.dive = null; if (want === "hive" || WL.built.has(want)){ WS.shown = want; WS.arrive[want] = 1; }
+    if (ch && ch.foci.length) WS.focus = WS.focusS = focusIn(ch);   // several builds in one chapter: the one being read
+    goalPose(); copyPose(goal, cur); pointer.x = pointer.y = 0; applyPose(); const t = clock(); worldsFrame(t); HV.h.prune(t); HV.h.render(t); HV.dirty = false; });
 }
-addEventListener("scroll", () => { if (stageEl) stageEl.classList.toggle("deep", (window.scrollY || 0) > innerHeight * .55); if (!HV.live) return; if (motionOn()) startLoop(); else hiveStill(); }, {passive:true});
+let pfT = 0;
+addEventListener("scroll", () => { if (stageEl) stageEl.classList.toggle("deep", (window.scrollY || 0) > innerHeight * .55); if (!HV.live){ queuePosters(); return; }
+  if (!pfT) pfT = setTimeout(() => { pfT = 0; prefetchWorlds(); }, 300);
+  if (motionOn()) startLoop(); else hiveStill(); }, {passive:true});
 let rsT = 0;
-addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { sizeHive(); measureAnchors(); if (motionOn()) startLoop(); else hiveStill(); }, 140); });
-if ("ResizeObserver" in window){ const mro = new ResizeObserver(() => { measureAnchors(); }); const m = document.getElementById("top"); if (m) mro.observe(m); }
+addEventListener("resize", () => { clearTimeout(rsT); rsT = setTimeout(() => { sizeHive(); measureAnchors(); queuePosters(); if (motionOn()) startLoop(); else hiveStill(); }, 140); });
+if ("ResizeObserver" in window){ const mro = new ResizeObserver(() => { measureAnchors(); queuePosters(); }); const m = document.getElementById("top"); if (m) mro.observe(m); }
+else { measureAnchors(); queuePosters(); }
 if (FINE) addEventListener("pointermove", e => {
   pointer.tx = clamp(e.clientX / innerWidth * 2 - 1, -1, 1); pointer.ty = clamp(e.clientY / innerHeight * 2 - 1, -1, 1);
   if (HV.live && motionOn()) startLoop();
@@ -2282,7 +2437,9 @@ copyBtn.addEventListener("click", () => {
     hive: () => (HV.live && !HV.dead) ? HV.h : null,
     hiveDead: () => !!HV.dead,
     bootHive,
-    own(who){ HV.owner = who; },
+    own(who){ HV.owner = who;
+      // the film plays in the hive itself: whatever project world was on screen gives way to it at once
+      if (who !== "site"){ WS.shown = "hive"; WS.from = WS.to = null; WS.dive = null; if (HV.h){ const m = HV.h.mix; m.a = "hive"; m.b = null; m.p = 0; } } },
     heroPose(){ return Object.assign({}, station("hero")); },
     // the film ends at hive time t on the hero pose: the page carries on from exactly that frame
     handoff(t, fadeIn){
