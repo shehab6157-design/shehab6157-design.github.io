@@ -15,9 +15,9 @@ My flagship project, APIS, defends a network the way a honeybee colony defends i
 - `tex-earth-*.webp`: Earth imagery for the S.O.S world, from NASA's Blue Marble (public domain), as packaged in the three.js examples.
 - `intro.js` and `intro.mp3`: the 55-second intro film, rendered live in the same hive and the project worlds, and its original orchestral score. Loaded only when the film plays; press **Play intro** in the navigation to watch it again.
 
-- `lounge.mp3`: quiet background music to read by, an original slow ballad for tenor saxophone, piano, bass and strings (2.5 minutes, looping). It starts after the intro film if the film played with its sound on; the music button in the navigation starts or stops it at any time, and the choice is remembered. It rests while the tab is hidden.
+- `smooth-jazz.mp3`: quiet background music to read by: "Daytime Smooth Jazz (2025) 2" by SenorMusica81, from [Pixabay](https://pixabay.com/music/smooth-jazz-daytime-smooth-jazz-2025-2-458721/) under the Pixabay Content License (Pixabay marks it as AI-generated), softened a touch and levelled quiet. It starts after the intro film if the film played with its sound on, and a short notice points to the music button in the navigation, which starts or stops it at any time; the choice is remembered. It loops, and rests while the tab is hidden.
 
-Both pieces are played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the tenor saxophone, the Steinway B piano, the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
+The intro score is played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.
