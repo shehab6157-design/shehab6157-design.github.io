@@ -13,7 +13,9 @@ My flagship project, APIS, defends a network the way a honeybee colony defends i
 - `index.html`: the page, with inline CSS and JavaScript (fonts come from Google Fonts).
 - `hive.js` and its `c-*.js` chunks: the 3D honeycomb and the project worlds, built with [three.js](https://threejs.org) (MIT) and a small film pipeline (bloom, depth of field, tone mapping). They load after the page, the worlds only as you near them, and only on devices with a GPU; everyone else sees `hive-*.webp` and `world-*.webp`, still renders of the same scenes.
 - `tex-earth-*.webp`: Earth imagery for the S.O.S world, from NASA's Blue Marble (public domain), as packaged in the three.js examples.
-- `intro.js` and `intro.mp3`: the 55-second intro film, rendered live in the same hive and the project worlds, and its original organ score. Loaded only when the film plays; press **Play intro** in the navigation to watch it again.
+- `intro.js` and `intro.mp3`: the 55-second intro film, rendered live in the same hive and the project worlds, and its original orchestral score. Loaded only when the film plays; press **Play intro** in the navigation to watch it again.
+
+The score is played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.

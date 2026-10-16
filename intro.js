@@ -1,5 +1,5 @@
 /* Shehab Shibli portfolio intro film: a 55-second title sequence rendered live in the Golden Hive (hive.js)
-   and the project worlds, cut to an original 100 BPM organ score (intro.mp3). Loaded by index.html only when it is needed. */
+   and the project worlds, cut to an original 100 BPM score for piano, strings, horns, harp and bells, played from CC0 orchestral samples (intro.mp3). Loaded by index.html only when it is needed. */
 (function(){
 "use strict";
 function init(api){
@@ -140,7 +140,7 @@ let F = null;   // everything that depends on the comb (cells, shots), built onc
 // the camera's move (from, to: position, target, lens), its depth of field, and where the honeycomb opens from
 const WSEG = [
   {key: "mcp", b0: SB.mcp, b1: SB.animal, clock: [7.2, 1], from: [[-3.7, 1.7, 5.9], [-.25, 1.75, -1.4], 32], to: [[2.7, 3.5, 8.1], [.4, 1.9, -1.6], 30], range: 9},
-  {key: "animal", b0: SB.animal, b1: SB.solar, clock: [1.6, 1.3], from: [[-6.0, 6.2, 1.6], [-5.6, 1.5, -9.5], 34], to: [[6.2, 13.6, 16.5], [-6.2, 2.4, -15], 34], range: 40, origin: [.86, .52], shift: [.2, 0]},
+  {key: "animal", b0: SB.animal, b1: SB.solar, clock: [1.16, 1.6], shot: [[0, 0], [.2, .03], [.27, .06], [.45, .5], [.7, .9], [1, 1]], range: 40, origin: [.86, .52], shift: [.1, 0]},
   {key: "solar", b0: SB.solar, b1: SB.sos, clock: [1.4, 2.9], from: [[.9, 3.2, 4.6], [.4, 1.45, -.1], 32], to: [[2.5, 4.0, 8.3], [.8, 1.35, -.3], 30], range: 14, origin: [.18, .28], shift: [.18, .13]},
   {key: "sos", b0: SB.sos, b1: SB.more, clock: [3.6, 1.55], from: [[2.7, 1.15, 3.9], [-3.0, .1, -.3], 34], to: [[-6.6, 3.6, 12.6], [-1.4, .1, 0], 34], range: 3000, origin: [.5, .86]},
   {key: "relay", b0: SB.more, b1: SB.real, clock: [6.2, 1.3], rail: true, range: 13, origin: [.14, .5], shift: [.2, .05]}];
@@ -265,10 +265,12 @@ function cameraAt(h, t){
   if (hs){ const [a, b] = F.MACRO[hs.key], u = eGlide(ramp(t, TB(hs.b0 - .7), TB(hs.b1 - hs.b0 + 1.8))); return applyCam(h, mixP(a, b, u)); }
   let s = F.S[0]; for (const x of F.S){ if (t >= x.a) s = x; }
   let p = mixP(s.from, s.to, s.ease(ramp(t, s.a, s.b - s.a)));
+  { const d = Math.hypot(p.pos[0] - p.tgt[0], p.pos[1] - p.tgt[1], p.pos[2] - p.tgt[2]), a = d * .0055;
+    p.pos[0] += a * Math.sin(t * .83 + 1.3); p.pos[1] += a * .6 * Math.sin(t * .61 + .4); p.pos[2] += a * .5 * Math.sin(t * 1.07 + 2.1); }
   if (t >= ST.alerts && t < ST.real - TB(1)){   // the dive: from the alerts overview straight down into the first project's cell
     const c = h.cells[F.wcell.mcp], tg = [c.x, c.y, c.h + .2], dv = Math.hypot(p.pos[0] - tg[0], p.pos[1] - tg[1], p.pos[2] - tg[2]) || 1, D = 6.2;
     const dive = pose(tg.map((v, i) => v + (p.pos[i] - tg[i]) / dv * D), tg, 26, {range: 3.5});
-    p = mixP(p, dive, eIO(ramp(t, TB(SB.mcp - 1.2), TB(1.6))));
+    const kd = eIO(ramp(t, TB(SB.mcp - 1.2), TB(1.6))); p = mixP(p, dive, kd); p.roll = (p.roll || 0) + DIVE_TURN * kd;
   }
   applyCam(h, p);
 }
@@ -287,10 +289,36 @@ function railX(b){
   return (2 * x3 - 3 * x2 + 1) * RX[i] + (x3 - 2 * x2 + x) * RM[i] + (-2 * x3 + 3 * x2) * RX[i + 1] + (x3 - x2) * RM[i + 1];
 }
 const posA = [0, 0, 0], tgtA = [0, 0, 0];
+// a smooth, monotone curve through [x, y] knots (Fritsch-Carlson): a segment's progress mapped onto a world's own camera path
+function mono(K){
+  const n = K.length, d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d.push((K[i + 1][1] - K[i][1]) / (K[i + 1][0] - K[i][0]));
+  m.push(d[0]); for (let i = 1; i < n - 1; i++) m.push(d[i - 1] * d[i] <= 0 ? 0 : (d[i - 1] + d[i]) / 2); m.push(d[n - 2]);
+  for (let i = 0; i < n - 1; i++){ if (d[i] === 0){ m[i] = m[i + 1] = 0; continue; } const a = m[i] / d[i], b = m[i + 1] / d[i], h = a * a + b * b; if (h > 9){ const k = 3 / Math.sqrt(h); m[i] = k * a * d[i]; m[i + 1] = k * b * d[i]; } }
+  return x => { if (x <= K[0][0]) return K[0][1]; if (x >= K[n - 1][0]) return K[n - 1][1];
+    let i = 0; while (x > K[i + 1][0]) i++; const h = K[i + 1][0] - K[i][0], t = (x - K[i][0]) / h, t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * K[i][1] + (t3 - 2 * t2 + t) * h * m[i] + (-2 * t3 + 3 * t2) * K[i + 1][1] + (t3 - t2) * h * m[i + 1]; }; }
+// the honeycomb sweeps turn the picture a little: the world leaving rolls away with the sweep, the one arriving settles
+// out of the same turn (the first world unwinds the dive's twist; the last rolls on into the comb)
+const TURN = .055, DIVE_TURN = .075;
+function rollAt(s, t){
+  const i = WSEG.indexOf(s), pv = WSEG[i - 1], nx = WSEG[i + 1]; let r = 0;
+  const side = o => (o && o[0] < .5 ? -1 : 1);
+  if (!pv){ const u = cl((t - TB(s.b0 - .8)) / TB(1.5)); r += DIVE_TURN * (1 - eSine(u)); }
+  else { const u = cl((t - TB(s.b0 - .7)) / TB(1.8)); r -= TURN * side(s.origin) * (1 - eSine(u)); }
+  if (nx){ const u = cl((t - TB(s.b1 - .7)) / TB(1.8)); r += TURN * side(nx.origin) * eSine(u); }
+  else { const u = cl((t - TB(s.b1 - .8)) / TB(1.7)); r += TURN * eSine(u); }
+  return r;
+}
 function worldCam(h, s, t){
   const w = h.worlds.get(s.key); if (!w) return;
   if (!s.fn) s.fn = tt => s.clock[0] + (tt - TB(s.b0)) * s.clock[1];
   w.clock = s.fn;
+  if (s.shot){   // the world's own camera path (it knows its car and its cloud), timed to the segment
+    if (!s.uOf) s.uOf = mono(s.shot);
+    const v = w.view; w.shot(s.fn(t), v, s.uOf(cl((t - TB(s.b0 - .7)) / TB(s.b1 - s.b0 + 1.6))));
+    v.roll = rollAt(s, t); v.yaw = v.pitch = 0; const sh = s.shift || [.14, 0]; v.shiftX = PORT ? 0 : sh[0]; v.shiftY = PORT ? .14 : sh[1];
+    return; }
   let fov;
   if (s.rail){ const x = railX((t - TB(s.b0)) / B); posA[0] = x - .5; posA[1] = 3.25; posA[2] = 8.7; tgtA[0] = x + .25; tgtA[1] = 1.12; tgtA[2] = -.55; fov = 30; }
   else {   // one continuous move from the cut in to the cut out (still moving through both sweeps)
@@ -301,7 +329,7 @@ function worldCam(h, s, t){
   // a tall screen: a wider lens and a step back (as the page does), the subject raised above the titles
   const a = W / H, g = a < 1.25 ? Math.pow(1.25 / a, .75) : 1, kd = Math.pow(g, .45), kf = Math.pow(g, .55);
   if (g > 1){ for (let i = 0; i < 3; i++) posA[i] = tgtA[i] + (posA[i] - tgtA[i]) * kd; fov = 2 * Math.atan(Math.tan(fov * Math.PI / 360) * kf) * 180 / Math.PI; }
-  const v = w.view; v.pos.set(posA[0], posA[1], posA[2]); v.target.set(tgtA[0], tgtA[1], tgtA[2]); v.fov = fov; v.roll = 0; v.yaw = v.pitch = 0;
+  const v = w.view; v.pos.set(posA[0], posA[1], posA[2]); v.target.set(tgtA[0], tgtA[1], tgtA[2]); v.fov = fov; v.roll = rollAt(s, t); v.yaw = v.pitch = 0;
   const O2 = DEV && window.__wseg && window.__wseg[s.key] && window.__wseg[s.key].shift, sh = O2 || s.shift || [.14, 0];
   v.shiftX = PORT ? 0 : sh[0]; v.shiftY = PORT ? .14 : sh[1];   // the subject right of the titles (they sit lower left), or above them
   v.focus = Math.hypot(posA[0] - tgtA[0], posA[1] - tgtA[1], posA[2] - tgtA[2]); v.range = s.range;
@@ -332,9 +360,10 @@ function releaseWorlds(h){ if (h) for (const s of WSEG){ const w = h.worlds.get(
 function postAt(h, t){
   const p = h.post;
   p.fade = t < ST.thesis ? eSine(ramp(t, 0, .8)) : 1;
-  p.exposure = 1;
+  let kick = 0; for (const [b, k] of [[SB.attack, .7], [SB.mcp, .8], [SB.real, .8], [SB.handoff, 1]]){ const d = t - TB(b); if (d >= 0 && d < 1.8) kick += k * Math.exp(-d / .3) * Math.min(1, d / .025); }
+  p.exposure = 1 + .15 * kick;
   p.haze = t >= ST.name && t < ST.handoff ? .34 * eSine(ramp(t, ST.name, TB(2))) : t >= ST.handoff ? .34 * (1 - eSine(ramp(t, ST.handoff, TB(3)))) : 0;
-  p.bloom = t < ST.thesis ? .5 : .38; p.vignette = t < ST.thesis ? 1 : .85; p.dof = 1; p.motes = 1; p.grain = .035;
+  p.bloom = (t < ST.thesis ? .5 : .38) + .14 * kick; p.vignette = t < ST.thesis ? 1 : .85; p.dof = 1; p.motes = 1; p.grain = .035;
   // dark scrims under the titles: left for the numbers and the projects, right for the credentials, centre for the big words
   let l = 0, r = 0, c = 0, b = 0;
   if (t < ST.thesis) b = .5 * ramp(t, .2, .4) * (1 - ramp(t, 2.1, .3));
@@ -376,7 +405,7 @@ function buildTitles(){
     title(gem(k) + nm, nm.length > 18 ? "lg long" : "lg", L(.08, .62, {py: .66}), t0, t1, {inD: .5, outD: .24});
     title(sub, "cap", L(.08, "calc(62% + clamp(38px, 4.6vw, 76px) * 1.25)", {py: "calc(66% + clamp(34px, 9vw, 56px) * 1.3)"}), t0 + .18, t1, {inD: .5, outD: .24}); };
   proj("mcp", "MCP Security Proxy", "Every AI-agent tool call, logged in a hash-chained trail", SB.mcp, SB.animal);
-  proj("animal", "Animal detection", "~340 ms per frame on a Raspberry Pi 5, cars within 1 km warned", SB.animal, SB.solar);
+  proj("animal", "Animal detection", "Night vision on an in-car Pi 5, cars within 1 km warned", SB.animal, SB.solar);
   proj("solar", "Bio-inspired solar screen", "68% less energy over a phone's office day, simulated", SB.solar, SB.sos);
   proj("sos", "S.O.S", "NASA Space Apps 2025, 3rd place, as team leader", SB.sos, SB.more);
   proj("scam", "ScamShield", "Warns on likely scams, never blocks", SB.more, SB.more + 4, .2);
