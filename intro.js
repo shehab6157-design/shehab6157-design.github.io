@@ -495,7 +495,7 @@ function drawGate(gt){
 }
 
 /* ---------- playback: the music is the clock ---------- */
-let mode = "off", ft = 0, lastNow = 0, raf2 = 0, gateT = 0, stalled = false, stallT0 = 0, audioLive = false, hidHold = false, resumeAudio = false, soundOn = true, capture = false, waitHive = 0;
+let mode = "off", ft = 0, lastNow = 0, raf2 = 0, gateT = 0, stalled = false, stallT0 = 0, audioLive = false, hidHold = false, resumeAudio = false, soundOn = true, capture = false, waitHive = 0, heard = false, skipped = false;
 const setInert = on => INERT.forEach(el => { el.inert = on; });
 function jumpTop(){ const d = document.documentElement, sb = d.style.scrollBehavior; d.style.scrollBehavior = "auto"; window.scrollTo(0, 0); d.style.scrollBehavior = sb; }
 function warmFonts(){
@@ -537,8 +537,9 @@ function openGate(){
 }
 function begin(fromGate){
   if (mode === "film") return;
+  if (api.music && !capture) api.music.filmStart();   // inside the visitor's click: the page's music rests (and may follow the film)
   if (!ensureHive()){ mode = "wait"; waitHive = performance.now(); try { audio.muted = true; audio.play().then(() => { audio.pause(); audio.muted = false; }, () => { audio.muted = false; }); } catch (e) {} loop2(); return; }
-  mode = "film"; ft = 0; stalled = true; stallT0 = performance.now(); audioLive = false; landed = released = false; NM = null; heroP = null;
+  mode = "film"; ft = 0; stalled = true; stallT0 = performance.now(); audioLive = false; heard = skipped = false; landed = released = false; NM = null; heroP = null;
   jumpTop(); layout(); api.own("film"); api.spotsOff(); H3.spot("gate", F.c0, null, {k: 0});
   schedule(H3);
   ov.classList.add("playing"); ov.classList.remove("ending", "out", "open");
@@ -554,7 +555,7 @@ function begin(fromGate){
   skipBtn.focus({preventScroll: true});
   loop2();
 }
-audio.addEventListener("playing", () => { if (mode !== "film") return; if (!audioLive){ audioLive = true; if (ft > .08){ try { audio.currentTime = ft; } catch (e) {} } } stalled = false; });
+audio.addEventListener("playing", () => { if (mode !== "film") return; heard = true; if (!audioLive){ audioLive = true; if (ft > .08){ try { audio.currentTime = ft; } catch (e) {} } } stalled = false; });
 audio.addEventListener("waiting", () => { if (mode === "film" && audioLive){ stalled = true; stallT0 = performance.now(); } });
 audio.addEventListener("error", () => { audioLive = false; stalled = false; soundBtn.disabled = true; });
 function fadeAudio(d){
@@ -579,11 +580,16 @@ function finish(){
   cleanup();
   api.setIntro(false);
   if (heroName){ heroName.setAttribute("tabindex", "-1"); heroName.focus({preventScroll: true}); }
+  // the page's quiet music follows a film watched with sound, once the film's own music has rung out
+  if (api.music){
+    let left = 0; try { if (!skipped && !audio.paused && isFinite(audio.duration)) left = Math.max(0, audio.duration - audio.currentTime); } catch (e) {}
+    api.music.filmEnd(heard && soundOn, Math.max(1, Math.min(9, left - 1.5)));
+  }
 }
 // skip: the picture dips to black, the page comes up on its own hero shot
 function skip(){
   if (mode === "off" || mode === "leaving") return;
-  fadeAudio(.35);
+  fadeAudio(.35); skipped = true;
   const from = mode;
   if (raf2){ cancelAnimationFrame(raf2); raf2 = 0; }
   mode = "leaving"; ov.classList.add("out");
@@ -602,6 +608,7 @@ function giveUp(){   // no live hive on this device: no film either, straight to
   if (mode === "off") return;
   mode = "off"; if (raf2){ cancelAnimationFrame(raf2); raf2 = 0; }
   root.classList.add("intro-landed"); released = true; release(); cleanup(); api.own("site"); api.setIntro(false);
+  if (api.music) api.music.filmEnd(false, 0);
 }
 function replay(){
   if (mode !== "off") return;

@@ -6,7 +6,7 @@ Shehab Shibli, Network Engineering and Computer Security graduate (CCNA, AWS Cer
 
 ## Design
 
-My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. When you reach another project, the camera dives into its cell and that project's own 3D world opens out of the honeycomb, showing how it works: the MCP proxy's audit trail, the roadside camera alerting cars within 1 km, the solar screen's layers saving energy step by step, the S.O.S sweeper netting debris over Earth, and ScamShield, the phishing detector and the AI assistant on one line of messages. The full design system is in [`MASTER.md`](MASTER.md).
+My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. When you reach another project, the camera dives into its cell and that project's own 3D world opens out of the honeycomb, showing how it works: the MCP proxy's audit trail, the in-car night-vision unit spotting an animal and warning cars within 1 km, the solar screen's layers saving energy step by step, the S.O.S sweeper netting debris over Earth, and ScamShield, the phishing detector and the AI assistant on one line of messages. The full design system is in [`MASTER.md`](MASTER.md).
 
 ## About this repo
 
@@ -15,7 +15,9 @@ My flagship project, APIS, defends a network the way a honeybee colony defends i
 - `tex-earth-*.webp`: Earth imagery for the S.O.S world, from NASA's Blue Marble (public domain), as packaged in the three.js examples.
 - `intro.js` and `intro.mp3`: the 55-second intro film, rendered live in the same hive and the project worlds, and its original orchestral score. Loaded only when the film plays; press **Play intro** in the navigation to watch it again.
 
-The score is played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
+- `lounge.mp3`: quiet background music to read by, an original slow ballad for tenor saxophone, piano, bass and strings (2.5 minutes, looping). It starts after the intro film if the film played with its sound on; the music button in the navigation starts or stops it at any time, and the choice is remembered. It rests while the tab is hidden.
+
+Both pieces are played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the tenor saxophone, the Steinway B piano, the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
 - `og.jpg`: the 1200×630 preview image shown when the link is shared.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.

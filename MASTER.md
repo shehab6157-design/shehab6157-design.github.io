@@ -88,9 +88,23 @@ A 55-second film plays on a first visit, rendered live in the hive and the proje
 - **Honesty**: every number in the film is one the site states.
 - **Who sees it**: not with reduced motion, after Pause motion, on links to a section, for crawlers and test tools, without WebGL2, or twice in a session. `?intro=1` forces it, `?intro=0` turns it off. **Play intro** in the nav replays it.
 
+## Background music
+
+- **What**: `lounge.mp3`, an original slow ballad (no borrowed melody) to read by: a tenor saxophone over soft piano, plucked bass and, in the middle, a quiet string pad. D-flat major, 66 BPM, 2.5 minutes, ending softly so it loops. Played from CC0 samples (VCSL tenor saxophone and Steinway B, VSCO 2 CE contrabass and strings) in the same Python sampler as the score: the saxophone scoops into phrase starts, slurs within a phrase, breathes every two bars and its vibrato blooms only on held notes. Mastered quiet: -23 LUFS, about 6.5 dB under the film's score.
+- **When it plays**: by itself only right after the intro film, when the film played with its sound on, once the film's own music has rung out (or a second after Skip). Otherwise the music button starts it. A visitor who switches it off is never started again on that browser (`ss-music`).
+- **The button**: in the navigation, next to Play intro: a note while the music is off, four soft bars that breathe while it plays (still with reduced motion or Pause motion); `aria-pressed` with the name "Background music".
+- **It rests**: while the tab is hidden and while the film replays, and comes back after. Pausing it from the lock screen or headphones is followed by the button.
+- **Behind it**: an audio element that loads nothing until it first plays; the film's Play click also unlocks it, so Safari and iOS allow it to start later on its own. Fades use the element's volume where the browser allows it; iOS keeps volume at 1, so there the music simply starts (softly, by design) and stops.
+
+## Navigation on phones
+
+- Up to 480 px the bar keeps the name, the music button, Pause motion and the menu; **Play the intro film** moves into the menu. The name steps down a size at 380 px and 340 px, so nothing overflows down to 320 px. From 1080 px down the links fold into the menu.
+
 ## Performance
 
 - The page and its poster paint first; `hive.js` and three.js (~165 KB gzipped) load when the page is idle, or at once when the film plays. The project worlds (~50 KB gzipped, plus a few textures for S.O.S) load as you near them, or from the film's gate.
-- Smooth scrolling: a world is built in small slices between frames, its textures go up to the GPU a few per frame and one small offscreen frame warms it before it first appears; moving shadows redraw every other frame and floor reflections render at a quarter of the resolution. The world camera follows the reader eased, so a jumpy scroll still makes a smooth move.
+- Smooth scrolling: a world is built in small slices between frames, its textures go up to the GPU a few per frame and one small offscreen frame warms it before it first appears; in that frame nothing is culled and every mesh that holds no light is shown, so all of its buffers upload then, not on the frame an object first comes into view. Moving shadows redraw every other frame and floor reflections render at a quarter of the resolution. The world camera follows the reader eased, so a jumpy scroll still makes a smooth move.
+- No shader is ever built mid-film or mid-scroll: a world's set of lights never changes once it is built (a car that leaves the road is parked out of sight, not hidden, since hiding a light would rebuild every lit shader on that frame), and the first frame after the render targets are made also builds what later frames need (the second world's target for a crossing, the haze pyramid and its blur). Checked frame by frame through the whole film: no new programs, textures or buffers after the first frame.
+- Older browsers: the 3D bundle is built to ES2020 (Safari 14, Chrome 80, Firefox 74 and later); CSS that uses `color-mix()` or `svh` gets a plain fallback in front of it at build time.
 - One `requestAnimationFrame` loop drives the hive and the sketches; sketches run only on screen; everything stops when the tab is hidden.
 - Panels don't use backdrop blur over the 3D (it would re-blur every frame); only the nav, the hero console and dialogs do. `?glforce` forces WebGL on a software renderer for testing.
