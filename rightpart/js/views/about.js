@@ -25,7 +25,9 @@ export default async function about() {
           <li><b>Integrity check</b><span>BOM against instructions against change history against the part records. It finds the step that still fits the old screw after an engineering change, and says which change it missed.</span></li>
           <li><b>Learn and explain</b><span>Each part says what it does, why it was chosen and what happens if the wrong one is fitted. A short quiz is built from the real device.</span></li>
           <li><b>Identify loose parts</b><span>Measure a screw by laying it on the screen, photograph it (the identifier learns your parts on the device), or scan any code on it.</span></li>
-          <li><b>Private and offline</b><span>A web app that installs on a tablet and works without a network. Data stays on the device; there is no server.</span></li>
+          <li><b>Answer questions</b><span>"Which screw goes in this step?", "what is C-55013?", "M3×8 or M3×10?" The Ask assistant answers from the company's own data, with the source of each answer, offline and without AI. It never guesses a torque or a part number, and it warns when the data disagrees.</span></li>
+          <li><b>Every company, its own data</b><span>Any production company adds its own space and loads its parts, BOMs and steps from spreadsheets or the step editor. With a company server, people sign in, roles decide who may change what, and every tablet gets the same published library.</span></li>
+          <li><b>Private and offline</b><span>A web app that installs on a tablet and works without a network. Without a company server the data never leaves the device; with one, it goes only to the company's own server.</span></li>
         </ol>
       </section>
 
@@ -33,6 +35,7 @@ export default async function about() {
         <h2>Does this exist already?</h2>
         <p>Parts of it, yes. Digital work-instruction platforms (for example VKS, Tulip, Dozuki, SwipeGuide, Azumuta, Operations1, Poka and Augmentir) replace paper with step-by-step screens, and MES or electronic device-history-record systems can require a barcode scan for each component. Phone apps identify a screw from a photo or measure it with an on-screen caliper.</p>
         <p>What is usually missing is the layer in between: one identity for a part across every code it goes by, a check that the instructions still match the BOM after every engineering change, and look-alike warnings at the moment a part is picked. That is where a wrong screw hides for years, and it is what RightPart focuses on, in a form small enough to try on one bench in a day.</p>
+        <p><a class="btn sm" href="#/challenges">${icon('alert')}Problems to expect, and what happened to others</a></p>
       </section>
 
       <section class="callout warn">${icon('shield')}<div>
@@ -48,7 +51,8 @@ export default async function about() {
             ['Connect to ERP and PLM', 'Read codes, BOMs and engineering changes automatically, so the integrity check runs on every change instead of once.'],
             ['3D from CAD', 'Load the real assembly model (glTF exported from the CAD system) instead of the generated one.'],
             ['Every language on the line', 'Instructions in Hebrew, Arabic, Russian, English and more, with right-to-left layouts.'],
-            ['Signed records', 'User log-in, electronic signatures and an audit trail for build records, then validation for production use.'],
+            ['Signed records', 'Sign-in, roles and an activity log are there; next come electronic signatures for build records, then validation for production use.'],
+            ['Steps from existing PDFs', 'AI drafts the steps from the PDF instructions a company already has; an engineer checks and approves every step before anyone builds from it.'],
             ['Shared photo identifier', 'Train once on the line\'s own parts and share it between stations.'],
           ].map(([t, d]) => html`<li class="card pad"><b>${t}</b><p class="small muted" style="margin-top:2px">${d}</p></li>`)}
         </ul>
@@ -56,7 +60,7 @@ export default async function about() {
 
       <section class="stack tight">
         <h2>Built with</h2>
-        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
+        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes · supabase-js (MIT) for the optional company server · Claude, only for the optional AI answers on a company's own server. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
       </section>
     </div>`,
   };

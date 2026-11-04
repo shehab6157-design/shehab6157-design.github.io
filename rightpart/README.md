@@ -1,6 +1,6 @@
 # RightPart
 
-**The right part, every time.** A working prototype of digital work instructions that know what every part is, and check themselves.
+**The right part, every time.** A working prototype of digital work instructions that know what every part is, and check themselves. Any production company can load its own devices, parts, BOMs and steps, and every worker gets step-by-step guidance and answers to their questions from that company's data.
 
 Live (once this folder is on `main`): **https://shehab6157-design.github.io/rightpart/**
 
@@ -22,7 +22,11 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 | **Identify a loose part** | Lay it on the screen and measure it (calibrated with a bank card), photograph it (the identifier learns your parts on the device), or scan any code. |
 | **Bin labels** | 100 × 50 mm, Code 128 barcode, every code the part goes by, a "NOT M3 × 10" warning, and the part's outline at actual size. |
 | **Training** | Fastener basics (heads, drives, threads, length, materials) and a quiz generated from the real device. |
-| **Private and offline** | Installs as an app, works without a network, keeps all data in the browser. No server, no account, no tracking. |
+| **Every company, its own data** | Each company is a separate space with its own library: loaded from CSV or JSON, or written in the step editor. Switch between them from the header. |
+| **Ask a question** | "Which screw goes in step 7?", "torque for 100-0233?", "what is C-55013?", "difference between M3x8 and M3x10". Answers come from the company's own data, with the source of each one, offline and without AI. It never guesses a torque or a part number, and it warns when the data disagrees. English, Hebrew and Arabic questions work. |
+| **Sign in (optional)** | A company server shares one library between people and tablets, with roles (owner, admin, engineer, supervisor, operator, viewer), numbered library versions, uploaded build records and optional AI answers from the company's records. See [backend/README.md](backend/README.md). |
+| **Problems to expect** | The problems products like this, and the companies using them, have run into, with sources: in the app and in [docs/PROBLEMS.md](docs/PROBLEMS.md). |
+| **Private and offline** | Installs as an app and works without a network. Without a company server, all data stays in the browser: no account, no tracking. |
 
 ## Five-minute tour
 
@@ -32,10 +36,15 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 4. **Build → Start a build**: scan or type `AF-SO-M3-12-MF` at step 1 (wrong standoff: red stop), then `C-55030` (right one: green).
 5. **Identify → Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
 6. **Part page → Bin label**, then print at 100 %.
+7. **Ask** (the button at the bottom right of every page): open step 7, press Ask, and ask "which screw here?".
 
-## Your own data
+## Your own company
 
-Everything you import stays in this browser (IndexedDB). Use **Your data** in the app.
+1. Press the company name in the header → **Add a company**. Each company gets its own storage; the demo stays as it was.
+2. Follow **Set up this company**: import parts, then BOMs, then steps (or write the steps in the editor), then print bin labels and run the integrity check.
+3. To share one library between people and tablets, connect a company server and sign in (see [backend/README.md](backend/README.md)). Without one, the data stays on the device it was loaded on: export it from **Data and records** to move it.
+
+Everything you import stays in this browser (IndexedDB) unless you publish it to your company server.
 
 **Parts CSV** (Excel → Save as CSV; comma, semicolon or tab). Download the template in the app. Columns:
 
@@ -46,6 +55,15 @@ Everything you import stays in this browser (IndexedDB). Use **Your data** in th
 - If size columns are empty, they are read from `designation` or `name` (`ISO 7380 M3x8 A2` fills head, drive, thread, length and material).
 
 **BOM CSV**: `device_id, device_name, bom_rev, item, code, qty, where`. The code can be any code of the part; `qty` can be `A/R`.
+
+**Steps CSV** (one row per step; download the template in the app): `device_id, device_name, instructions_rev, step, title, summary, parts, tools, instructions, checks, warnings, why, critical, esd, image`.
+
+- `parts`: `100-0233 x4 @0.6; 500-4001 x A/R; 200-1002` (any code of the part, `x` quantity, `@` torque in N·m, `A/R` for as required). Parts are separated by `;`.
+- `tools`, `instructions`, `checks` and `warnings`: separate items with `|` or put one per line inside the cell. A warning can start with `warning:`, `caution:` or `notice:`.
+- `critical` and `esd`: `yes` or empty.
+- Importing steps for a device replaces that device's steps and keeps its BOM, so a device is updated by importing its steps again. Devices that do not exist yet are created.
+
+The step editor checks each step against the BOM as you type: unknown codes, parts not in the BOM, retired parts, look-alikes and missing torques.
 
 **Library JSON** (everything, including steps and 3D scenes): see `data/demo-library.json`. In short:
 
@@ -74,13 +92,19 @@ Plain HTML, CSS and JavaScript modules: no framework, no build step. Serve the f
 ```
 index.html            app shell (strict Content Security Policy: scripts from this site only)
 css/app.css           design system, light and dark
-js/app.js             router, global search, navigation
+js/app.js             router, global search, navigation, company switcher
+js/store.js           one IndexedDB database per company, and the list of companies
+js/cloud.js           optional company server: sign-in, roles, library versions, record upload, AI answers
+js/askui.js, askpanel.js   the Ask chat (page and panel)
+js/importflows.js     CSV and JSON imports shared by the setup, data and editor pages
+js/problems.js        the "Problems to expect" list (docs/PROBLEMS.md is generated from it)
 js/core/              pure logic, runs in the browser and in Node tests
+  assistant.js        answers questions from the data, offline, with sources (no AI)
   decode.js           reads designations: ISO/DIN standards, metric and inch threads, drives, materials
   model.js            the index: every code -> one part, search, where-used
   lookalike.js        similarity of fasteners and the difference in words
   audit.js            the integrity check
-  importer.js         CSV / JSON import
+  importer.js         CSV / JSON import, including steps
   code128.js, csv.js, dims.js
 js/draw.js            parametric 2D drawings (true scale)
 js/viewer3d.js        3D assembly viewer (three.js), parts generated from specs
@@ -89,7 +113,9 @@ js/vision.js          on-device photo identification (TensorFlow.js + MobileNet 
 js/scan.js            barcode scanning (BarcodeDetector, or ZXing)
 js/views/             one file per page
 data/demo-library.json   the fictional Nova-1 library
-vendor/               three.js (tree-shaken bundle), TensorFlow.js, MobileNet weights, ZXing
+backend/              optional company server (Supabase): schema with row-level security, tests, AI function
+docs/PROBLEMS.md      problems to expect, with sources
+vendor/               three.js (tree-shaken bundle), TensorFlow.js, MobileNet weights, ZXing, supabase-js
 sw.js                 offline cache
 tests/                node --test
 ```
@@ -116,10 +142,16 @@ npx esbuild three-entry.js --bundle --format=esm --minify --target=es2020 --lega
 
 When you change a file listed in `sw.js`, bump `VERSION` there so installed copies update.
 
+After editing `js/problems.js`, regenerate the document:
+
+```bash
+node tools/problems-md.mjs
+```
+
 ## Next steps
 
-Pilot on one sub-assembly with real data on an approved private copy · read codes, BOMs and changes from the ERP/PLM so the check runs on every change · load the real 3D model from CAD (glTF) · instructions in Hebrew, Arabic, Russian and English with right-to-left layout · log-in, electronic signatures and audit trail, then validation · a shared photo identifier trained on the line's own parts · a supervisor dashboard (wrong scans per step, doubts, training scores).
+Pilot on one sub-assembly with real data on an approved private copy · read codes, BOMs and changes from the ERP/PLM so the check runs on every change · load the real 3D model from CAD (glTF) · instructions in Hebrew, Arabic, Russian and English with right-to-left layout · electronic signatures, then validation · single sign-on with the company's accounts · AI drafts of steps from existing PDFs, approved by an engineer · a shared photo identifier trained on the line's own parts · a supervisor dashboard (wrong scans per step, doubts, questions asked, training scores).
 
 ## Credits
 
-[three.js](https://threejs.org) (MIT) · [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0) · [ZXing](https://github.com/zxing-js/library) (Apache 2.0). The Nova-1, its parts, codes and suppliers are fictional.
+[three.js](https://threejs.org) (MIT) · [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0) · [ZXing](https://github.com/zxing-js/library) (Apache 2.0) · [supabase-js](https://github.com/supabase/supabase-js) (MIT). The Nova-1, its parts, codes and suppliers are fictional.

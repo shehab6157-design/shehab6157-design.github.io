@@ -22,6 +22,11 @@ export default async function deviceView({ app, params, navigate }) {
     e.steps.push(steps.indexOf(s) + 1);
     stepQty.set(sp.part.id, e);
   }
+  // Kit of every part fitted in the steps (or listed in the BOM), for devices without a 3D model.
+  const kitMap = new Map();
+  for (const [id, e] of stepQty) kitMap.set(id, { part: app.index.parts.get(id), qty: e.ar ? 'A/R' : `×${e.qty}` });
+  if (!kitMap.size) for (const l of dev.bom?.lines || []) { const r = resolveCode(app.index, l.code); if (r.part) kitMap.set(r.part.id, { part: r.part, qty: `×${l.qty}` }); }
+  const kit = [...kitMap.values()].filter((k) => k.part);
   const bomRows = (dev.bom?.lines || []).map((l) => {
     const r = resolveCode(app.index, l.code);
     const sq = r.part ? stepQty.get(r.part.id) : null;
@@ -44,9 +49,11 @@ export default async function deviceView({ app, params, navigate }) {
           <div class="row" style="margin-top:10px"><span class="chip">BOM ${dev.bom?.doc || ''} rev ${dev.bom?.rev || '?'}</span><span class="chip ${dev.bom?.rev !== dev.instructions?.rev ? 'warn' : ''}">Instructions ${dev.instructions?.doc || ''} rev ${dev.instructions?.rev || '?'}</span><span class="chip">${steps.length} steps</span></div>
         </div>
         <div class="row">
-          <a class="btn" href="${stepHref(dev.id, steps[0]?.id, 'learn')}">${icon('learn')}Learn</a>
+          ${steps.length ? html`<a class="btn" href="${stepHref(dev.id, steps[0].id, 'learn')}">${icon('learn')}Learn</a>
           <button class="btn primary" id="startBuild" type="button">${icon('play')}Start a build</button>
-          <a class="btn" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}Quiz</a>
+          <a class="btn" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}Quiz</a>` : ''}
+          <a class="btn ${steps.length ? '' : 'primary'}" href="#/editor/${encodeURIComponent(dev.id)}">${icon('edit')}${steps.length ? 'Edit steps' : 'Write the steps'}</a>
+          <a class="btn ghost" href="#/editor/new" title="Add another device">${icon('plus')}Device</a>
         </div>
       </div>
 
@@ -54,13 +61,15 @@ export default async function deviceView({ app, params, navigate }) {
 
       <section class="split">
         <div class="stack">
-          <div class="viewer" id="viewer"><div class="vhint">Drag to turn · pinch to zoom · tap a part</div>
+          ${dev.scene ? html`<div class="viewer" id="viewer"><div class="vhint">Drag to turn · pinch to zoom · tap a part</div>
             <div class="vbar"><div class="grp"><button class="vbtn" type="button" id="explode" aria-pressed="false">${icon('explode')}Exploded</button></div><div class="grp"><button class="vbtn" type="button" id="resetCam">${icon('reset')}Reset view</button></div></div>
           </div>
-          <p class="tiny muted">The 3D model is generated from the library: each screw is drawn from its own spec, so its length on screen is its real length.</p>
+          <p class="tiny muted">The 3D model is generated from the library: each screw is drawn from its own spec, so its length on screen is its real length.</p>` : html`<div class="viewer board-mode"><div class="board">${kit.map(({ part, qty }) => html`<a class="kit" href="${partHref(part.id)}">${thumb(part)}<span class="q">${qty}</span><span class="n">${part.name}</span><span class="tiny muted code">${part.id}</span></a>`)}</div></div>
+          <p class="tiny muted">No 3D model for this device: every step shows its photos and its kit of parts with true-proportion drawings. A 3D scene can be added to the library file (see the README).</p>`}
         </div>
         <div class="stack">
           <h2>Steps</h2>
+          ${steps.length ? '' : html`<div class="empty">No steps yet. <a href="#/editor/${encodeURIComponent(dev.id)}">Write them</a> or import them from a spreadsheet on <a href="#/setup">Set up this company</a>.</div>`}
           <ol class="list-plain">${steps.map((s, i) => {
             const fl = (app.audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info');
             const sp = stepParts(app.index, s);
@@ -98,7 +107,7 @@ export default async function deviceView({ app, params, navigate }) {
     </div>`,
     mount(root) {
       let viewer = null;
-      import('../viewer3d.js').then(({ createViewer }) => {
+      if (dev.scene) import('../viewer3d.js').then(({ createViewer }) => {
         const el = root.querySelector('#viewer');
         if (!el?.isConnected) return;
         viewer = createViewer(el, { app, device: dev, mode: 'overview', onPick: (part) => toast(`${part.id}: ${part.name}`) });

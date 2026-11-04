@@ -1,7 +1,7 @@
 // Offline support. The app shell is cached on install; the photo-identification model and
 // TensorFlow.js (about 7 MB) are cached the first time they are used.
 // Bump VERSION whenever a file in SHELL changes.
-const VERSION = 'rp-2026-11-04-1';
+const VERSION = 'rp-2026-11-04-2';
 const SHELL = [
   './',
   'index.html',
@@ -17,6 +17,12 @@ const SHELL = [
   'js/scan.js',
   'js/gauge.js',
   'js/vision.js',
+  'js/config.js',
+  'js/cloud.js',
+  'js/importflows.js',
+  'js/askui.js',
+  'js/askpanel.js',
+  'js/problems.js',
   'js/core/dims.js',
   'js/core/decode.js',
   'js/core/model.js',
@@ -25,6 +31,7 @@ const SHELL = [
   'js/core/code128.js',
   'js/core/csv.js',
   'js/core/importer.js',
+  'js/core/assistant.js',
   'js/views/home.js',
   'js/views/parts.js',
   'js/views/search.js',
@@ -40,9 +47,15 @@ const SHELL = [
   'js/views/data.js',
   'js/views/about.js',
   'js/views/labels.js',
+  'js/views/companies.js',
+  'js/views/setup.js',
+  'js/views/editor.js',
+  'js/views/ask.js',
+  'js/views/challenges.js',
   'data/demo-library.json',
   'vendor/three/three.bundle.js',
   'vendor/zxing/zxing.min.js',
+  'vendor/supabase/supabase.js',
   'icons/icon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',

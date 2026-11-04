@@ -145,3 +145,104 @@ export function partsTemplateCSV() {
 export function bomTemplateCSV() {
   return toCSV([BOM_COLUMNS, ['NOVA-1', 'Nova-1 demo console', 'C', '17', 'C-55013', '6', 'Front bezel'], ['NOVA-1', 'Nova-1 demo console', 'C', '22', '500-4001', 'A/R', 'Bezel screws']]);
 }
+
+// ---------- Assembly steps ----------
+export const STEP_COLUMNS = ['device_id', 'device_name', 'instructions_rev', 'step', 'title', 'summary', 'parts', 'tools', 'instructions', 'checks', 'warnings', 'why', 'critical', 'esd', 'image'];
+
+const yes = (v) => /^(y|yes|true|1|x|כן|نعم)$/i.test(String(v ?? '').trim());
+const list = (v) => String(v ?? '').split(/\s*\|\s*|\n/).map((s) => s.trim()).filter(Boolean);
+
+/**
+ * "100-0233 x6 @0.6; 500-4001 x A/R; 200-1002" -> [{code, qty, torque?}]
+ * Separators between parts: ";" or newline. Quantity: "x6", "×6", "*6" or "6x". Torque: "@0.6" (N·m).
+ */
+export function parsePartsCell(cell) {
+  const out = [];
+  for (const raw of String(cell ?? '').split(/[;\n]+/)) {
+    let s = raw.trim();
+    if (!s) continue;
+    let torque = null;
+    const t = s.match(/@\s*(\d+(?:[.,]\d+)?)\s*(?:N\s*·?\s*m|Nm)?\s*$/i);
+    if (t) { torque = num(t[1]); s = s.slice(0, t.index).trim(); }
+    let qty = 1;
+    const q = s.match(/\s+(?:[x×*]\s*)?(\d+|A\/R)\s*$/i) || s.match(/\s*[x×*]\s*(\d+|A\/R)\s*$/i);
+    if (q) { qty = /^\d+$/.test(q[1]) ? parseInt(q[1], 10) : 'A/R'; s = s.slice(0, q.index).trim(); }
+    const lead = s.match(/^(\d+)\s*[x×*]\s+(.+)$/);
+    if (lead) { qty = parseInt(lead[1], 10); s = lead[2].trim(); }
+    if (!s) continue;
+    const ref = { code: s, qty };
+    if (torque != null) ref.torque = { value: torque, unit: 'N·m' };
+    out.push(ref);
+  }
+  return out;
+}
+
+export function stepsFromCSV(text) {
+  const rows = parseCSVObjects(text).map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [key(k), v])));
+  const devices = new Map();
+  const warnings = [];
+  rows.forEach((r, i) => {
+    const line = i + 2;
+    const id = r.device_id || r.device || r.product;
+    if (!id) { warnings.push(`Row ${line}: no device_id, skipped.`); return; }
+    if (!r.title && !r.instructions) { warnings.push(`Row ${line}: no title or instructions, skipped.`); return; }
+    const d = devices.get(id) || { id, name: r.device_name || id, rev: r.instructions_rev || '', steps: [] };
+    if (r.device_name && d.name === id) d.name = r.device_name;
+    if (r.instructions_rev && !d.rev) d.rev = r.instructions_rev;
+    const n = d.steps.length + 1;
+    const stepId = r.step && !/^\d+$/.test(r.step) ? r.step : `S${r.step && /^\d+$/.test(r.step) ? parseInt(r.step, 10) : n}`;
+    if (d.steps.some((s) => s.id === stepId)) warnings.push(`Row ${line}: step ${stepId} appears twice for ${id}.`);
+    const step = {
+      id: stepId,
+      title: r.title || `Step ${n}`,
+      summary: r.summary || '',
+      parts: parsePartsCell(r.parts),
+      tools: list(r.tools),
+      instructions: list(r.instructions),
+      checks: list(r.checks),
+      warnings: list(r.warnings).map((w) => {
+        const m = w.match(/^(warning|caution|notice)\s*:\s*(.+)$/i);
+        return m ? { level: m[1].toLowerCase(), text: m[2] } : { level: 'caution', text: w };
+      }),
+    };
+    if (r.why) step.why = r.why;
+    if (yes(r.critical)) step.critical = true;
+    if (yes(r.esd)) step.esd = true;
+    if (r.image) step.images = list(r.image);
+    if (!step.parts.length) warnings.push(`Row ${line} (${id} ${stepId}): no parts listed.`);
+    d.steps.push(step);
+    devices.set(id, d);
+  });
+  for (const d of devices.values()) d.steps.sort((a, b) => (parseInt(a.id.replace(/\D/g, ''), 10) || 0) - (parseInt(b.id.replace(/\D/g, ''), 10) || 0));
+  return { devices: [...devices.values()], warnings };
+}
+
+/** Replace the steps of each device in the CSV (creating devices that do not exist yet). */
+export function mergeSteps(lib, devices) {
+  const out = structuredClone(lib);
+  out.devices = out.devices || [];
+  for (const d of devices) {
+    let dev = out.devices.find((x) => x.id === d.id);
+    if (!dev) { dev = { id: d.id, name: d.name, description: '', bom: { rev: '', lines: [] }, instructions: { rev: d.rev, steps: [] } }; out.devices.push(dev); }
+    dev.instructions = { ...(dev.instructions || {}), rev: d.rev || dev.instructions?.rev || '', steps: d.steps };
+  }
+  return out;
+}
+
+export function stepsToCSV(dev) {
+  const fmtParts = (parts) => parts.map((p) => `${p.code} x${p.qty}${p.torque?.value != null ? ` @${p.torque.value}` : ''}`).join('; ');
+  const rows = [STEP_COLUMNS];
+  (dev.instructions?.steps || []).forEach((s, i) => rows.push([
+    dev.id, dev.name, dev.instructions?.rev || '', i + 1, s.title, s.summary || '', fmtParts(s.parts || []),
+    (s.tools || []).join(' | '), (s.instructions || []).join(' | '), (s.checks || []).join(' | '),
+    (s.warnings || []).map((w) => `${w.level}: ${w.text}`).join(' | '), s.why || '', s.critical ? 'yes' : '', s.esd ? 'yes' : '', (s.images || []).join(' | '),
+  ]));
+  return toCSV(rows);
+}
+
+export function stepsTemplateCSV() {
+  return toCSV([STEP_COLUMNS,
+    ['NOVA-1', 'Nova-1 demo console', 'B', '1', 'Fit the four board standoffs', 'Screw four standoffs into the base plate.', '200-1001 x1; 100-0410 x4 @0.5', '5.5 mm nut driver | Torque driver', 'Place the chassis on the ESD mat | Screw a standoff into each hole by hand | Tighten each to 0.5 N·m', 'All four standoffs sit flat', 'notice: Brass is soft: do not over-tighten', 'The standoffs set the height of the board.', '', '', ''],
+    ['NOVA-1', '', '', '2', 'Mount the power supply', '', '300-2002 x1; 100-0236 x4 @0.6', 'T10 bit | Torque driver', 'Set the power supply on the base plate | Fit the four screws | Tighten to 0.6 N·m', 'Flanges sit flat', '', '', '', '', ''],
+  ]);
+}

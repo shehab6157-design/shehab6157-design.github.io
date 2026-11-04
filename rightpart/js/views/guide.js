@@ -143,7 +143,12 @@ export default async function guide({ app, params, query, navigate }) {
       // ---- 3D viewer (kept alive between steps of the same device) ----
       clearTimeout(keep.timer);
       const slot = root.querySelector('#viewerSlot');
-      if (keep.deviceId === dev.id && keep.el) {
+      if (!dev.scene) {
+        // No 3D model for this device: show the step's photos and its kit of parts instead.
+        disposeKeep();
+        slot.classList.add('board-mode');
+        slot.innerHTML = String(stepBoard(app, step, disputedPart));
+      } else if (keep.deviceId === dev.id && keep.el) {
         slot.replaceWith(keep.el);
         keep.viewer?.setStep(step.id);
       } else {
@@ -154,7 +159,7 @@ export default async function guide({ app, params, query, navigate }) {
         import('../viewer3d.js').then(({ createViewer }) => {
           if (keep.el !== slot) return;
           keep.viewer = createViewer(slot, { app, device: dev, onPick: (part) => pickToast(part) });
-          if (!keep.viewer) { slot.insertAdjacentHTML('beforeend', '<div class="vfallback">3D needs WebGL, which this browser does not offer. The parts and drawings below are complete without it.</div>'); return; }
+          if (!keep.viewer) { slot.classList.add('board-mode'); slot.innerHTML = String(stepBoard(app, step, disputedPart)); return; }
           const current = slot.dataset.step || step.id;
           keep.viewer.setStep(current, { instantCamera: true });
         });
@@ -166,7 +171,7 @@ export default async function guide({ app, params, query, navigate }) {
           if (b.dataset.v === 'ghost') { const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); keep.viewer.setGhost(on); }
         });
       }
-      keep.el.dataset.step = step.id;
+      if (keep.el) keep.el.dataset.step = step.id;
 
       // ---- Build mode: verification and completion ----
       const state = new Map();
@@ -282,6 +287,13 @@ export default async function guide({ app, params, query, navigate }) {
       };
     },
   };
+}
+
+/** The kit for a step, for devices without a 3D model: photos (if any) and every part with its count. */
+export function stepBoard(app, step, flaggedPart) {
+  const sps = stepParts(app.index, step);
+  return html`${(step.images || []).map((src) => html`<img class="step-photo" src="${src}" alt="Photo for step: ${step.title}" loading="lazy">`)}
+    <div class="board">${sps.map((sp) => sp.part ? html`<a class="kit ${flaggedPart === sp.part.id ? 'flag' : ''}" href="${partHref(sp.part.id)}">${raw(drawPart(sp.part, { view: 'auto' }))}<span class="q">${sp.qty === 'A/R' ? 'A/R' : `×${sp.qty}`}</span><span class="n">${sp.part.name}</span><span class="tiny muted code">${sp.part.id}</span></a>` : html`<div class="kit flag"><span class="q">?</span><span class="n">Unknown code ${sp.ref.code}</span></div>`)}</div>`;
 }
 
 function disposeKeep() {
