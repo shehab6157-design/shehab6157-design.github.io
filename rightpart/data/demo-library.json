@@ -1,0 +1,2575 @@
+{
+ "schema": "rightpart/1",
+ "meta": {
+  "name": "RightPart demo library",
+  "demo": true,
+  "updated": "2026-11-04",
+  "notice": "Fictional device and parts for demonstration and training. Not engineering data: do not use these values to build or repair real equipment."
+ },
+ "parts": [
+  {
+   "id": "100-0231",
+   "category": "screw",
+   "name": "Pan head screw M3 × 6, Phillips, stainless",
+   "designation": "ISO 7045 M3x6 H A2",
+   "spec": {
+    "head": "pan",
+    "drive": "phillips",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 6,
+    "material": "A2",
+    "driveSize": "PH1"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55011",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7045-M3-6-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "supplier",
+     "code": "DS-101-306",
+     "source": "Delta Supply (fictional)"
+    },
+    {
+     "type": "manufacturer",
+     "code": "7045-0306-A2",
+     "source": "Manufacturer catalogue"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.4,
+    "unit": "N·m"
+   },
+   "tool": "PH1 bit, torque driver at 0.4 N·m",
+   "details": {
+    "function": "Holds the main circuit board down on its four standoffs.",
+    "why": "The pan head has a wide, flat bearing face that presses the board evenly. Stainless A2 never rusts on the board. 6 mm passes the nylon washer (0.8 mm) and the board (1.6 mm) and still grips about 7 threads of the standoff.",
+    "ifWrong": "An 8 mm screw bottoms out in the standoff, so the board is not clamped and slowly vibrates loose. The Pozidriv look-alike (100-0232) takes a PZ bit: a PH1 bit cams out of it and chews the head.",
+    "tips": "Start all four screws by hand before tightening any of them, then torque them in a cross pattern."
+   },
+   "tags": [
+    "board",
+    "pcb"
+   ]
+  },
+  {
+   "id": "100-0232",
+   "category": "screw",
+   "name": "Pan head screw M3 × 6, Pozidriv, zinc plated",
+   "designation": "ISO 7045 M3x6 Z 4.8 zinc",
+   "spec": {
+    "head": "pan",
+    "drive": "pozidriv",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 6,
+    "material": "zinc",
+    "driveSize": "PZ1"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-7045-M3-6-ZN-Z",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.5,
+    "unit": "N·m"
+   },
+   "tool": "PZ1 bit",
+   "details": {
+    "function": "General-purpose screw kept for other products. Not used in the Nova-1.",
+    "why": "Zinc-plated steel is cheaper and fine for parts that stay dry.",
+    "ifWrong": "From arm's length it looks exactly like 100-0231. In the Nova-1 it would rust over time, and a Phillips bit cams out of its Pozidriv recess."
+   }
+  },
+  {
+   "id": "100-0233",
+   "category": "screw",
+   "name": "Button head screw M3 × 8, hex socket, stainless",
+   "designation": "ISO 7380-1 M3x8 A2",
+   "spec": {
+    "head": "button",
+    "drive": "hex",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 8,
+    "material": "A2",
+    "driveSize": "2 mm"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55013",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7380-M3-8-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "supplier",
+     "code": "DS-103-308",
+     "source": "Delta Supply (fictional)"
+    },
+    {
+     "type": "manufacturer",
+     "code": "7380-0308-A2",
+     "source": "Manufacturer catalogue"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.6,
+    "unit": "N·m"
+   },
+   "tool": "2 mm hex bit, torque driver at 0.6 N·m",
+   "details": {
+    "function": "Fixes the front bezel to the six bosses on the front frame.",
+    "why": "The button head is low and rounded: it looks clean on the front of the device and has no edge to catch a glove or a cleaning cloth. 8 mm = 4 mm of bezel plus 4 mm into the 5 mm deep boss, so it clamps fully with 1 mm to spare.",
+    "ifWrong": "The 10 mm screw (100-0234) looks the same but is 2 mm longer: it hits the bottom of the 5 mm boss before its head reaches the bezel. The torque driver still clicks, so it feels right, but the bezel is not clamped: it rattles and the screws work loose in transport.",
+    "tips": "A drop of low-strength threadlocker on the first two threads. Check every head sits flat on the bezel."
+   },
+   "tags": [
+    "bezel",
+    "front"
+   ]
+  },
+  {
+   "id": "100-0234",
+   "category": "screw",
+   "name": "Button head screw M3 × 10, hex socket, stainless",
+   "designation": "ISO 7380-1 M3x10 A2",
+   "spec": {
+    "head": "button",
+    "drive": "hex",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 10,
+    "material": "A2",
+    "driveSize": "2 mm"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55014",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7380-M3-10-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "supplier",
+     "code": "DS-103-310",
+     "source": "Delta Supply (fictional)"
+    },
+    {
+     "type": "manufacturer",
+     "code": "7380-0310-A2",
+     "source": "Manufacturer catalogue"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.6,
+    "unit": "N·m"
+   },
+   "tool": "2 mm hex bit, torque driver at 0.6 N·m",
+   "details": {
+    "function": "Fixes the top cover to the front and rear flanges.",
+    "why": "10 mm passes the cover (1.5 mm) and the flange (1.5 mm) and fully engages the self-clinching nut, with the tip free below. It uses the same 2 mm key as the bezel screws, so one tool does both.",
+    "ifWrong": "It looks identical to the 8 mm bezel screw (100-0233). Fitted in the bezel it bottoms out in the bosses. Since BOM rev C (change ECO-0142) the bezel takes 8 mm screws only.",
+    "tips": "Keep this bin away from the 8 mm bin, or use a different bin colour."
+   },
+   "tags": [
+    "cover"
+   ]
+  },
+  {
+   "id": "100-0235",
+   "category": "screw",
+   "name": "Pan head screw M2.5 × 5, Phillips, stainless",
+   "designation": "ISO 7045 M2.5x5 H A2",
+   "spec": {
+    "head": "pan",
+    "drive": "phillips",
+    "thread": "M2.5",
+    "d": 2.5,
+    "pitch": 0.45,
+    "system": "metric",
+    "length": 5,
+    "material": "A2",
+    "driveSize": "PH1"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55015",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7045-M2.5-5-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "manufacturer",
+     "code": "7045-0255-A2",
+     "source": "Manufacturer catalogue"
+    }
+   ],
+   "status": "active",
+   "tool": "PH1 bit",
+   "details": {
+    "function": "Holds the display module to the front frame through its four mounting ears.",
+    "why": "The display ears have 2.7 mm holes, made for M2.5. The screw is short so it can never reach the glass.",
+    "ifWrong": "An M3 screw does not fit the ear holes: forcing it cracks the ear. A longer screw can press on the back of the display."
+   }
+  },
+  {
+   "id": "100-0236",
+   "category": "screw",
+   "name": "Pan head screw M3 × 6, Torx, stainless",
+   "designation": "ISO 14583 M3x6 A2",
+   "spec": {
+    "head": "pan",
+    "drive": "torx",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 6,
+    "material": "A2",
+    "driveSize": "T10"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55016",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-14583-M3-6-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "legacy",
+     "code": "SCR-TX-36",
+     "source": "Old ERP",
+     "note": "Retired code, used until 2024"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.6,
+    "unit": "N·m"
+   },
+   "tool": "T10 bit, torque driver at 0.6 N·m",
+   "details": {
+    "function": "Fixes the power supply flanges to the base plate.",
+    "why": "The power supply needs a little more torque than the board. Torx takes it without slipping, and its T10 bit cannot be mixed up with the PH1 bit used on the board.",
+    "ifWrong": "A Phillips screw slips at 0.6 N·m and the head gets damaged. A screw longer than 6 mm sticks out under the base plate and the device rocks on the table."
+   }
+  },
+  {
+   "id": "100-0237",
+   "category": "screw",
+   "name": "Pan head screw M3 × 25, Phillips, stainless",
+   "designation": "ISO 7045 M3x25 H A2",
+   "spec": {
+    "head": "pan",
+    "drive": "phillips",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 25,
+    "material": "A2",
+    "driveSize": "PH1"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55017",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7045-M3-25-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.3,
+    "unit": "N·m"
+   },
+   "tool": "PH1 bit, torque driver at 0.3 N·m",
+   "details": {
+    "function": "Fixes the cooling fan to the rear wall, through the fan frame.",
+    "why": "25 mm = 2 mm wall + 15 mm fan + 4 mm lock nut + a few threads out. A lock nut only locks when the thread passes all the way through its nylon ring.",
+    "ifWrong": "A 20 mm screw is too short: the thread stops inside the nylon ring, so the nut does not lock and the fan rattles loose. Over-tightening cracks the plastic fan frame, which is why the torque is low."
+   }
+  },
+  {
+   "id": "100-0238",
+   "category": "screw",
+   "name": "Socket head cap screw M3 × 8, stainless",
+   "designation": "ISO 4762 M3x8 A2",
+   "spec": {
+    "head": "socket",
+    "drive": "hex",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 8,
+    "material": "A2",
+    "driveSize": "2.5 mm"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-4762-M3-8-A2",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "supplier",
+     "code": "DS-103-308",
+     "source": "Delta Supply (fictional)",
+     "note": "Same code as on 100-0233: to be checked"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 1.0,
+    "unit": "N·m"
+   },
+   "tool": "2.5 mm hex bit",
+   "details": {
+    "function": "Used on other products where a strong joint is needed. Not used in the Nova-1.",
+    "why": "The tall head takes more torque than a button head.",
+    "ifWrong": "Same thread and length as the bezel screw (100-0233), but the tall head sticks out of the bezel and needs a 2.5 mm key."
+   }
+  },
+  {
+   "id": "100-0239",
+   "category": "screw",
+   "name": "Pan head screw #4-40 × 1/4, Phillips, zinc plated",
+   "designation": "#4-40 x 1/4 PPH zinc",
+   "spec": {
+    "head": "pan",
+    "drive": "phillips",
+    "thread": "#4-40 UNC",
+    "d": 2.84,
+    "pitch": 0.635,
+    "system": "unified",
+    "length": 6.35,
+    "material": "zinc",
+    "driveSize": "PH1",
+    "lengthLabel": "1/4 in"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "DS-440-025",
+     "source": "Delta Supply (fictional)"
+    },
+    {
+     "type": "manufacturer",
+     "code": "PPH-440-1/4-ZN",
+     "source": "Manufacturer catalogue"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.4,
+    "unit": "N·m"
+   },
+   "tool": "PH1 bit",
+   "details": {
+    "function": "Inch screw kept for a US-made accessory. Not used in the Nova-1.",
+    "why": "Parts designed in the US use unified (inch) threads.",
+    "ifWrong": "It is almost the same size as M3 × 6, but it has 40 threads per inch (0.635 mm pitch) instead of 0.5 mm: it starts in an M3 hole, then jams and strips the thread."
+   }
+  },
+  {
+   "id": "100-0240",
+   "category": "screw",
+   "name": "Screw M2.5x5 pan PH A2",
+   "designation": "ISO 7045 M2.5x5 H A2",
+   "spec": {
+    "head": "pan",
+    "drive": "phillips",
+    "thread": "M2.5",
+    "d": 2.5,
+    "pitch": 0.45,
+    "system": "metric",
+    "length": 5,
+    "material": "A2",
+    "driveSize": "PH1"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "DS-101-255",
+     "source": "Delta Supply (fictional)",
+     "note": "Created by purchasing in 2025"
+    }
+   ],
+   "status": "active",
+   "tool": "PH1 bit"
+  },
+  {
+   "id": "100-0230",
+   "category": "nut",
+   "name": "Hex nut M3, zinc plated",
+   "designation": "ISO 4032 M3 zinc",
+   "spec": {
+    "variant": "hex",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "af": 5.5,
+    "m": 2.4,
+    "material": "zinc"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-4032-M3-ZN",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "obsolete",
+   "details": {
+    "function": "Plain nut once used on the fan. Retired.",
+    "why": "Replaced by the nylon-insert lock nut 100-0311 because plain nuts shook loose on the fan."
+   },
+   "replacedBy": "100-0311"
+  },
+  {
+   "id": "100-0310",
+   "category": "nut",
+   "name": "Hex nut M4, stainless",
+   "designation": "ISO 4032 M4 A2",
+   "spec": {
+    "variant": "hex",
+    "thread": "M4",
+    "d": 4,
+    "pitch": 0.7,
+    "system": "metric",
+    "af": 7,
+    "m": 3.2,
+    "material": "A2"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55020",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-4032-M4-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 1.2,
+    "unit": "N·m"
+   },
+   "tool": "7 mm nut driver, torque driver at 1.2 N·m",
+   "details": {
+    "function": "Clamps the protective earth (PE) ring terminal on the earth stud.",
+    "why": "The M4 stud is the earth point of the chassis. Stainless so the contact never corrodes.",
+    "ifWrong": "A loose earth nut is a safety failure: in a fault, the metal case could become live. Never use the earth stud to hold anything else."
+   }
+  },
+  {
+   "id": "100-0311",
+   "category": "nut",
+   "name": "Lock nut M3, nylon insert, stainless",
+   "designation": "ISO 10511 M3 A2",
+   "spec": {
+    "variant": "nyloc",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "af": 5.5,
+    "m": 4,
+    "material": "A2"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55021",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-10511-M3-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "tool": "5.5 mm spanner",
+   "details": {
+    "function": "Locks the four fan screws so vibration cannot turn them loose.",
+    "why": "The fan vibrates for its whole life. The nylon ring grips the thread and stops the nut turning.",
+    "ifWrong": "A plain nut shakes loose. A lock nut that has been removed once grips less: always fit a new one."
+   }
+  },
+  {
+   "id": "100-0312",
+   "category": "washer",
+   "name": "Star washer M4, external teeth, stainless",
+   "designation": "DIN 6798 A M4 A2",
+   "spec": {
+    "variant": "star-ext",
+    "thread": "M4",
+    "d": 4,
+    "id": 4.3,
+    "od": 8,
+    "t": 0.5,
+    "material": "A2"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55022",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-6798A-M4-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Two of them sandwich the earth ring terminal on the earth stud.",
+    "why": "The teeth cut through the anodising and lock the nut, so the earth bond stays low-resistance for the life of the device.",
+    "ifWrong": "A plain or split washer does not cut through the coating: the earth bond can fail the safety test, or pass at the factory and fail later in use."
+   }
+  },
+  {
+   "id": "100-0313",
+   "category": "washer",
+   "name": "Plain washer M3, nylon",
+   "designation": "ISO 7089 M3 nylon",
+   "spec": {
+    "variant": "flat",
+    "thread": "M3",
+    "d": 3,
+    "id": 3.2,
+    "od": 7,
+    "t": 0.8,
+    "material": "nylon"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55023",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-7089-M3-PA",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Sits under each board screw.",
+    "why": "Nylon spreads the load without scratching the board's protective coating, and keeps the screw head off the tracks near the hole.",
+    "ifWrong": "A metal washer (100-0314) can scratch through the solder mask and short a track next to the hole."
+   }
+  },
+  {
+   "id": "100-0314",
+   "category": "washer",
+   "name": "Plain washer M3, stainless",
+   "designation": "ISO 7089 M3 A2",
+   "spec": {
+    "variant": "flat",
+    "thread": "M3",
+    "d": 3,
+    "id": 3.2,
+    "od": 7,
+    "t": 0.5,
+    "material": "A2"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-7089-M3-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "General-purpose washer. Not used in the Nova-1.",
+    "why": "Spreads the load under a screw head on metal parts."
+   }
+  },
+  {
+   "id": "100-0315",
+   "category": "washer",
+   "name": "Split lock washer M4, stainless",
+   "designation": "DIN 127 B M4 A2",
+   "spec": {
+    "variant": "split",
+    "thread": "M4",
+    "d": 4,
+    "id": 4.1,
+    "od": 7.6,
+    "t": 0.9,
+    "material": "A2"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-127B-M4-A2",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Kept for older products. Not used in the Nova-1.",
+    "why": "A split spring ring that resists loosening a little.",
+    "ifWrong": "Never a substitute for the star washer on the earth stud: it does not cut through the anodising."
+   }
+  },
+  {
+   "id": "100-0410",
+   "category": "standoff",
+   "name": "Hex standoff M3 × 10, male-female, nickel-plated brass",
+   "designation": "Standoff M3x10 M-F brass nickel",
+   "spec": {
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 10,
+    "gender": "M-F",
+    "af": 5.5,
+    "maleLength": 6,
+    "material": "brass-ni"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-55030",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "AF-SO-M3-10-MF",
+     "source": "Alpha Fasteners (fictional)"
+    },
+    {
+     "type": "legacy",
+     "code": "HS-M3-12-MF",
+     "source": "Old ERP",
+     "note": "Code from the 2023 catalogue"
+    }
+   ],
+   "status": "active",
+   "torque": {
+    "value": 0.5,
+    "unit": "N·m"
+   },
+   "tool": "5.5 mm nut driver, torque driver at 0.5 N·m",
+   "details": {
+    "function": "Holds the main board 10 mm above the base plate.",
+    "why": "10 mm leaves room for the tall parts under the board and lets air flow. Brass is easy on the thread of the aluminium base.",
+    "ifWrong": "The 12 mm standoff (100-0411) lifts the board 2 mm: the display cable then pulls on its connector.",
+    "tips": "Brass is soft: above 0.6 N·m the male thread can shear off in the base plate."
+   }
+  },
+  {
+   "id": "100-0411",
+   "category": "standoff",
+   "name": "Hex standoff M3 × 12, male-female, nickel-plated brass",
+   "designation": "Standoff M3x12 M-F brass nickel",
+   "spec": {
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 12,
+    "gender": "M-F",
+    "af": 5.5,
+    "maleLength": 6,
+    "material": "brass-ni"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "AF-SO-M3-12-MF",
+     "source": "Alpha Fasteners (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Used on other products. Not used in the Nova-1.",
+    "why": "Gives 12 mm of clearance under a board."
+   }
+  },
+  {
+   "id": "200-1001",
+   "category": "mechanical",
+   "name": "Chassis, Nova-1 (base, rear wall, front frame)",
+   "spec": {
+    "size": "240 × 180 × 112 mm",
+    "material": "Aluminium 5052, clear anodised",
+    "fitted": "Earth stud M4, IEC power inlet, 12 self-clinching nuts"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-60001",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "drawing",
+     "code": "DWG-NV1-100 rev C",
+     "source": "Drawing"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "The metal frame every other part mounts to, and the earth reference of the device.",
+    "why": "Folded aluminium is light and stiff, and the anodising protects it from cleaning agents.",
+    "tips": "Inspect for dents and scratches before you start. The earth stud must be clean and bare."
+   }
+  },
+  {
+   "id": "200-1002",
+   "category": "mechanical",
+   "name": "Front bezel, black anodised",
+   "spec": {
+    "size": "240 × 112 × 4 mm",
+    "material": "Aluminium, black anodised",
+    "window": "154 × 88 mm"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-60002",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "drawing",
+     "code": "DWG-NV1-110 rev C",
+     "source": "Drawing"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "The front face of the device. Frames the display and protects its edge.",
+    "why": "Black anodising does not reflect light into the user's eyes."
+   }
+  },
+  {
+   "id": "200-1003",
+   "category": "mechanical",
+   "name": "Top cover",
+   "spec": {
+    "size": "243 × 112 × 170 mm",
+    "material": "Aluminium, painted"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-60003",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Closes the device and keeps fingers away from the inside.",
+    "why": "One U-shaped part covers the top and both sides."
+   }
+  },
+  {
+   "id": "300-2001",
+   "category": "pcb",
+   "name": "Main control board MCB-1",
+   "spec": {
+    "size": "120 × 80 × 1.6 mm",
+    "connectors": "J1 power, J3 display, J5 fan"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-61001",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Runs the device: reads the touch screen, controls the fan and power.",
+    "why": "One board keeps the wiring short.",
+    "ifWrong": "Static discharge from a hand can damage it without any visible sign.",
+    "tips": "Hold it by the edges only, with a grounded wrist strap."
+   },
+   "esd": true
+  },
+  {
+   "id": "300-2002",
+   "category": "module",
+   "name": "Power supply 24 V 150 W, open frame",
+   "spec": {
+    "size": "90 × 40 × 50 mm",
+    "output": "24 V DC, 6.25 A"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-61002",
+     "source": "Customer BOM"
+    },
+    {
+     "type": "supplier",
+     "code": "PS-24-150-OF",
+     "source": "Power supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Turns mains power into 24 V for the board, the display and the fan.",
+    "why": "Mounted low and at the back, next to the power inlet, to keep mains wiring short."
+   }
+  },
+  {
+   "id": "300-2003",
+   "category": "electrical",
+   "name": "Fan 60 × 60 × 15 mm, 24 V",
+   "spec": {
+    "size": "60 × 60 × 15 mm",
+    "voltage": "24 V DC",
+    "airflow": "Arrow on the frame"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-61003",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Pulls warm air out at the back of the device.",
+    "why": "The arrow on the frame shows the airflow: it must point out of the device.",
+    "ifWrong": "Fitted backwards it blows warm air into the device. It overheats only on hot days, so the mistake can go unnoticed for a long time."
+   }
+  },
+  {
+   "id": "300-2004",
+   "category": "module",
+   "name": "Display module 7 in, touch",
+   "spec": {
+    "size": "165 × 100 × 5 mm",
+    "interface": "40-way flat cable"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-61004",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Shows the user interface and reads the touch input.",
+    "why": "Mounted on the front frame, not on the bezel, so the bezel can be changed without touching the display."
+   },
+   "esd": true
+  },
+  {
+   "id": "400-3001",
+   "category": "cable",
+   "name": "Display flat cable (FFC), 40-way, 150 mm",
+   "spec": {
+    "length": "150 mm",
+    "pitch": "0.5 mm",
+    "contacts": "Blue stiffener side up"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-62001",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Carries the display and touch signals to the board (J3).",
+    "why": "Flat cable is thin and flexible.",
+    "ifWrong": "Fitted upside down or not fully inserted, the display shows nothing or flickers when warm."
+   }
+  },
+  {
+   "id": "400-3002",
+   "category": "cable",
+   "name": "Protective earth wire, green/yellow, M4 ring terminal",
+   "spec": {
+    "length": "80 mm",
+    "cross-section": "1.0 mm²",
+    "terminal": "M4 ring"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-62002",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Connects the earth pin of the power inlet to the chassis earth stud.",
+    "why": "Green/yellow is the international colour for protective earth."
+   }
+  },
+  {
+   "id": "400-3003",
+   "category": "consumable",
+   "name": "Cable tie 100 × 2.5 mm, nylon",
+   "spec": {
+    "size": "100 × 2.5 mm",
+    "material": "PA66"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-62003",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Holds the cables clear of the fan and of sharp edges.",
+    "why": "Cheap, quick, and keeps the wiring the same in every device."
+   }
+  },
+  {
+   "id": "500-4001",
+   "category": "consumable",
+   "name": "Threadlocker, low strength (purple)",
+   "spec": {
+    "strength": "Low, removable with hand tools"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-63001",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Stops small screws turning loose under vibration.",
+    "why": "Low strength so the bezel can still be removed for service.",
+    "ifWrong": "A high-strength (red) threadlocker would make the M3 screws break before they come out."
+   }
+  },
+  {
+   "id": "500-4002",
+   "category": "label",
+   "name": "Rating label, Nova-1",
+   "spec": {
+    "size": "64 × 26 mm",
+    "content": "Model, supply, serial number"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-63002",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Identifies the device and its electrical rating.",
+    "why": "Every device must carry its serial number so it can be traced."
+   }
+  },
+  {
+   "id": "500-4003",
+   "category": "consumable",
+   "name": "Torque seal (inspection lacquer)",
+   "spec": {
+    "colour": "Orange"
+   },
+   "aliases": [
+    {
+     "type": "customer",
+     "code": "C-63003",
+     "source": "Customer BOM"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "A line of lacquer across nut and stud shows the joint was torqued and has not moved since.",
+    "why": "An inspector can see at a glance whether a safety-critical joint is untouched."
+   }
+  }
+ ],
+ "devices": [
+  {
+   "id": "NOVA-1",
+   "name": "Nova-1 demo console",
+   "description": "A fictional bench-top console (power supply, control board, fan, touch display) made up to show how RightPart works. Its instructions contain one deliberate mistake for the integrity check to find.",
+   "image": null,
+   "bom": {
+    "rev": "C",
+    "doc": "BOM-NV1",
+    "lines": [
+     {
+      "item": 1,
+      "code": "200-1001",
+      "qty": 1,
+      "where": "Chassis"
+     },
+     {
+      "item": 2,
+      "code": "100-0410",
+      "qty": 4,
+      "where": "Board standoffs"
+     },
+     {
+      "item": 3,
+      "code": "300-2002",
+      "qty": 1,
+      "where": "Power supply"
+     },
+     {
+      "item": 4,
+      "code": "100-0236",
+      "qty": 4,
+      "where": "Power supply flanges"
+     },
+     {
+      "item": 5,
+      "code": "300-2001",
+      "qty": 1,
+      "where": "Main board"
+     },
+     {
+      "item": 6,
+      "code": "100-0313",
+      "qty": 4,
+      "where": "Under board screws"
+     },
+     {
+      "item": 7,
+      "code": "100-0231",
+      "qty": 4,
+      "where": "Board screws"
+     },
+     {
+      "item": 8,
+      "code": "300-2003",
+      "qty": 1,
+      "where": "Fan"
+     },
+     {
+      "item": 9,
+      "code": "100-0237",
+      "qty": 4,
+      "where": "Fan"
+     },
+     {
+      "item": 10,
+      "code": "100-0311",
+      "qty": 4,
+      "where": "Fan"
+     },
+     {
+      "item": 11,
+      "code": "400-3002",
+      "qty": 1,
+      "where": "Earth"
+     },
+     {
+      "item": 12,
+      "code": "100-0312",
+      "qty": 2,
+      "where": "Earth stud"
+     },
+     {
+      "item": 13,
+      "code": "100-0310",
+      "qty": 1,
+      "where": "Earth stud"
+     },
+     {
+      "item": 14,
+      "code": "300-2004",
+      "qty": 1,
+      "where": "Display"
+     },
+     {
+      "item": 15,
+      "code": "100-0235",
+      "qty": 4,
+      "where": "Display"
+     },
+     {
+      "item": 16,
+      "code": "200-1002",
+      "qty": 1,
+      "where": "Front bezel"
+     },
+     {
+      "item": 17,
+      "code": "C-55013",
+      "qty": 6,
+      "where": "Front bezel"
+     },
+     {
+      "item": 18,
+      "code": "400-3001",
+      "qty": 1,
+      "where": "Display cable"
+     },
+     {
+      "item": 19,
+      "code": "400-3003",
+      "qty": 4,
+      "where": "Cable dressing"
+     },
+     {
+      "item": 20,
+      "code": "200-1003",
+      "qty": 1,
+      "where": "Top cover"
+     },
+     {
+      "item": 21,
+      "code": "C-55014",
+      "qty": 6,
+      "where": "Top cover"
+     },
+     {
+      "item": 22,
+      "code": "500-4001",
+      "qty": "A/R",
+      "where": "Bezel screws"
+     },
+     {
+      "item": 23,
+      "code": "500-4003",
+      "qty": "A/R",
+      "where": "Earth nut"
+     },
+     {
+      "item": 24,
+      "code": "500-4002",
+      "qty": 1,
+      "where": "Rear wall"
+     }
+    ]
+   },
+   "instructions": {
+    "rev": "B",
+    "doc": "WI-NV1-ASSY",
+    "steps": [
+     {
+      "id": "S1",
+      "title": "Fit the four board standoffs",
+      "summary": "Screw four 10 mm standoffs into the base plate where the main board will sit.",
+      "parts": [
+       {
+        "code": "200-1001",
+        "qty": 1,
+        "note": "Inspect first"
+       },
+       {
+        "code": "100-0410",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "5.5 mm nut driver",
+       "Torque driver 0.2–1.2 N·m"
+      ],
+      "instructions": [
+       "Place the chassis on the ESD mat with the front frame toward you.",
+       "Find the four holes marked B1–B4 on the right half of the base plate.",
+       "Screw a standoff into each hole by hand until it sits flat.",
+       "Tighten each standoff to 0.5 N·m."
+      ],
+      "checks": [
+       "All four standoffs sit flat and upright",
+       "Earth stud is clean and undamaged"
+      ],
+      "warnings": [
+       {
+        "level": "notice",
+        "text": "Brass is soft: above 0.6 N·m the thread can shear off in the base plate."
+       }
+      ],
+      "why": "The standoffs set the height of the main board. Every part fitted later lines up on them, so they must be fully seated."
+     },
+     {
+      "id": "S2",
+      "title": "Mount the power supply",
+      "summary": "Fix the power supply to the left rear of the base plate with four Torx screws.",
+      "parts": [
+       {
+        "code": "300-2002",
+        "qty": 1
+       },
+       {
+        "code": "SCR-TX-36",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "T10 bit",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Check that the power supply label reads 24 V.",
+       "Set it on the left rear of the base plate, output terminals toward the board.",
+       "Fit the four screws through the flanges.",
+       "Tighten to 0.6 N·m in a cross pattern."
+      ],
+      "checks": [
+       "Output terminals face the board",
+       "Flanges sit flat, no gap underneath"
+      ],
+      "why": "The power supply is the heaviest part inside. Four tight screws stop it moving if the device is dropped."
+     },
+     {
+      "id": "S3",
+      "title": "Fit the main board",
+      "summary": "Lower the board onto the standoffs and fix it with four screws and nylon washers.",
+      "critical": false,
+      "esd": true,
+      "parts": [
+       {
+        "code": "300-2001",
+        "qty": 1
+       },
+       {
+        "code": "100-0313",
+        "qty": 4
+       },
+       {
+        "code": "100-0231",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "PH1 bit",
+       "Torque driver",
+       "ESD wrist strap"
+      ],
+      "instructions": [
+       "Put on the ESD wrist strap and check it on the tester.",
+       "Hold the board by its edges, connectors toward the front.",
+       "Lower it onto the four standoffs.",
+       "Put a nylon washer under each screw and start all four screws by hand.",
+       "Tighten to 0.4 N·m in a cross pattern."
+      ],
+      "checks": [
+       "The board does not rock",
+       "No scratches around the mounting holes"
+      ],
+      "warnings": [
+       {
+        "level": "caution",
+        "text": "Static-sensitive: never touch the board without a grounded wrist strap."
+       }
+      ],
+      "why": "Tightening in a cross pattern pulls the board down evenly. Tightening one corner fully first can bend the board and crack solder joints."
+     },
+     {
+      "id": "S4",
+      "title": "Fit the cooling fan",
+      "summary": "Fix the fan inside the rear wall with four long screws and new lock nuts.",
+      "parts": [
+       {
+        "code": "300-2003",
+        "qty": 1
+       },
+       {
+        "code": "100-0237",
+        "qty": 4
+       },
+       {
+        "code": "100-0311",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "PH1 bit",
+       "5.5 mm spanner",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Find the airflow arrow on the fan frame.",
+       "Hold the fan against the inside of the rear wall, arrow pointing out of the device, cable at the bottom.",
+       "Push the four screws in from outside the rear wall.",
+       "Fit a new lock nut on each screw inside.",
+       "Tighten to 0.3 N·m. The fan frame is plastic: do not over-tighten."
+      ],
+      "checks": [
+       "Airflow arrow points out of the device",
+       "At least two threads show past each lock nut",
+       "The fan spins freely by hand"
+      ],
+      "warnings": [
+       {
+        "level": "caution",
+        "text": "Lock nuts are single-use. Never refit one that has been removed."
+       }
+      ],
+      "why": "A fan fitted backwards blows warm air into the device instead of out. It only overheats on hot days, so the mistake can go unnoticed."
+     },
+     {
+      "id": "S5",
+      "title": "Connect the protective earth",
+      "summary": "Clamp the earth wire on the earth stud between two star washers.",
+      "critical": true,
+      "parts": [
+       {
+        "code": "400-3002",
+        "qty": 1
+       },
+       {
+        "code": "100-0312",
+        "qty": 2
+       },
+       {
+        "code": "100-0310",
+        "qty": 1
+       },
+       {
+        "code": "500-4003",
+        "qty": "A/R"
+       }
+      ],
+      "tools": [
+       "7 mm nut driver",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Fit the first star washer on the earth stud.",
+       "Fit the ring terminal of the green/yellow wire.",
+       "Fit the second star washer.",
+       "Fit the M4 nut and tighten to 1.2 N·m.",
+       "Draw a line of torque seal across the nut and the stud."
+      ],
+      "checks": [
+       "Order: star washer, ring terminal, star washer, nut",
+       "Torque seal line across nut and stud",
+       "Nothing else fixed on the earth stud"
+      ],
+      "warnings": [
+       {
+        "level": "warning",
+        "text": "Safety-critical: this joint protects the user from electric shock if a fault occurs."
+       }
+      ],
+      "why": "In a fault, current must flow to earth through this joint instead of through the person touching the device. The star washers cut through the anodising so the joint stays well below the safety limit for the life of the device."
+     },
+     {
+      "id": "S6",
+      "title": "Fit the display",
+      "summary": "Fix the display to the front frame with four M2.5 screws.",
+      "esd": true,
+      "parts": [
+       {
+        "code": "300-2004",
+        "qty": 1
+       },
+       {
+        "code": "100-0235",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "PH1 bit",
+       "ESD wrist strap"
+      ],
+      "instructions": [
+       "Leave the protective film on the screen until final inspection.",
+       "Feed the display cable through the slot in the front frame.",
+       "Place the display on the front frame, connector at the bottom.",
+       "Fit the four screws through the mounting ears."
+      ],
+      "checks": [
+       "Display sits flat with even gaps",
+       "Cable not pinched in the slot"
+      ],
+      "warnings": [
+       {
+        "level": "caution",
+        "text": "Static-sensitive: wear the wrist strap."
+       }
+      ],
+      "why": "The display is fixed to the front frame, not to the bezel, so the bezel can be changed later without touching the display."
+     },
+     {
+      "id": "S7",
+      "title": "Fit the front bezel",
+      "summary": "Fit the bezel over the display and fix it with six button head screws.",
+      "parts": [
+       {
+        "code": "200-1002",
+        "qty": 1
+       },
+       {
+        "code": "100-0234",
+        "qty": 6,
+        "note": "Threadlocker on the first two threads"
+       },
+       {
+        "code": "500-4001",
+        "qty": "A/R"
+       }
+      ],
+      "tools": [
+       "2 mm hex bit",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Check the bezel window is clean.",
+       "Place the bezel over the display, lined up on the six bosses.",
+       "Put a drop of threadlocker on the first two threads of each screw.",
+       "Fit the six screws and tighten to 0.6 N·m, top and bottom alternately."
+      ],
+      "checks": [
+       "The bezel sits flat, no gap at the corners",
+       "All six screw heads sit flat on the bezel"
+      ],
+      "why": "The bezel protects the edge of the display and closes the front. It must be clamped firmly so it does not rattle."
+     },
+     {
+      "id": "S8",
+      "title": "Connect the cables",
+      "summary": "Connect display, fan and power cables to the board and tie them clear of the fan.",
+      "parts": [
+       {
+        "code": "400-3001",
+        "qty": 1
+       },
+       {
+        "code": "400-3003",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "Flush side cutters"
+      ],
+      "instructions": [
+       "Connect the display cable to J3: blue stiffener up, push it in straight, close the latch.",
+       "Connect the fan cable to J5.",
+       "Connect the power supply output to J1.",
+       "Tie the cables to the anchor points with four cable ties and cut the tails flush."
+      ],
+      "checks": [
+       "All connector latches closed",
+       "Cables clear of the fan blades",
+       "Tie tails cut flush"
+      ],
+      "why": "A half-seated connector can pass the first test and fail in use when the device warms up."
+     },
+     {
+      "id": "S9",
+      "title": "Fit the top cover",
+      "summary": "Close the device with the top cover and six button head screws.",
+      "parts": [
+       {
+        "code": "200-1003",
+        "qty": 1
+       },
+       {
+        "code": "100-0234",
+        "qty": 6
+       }
+      ],
+      "tools": [
+       "2 mm hex bit",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Check that no loose parts or cable tie tails are left inside.",
+       "Lower the cover straight down, its sides outside the base plate.",
+       "Fit the six screws: three at the front, three at the rear.",
+       "Tighten to 0.6 N·m."
+      ],
+      "checks": [
+       "No cable trapped under the cover edge",
+       "The cover sits flat on both flanges"
+      ],
+      "why": "The cover keeps fingers and dust out. Six screws spread the clamping evenly."
+     },
+     {
+      "id": "S10",
+      "title": "Final inspection and rating label",
+      "summary": "Test the earth bond, apply the rating label and record the result.",
+      "critical": true,
+      "parts": [
+       {
+        "code": "500-4002",
+        "qty": 1
+       }
+      ],
+      "tools": [
+       "Earth bond tester",
+       "Label printer"
+      ],
+      "instructions": [
+       "Shake the device gently: nothing should rattle.",
+       "Measure the earth bond from the earth pin of the power inlet to the chassis.",
+       "Print the rating label with the serial number and stick it on the rear wall above the fan.",
+       "Record the serial number and the test result in the build record."
+      ],
+      "checks": [
+       "Earth bond below 0.1 Ω",
+       "Label serial number matches the build record",
+       "No rattle when shaken"
+      ],
+      "warnings": [
+       {
+        "level": "warning",
+        "text": "Do not power the device until the earth bond test has passed."
+       }
+      ],
+      "why": "The earth bond test proves the protective earth joint from step 5 works. The label makes the device traceable for its whole life."
+     }
+    ]
+   },
+   "changes": [
+    {
+     "rev": "B",
+     "eco": "ECO-0118",
+     "date": "2024-06-03",
+     "text": "Power supply screws changed to Torx (100-0236).",
+     "parts": [
+      "100-0236"
+     ]
+    },
+    {
+     "rev": "C",
+     "eco": "ECO-0142",
+     "date": "2025-03-12",
+     "text": "Front bezel screws changed from 100-0234 (M3 × 10) to 100-0233 (M3 × 8): the 10 mm screw bottoms out in the 5 mm bezel bosses.",
+     "parts": [
+      "100-0233",
+      "100-0234"
+     ]
+    }
+   ],
+   "scene": {
+    "units": "mm",
+    "overview": {
+     "pos": [
+      330,
+      250,
+      380
+     ],
+     "target": [
+      0,
+      45,
+      0
+     ]
+    },
+    "cameras": {
+     "S1": {
+      "pos": [
+       190,
+       170,
+       210
+      ],
+      "target": [
+       50,
+       5,
+       5
+      ]
+     },
+     "S2": {
+      "pos": [
+       -230,
+       170,
+       150
+      ],
+      "target": [
+       -65,
+       15,
+       -40
+      ]
+     },
+     "S3": {
+      "pos": [
+       170,
+       180,
+       200
+      ],
+      "target": [
+       50,
+       12,
+       5
+      ]
+     },
+     "S4": {
+      "pos": [
+       170,
+       130,
+       -280
+      ],
+      "target": [
+       60,
+       45,
+       -85
+      ]
+     },
+     "S5": {
+      "pos": [
+       -190,
+       90,
+       -150
+      ],
+      "target": [
+       -100,
+       6,
+       -78
+      ]
+     },
+     "S6": {
+      "pos": [
+       90,
+       120,
+       320
+      ],
+      "target": [
+       0,
+       57,
+       83
+      ]
+     },
+     "S7": {
+      "pos": [
+       -150,
+       110,
+       330
+      ],
+      "target": [
+       0,
+       57,
+       88
+      ]
+     },
+     "S8": {
+      "pos": [
+       150,
+       250,
+       150
+      ],
+      "target": [
+       20,
+       20,
+       0
+      ]
+     },
+     "S9": {
+      "pos": [
+       290,
+       290,
+       300
+      ],
+      "target": [
+       0,
+       60,
+       0
+      ]
+     },
+     "S10": {
+      "pos": [
+       -230,
+       190,
+       -330
+      ],
+      "target": [
+       20,
+       57,
+       -70
+      ]
+     }
+    },
+    "objects": [
+     {
+      "id": "chassis",
+      "kind": "chassis",
+      "code": "200-1001",
+      "base": true,
+      "plate": [
+       240,
+       2,
+       180
+      ],
+      "rear": {
+       "h": 110,
+       "t": 2,
+       "fan": [
+        60,
+        45,
+        29
+       ],
+       "inlet": [
+        -65,
+        35
+       ]
+      },
+      "front": {
+       "z": 80,
+       "h": 110,
+       "t": 1.5,
+       "window": [
+        150,
+        92,
+        0,
+        59
+       ],
+       "bosses": [
+        [
+         -105,
+         20
+        ],
+        [
+         105,
+         20
+        ],
+        [
+         -105,
+         59
+        ],
+        [
+         105,
+         59
+        ],
+        [
+         -105,
+         98
+        ],
+        [
+         105,
+         98
+        ]
+       ],
+       "boss": 5
+      },
+      "flanges": [
+       -82,
+       74
+      ],
+      "stud": [
+       -100,
+       2,
+       -78
+      ]
+     },
+     {
+      "id": "S1-100-0410",
+      "kind": "fastener",
+      "code": "100-0410",
+      "step": "S1",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -6,
+        2,
+        -31
+       ],
+       [
+        106,
+        2,
+        -31
+       ],
+       [
+        -6,
+        2,
+        41
+       ],
+       [
+        106,
+        2,
+        41
+       ]
+      ],
+      "from": 55,
+      "order": 0
+     },
+     {
+      "id": "psu",
+      "kind": "psu",
+      "code": "300-2002",
+      "step": "S2",
+      "pos": [
+       -65,
+       22,
+       -41
+      ],
+      "size": [
+       90,
+       40,
+       50
+      ],
+      "flanges": [
+       -114,
+       -16
+      ],
+      "from": [
+       0,
+       100,
+       0
+      ]
+     },
+     {
+      "id": "S2-SCR-TX-36",
+      "kind": "fastener",
+      "code": "SCR-TX-36",
+      "step": "S2",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -114,
+        3.5,
+        -58
+       ],
+       [
+        -114,
+        3.5,
+        -24
+       ],
+       [
+        -16,
+        3.5,
+        -58
+       ],
+       [
+        -16,
+        3.5,
+        -24
+       ]
+      ],
+      "from": 45,
+      "order": 1
+     },
+     {
+      "id": "pcb",
+      "kind": "pcb",
+      "code": "300-2001",
+      "step": "S3",
+      "pos": [
+       50,
+       12.8,
+       5
+      ],
+      "size": [
+       120,
+       1.6,
+       80
+      ],
+      "from": [
+       0,
+       80,
+       0
+      ]
+     },
+     {
+      "id": "S3-100-0313",
+      "kind": "fastener",
+      "code": "100-0313",
+      "step": "S3",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -6,
+        13.6,
+        -31
+       ],
+       [
+        106,
+        13.6,
+        -31
+       ],
+       [
+        -6,
+        13.6,
+        41
+       ],
+       [
+        106,
+        13.6,
+        41
+       ]
+      ],
+      "from": 30,
+      "order": 1
+     },
+     {
+      "id": "S3-100-0231",
+      "kind": "fastener",
+      "code": "100-0231",
+      "step": "S3",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -6,
+        14.4,
+        -31
+       ],
+       [
+        106,
+        14.4,
+        -31
+       ],
+       [
+        -6,
+        14.4,
+        41
+       ],
+       [
+        106,
+        14.4,
+        41
+       ]
+      ],
+      "from": 45,
+      "order": 2
+     },
+     {
+      "id": "fan",
+      "kind": "fan",
+      "code": "300-2003",
+      "step": "S4",
+      "pos": [
+       60,
+       45,
+       -80.5
+      ],
+      "size": [
+       60,
+       60,
+       15
+      ],
+      "from": [
+       0,
+       0,
+       90
+      ]
+     },
+     {
+      "id": "S4-100-0237",
+      "kind": "fastener",
+      "code": "100-0237",
+      "step": "S4",
+      "dir": [
+       0,
+       0,
+       1
+      ],
+      "at": [
+       [
+        35,
+        20,
+        -90
+       ],
+       [
+        85,
+        20,
+        -90
+       ],
+       [
+        35,
+        70,
+        -90
+       ],
+       [
+        85,
+        70,
+        -90
+       ]
+      ],
+      "from": 55,
+      "order": 1
+     },
+     {
+      "id": "S4-100-0311",
+      "kind": "fastener",
+      "code": "100-0311",
+      "step": "S4",
+      "dir": [
+       0,
+       0,
+       -1
+      ],
+      "at": [
+       [
+        35,
+        20,
+        -73
+       ],
+       [
+        85,
+        20,
+        -73
+       ],
+       [
+        35,
+        70,
+        -73
+       ],
+       [
+        85,
+        70,
+        -73
+       ]
+      ],
+      "from": 40,
+      "order": 2
+     },
+     {
+      "id": "S5-washer-1",
+      "kind": "fastener",
+      "code": "100-0312",
+      "step": "S5",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -100,
+        2,
+        -78
+       ]
+      ],
+      "from": 50,
+      "order": 0
+     },
+     {
+      "id": "pe-wire",
+      "kind": "cable",
+      "code": "400-3002",
+      "step": "S5",
+      "order": 1,
+      "color": "#1F9D55",
+      "stripe": "#E9C21B",
+      "radius": 1.5,
+      "points": [
+       [
+        -65,
+        28,
+        -86
+       ],
+       [
+        -72,
+        20,
+        -84
+       ],
+       [
+        -86,
+        9,
+        -80
+       ],
+       [
+        -95,
+        3.5,
+        -78.5
+       ],
+       [
+        -100,
+        2.9,
+        -78
+       ]
+      ],
+      "ring": {
+       "at": [
+        -100,
+        2.5,
+        -78
+       ],
+       "id": 4.3,
+       "od": 9,
+       "t": 0.8
+      },
+      "from": [
+       0,
+       45,
+       0
+      ]
+     },
+     {
+      "id": "S5-washer-2",
+      "kind": "fastener",
+      "code": "100-0312",
+      "step": "S5",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -100,
+        3.3,
+        -78
+       ]
+      ],
+      "from": 55,
+      "order": 2
+     },
+     {
+      "id": "S5-100-0310",
+      "kind": "fastener",
+      "code": "100-0310",
+      "step": "S5",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -100,
+        3.8,
+        -78
+       ]
+      ],
+      "from": 65,
+      "order": 3
+     },
+     {
+      "id": "display",
+      "kind": "display",
+      "code": "300-2004",
+      "step": "S6",
+      "pos": [
+       0,
+       59,
+       83.25
+      ],
+      "size": [
+       165,
+       100,
+       5
+      ],
+      "ears": [
+       [
+        -88,
+        15
+       ],
+       [
+        88,
+        15
+       ],
+       [
+        -88,
+        103
+       ],
+       [
+        88,
+        103
+       ]
+      ],
+      "from": [
+       0,
+       0,
+       100
+      ]
+     },
+     {
+      "id": "S6-100-0235",
+      "kind": "fastener",
+      "code": "100-0235",
+      "step": "S6",
+      "dir": [
+       0,
+       0,
+       -1
+      ],
+      "at": [
+       [
+        -88,
+        15,
+        81.75
+       ],
+       [
+        88,
+        15,
+        81.75
+       ],
+       [
+        -88,
+        103,
+        81.75
+       ],
+       [
+        88,
+        103,
+        81.75
+       ]
+      ],
+      "from": 40,
+      "order": 1
+     },
+     {
+      "id": "bezel",
+      "kind": "bezel",
+      "code": "200-1002",
+      "step": "S7",
+      "pos": [
+       0,
+       57,
+       87.75
+      ],
+      "size": [
+       240,
+       112,
+       4
+      ],
+      "window": [
+       154,
+       88,
+       0,
+       2
+      ],
+      "from": [
+       0,
+       0,
+       120
+      ]
+     },
+     {
+      "id": "S7-100-0234",
+      "kind": "fastener",
+      "code": "100-0234",
+      "step": "S7",
+      "dir": [
+       0,
+       0,
+       -1
+      ],
+      "at": [
+       [
+        -105,
+        20,
+        89.75
+       ],
+       [
+        105,
+        20,
+        89.75
+       ],
+       [
+        -105,
+        59,
+        89.75
+       ],
+       [
+        105,
+        59,
+        89.75
+       ],
+       [
+        -105,
+        98,
+        89.75
+       ],
+       [
+        105,
+        98,
+        89.75
+       ]
+      ],
+      "from": 50,
+      "order": 1
+     },
+     {
+      "id": "ffc",
+      "kind": "ribbon",
+      "code": "400-3001",
+      "step": "S8",
+      "width": 20,
+      "color": "#C9A15A",
+      "points": [
+       [
+        0,
+        26,
+        79.2
+       ],
+       [
+        0,
+        20,
+        72
+       ],
+       [
+        22,
+        16.5,
+        58
+       ],
+       [
+        50,
+        14.7,
+        46
+       ]
+      ],
+      "from": [
+       0,
+       40,
+       0
+      ]
+     },
+     {
+      "id": "fan-cable",
+      "kind": "cable",
+      "step": "S8",
+      "label": "Fan cable (part of the fan)",
+      "color": "#22262B",
+      "radius": 1.2,
+      "points": [
+       [
+        75,
+        17,
+        -73
+       ],
+       [
+        82,
+        15,
+        -60
+       ],
+       [
+        92,
+        14.8,
+        -40
+       ],
+       [
+        96,
+        14.7,
+        -30
+       ]
+      ],
+      "from": [
+       0,
+       30,
+       0
+      ]
+     },
+     {
+      "id": "psu-cable",
+      "kind": "cable",
+      "step": "S8",
+      "label": "Power supply output (part of the power supply)",
+      "color": "#B42318",
+      "radius": 1.4,
+      "points": [
+       [
+        -20,
+        32,
+        -32
+       ],
+       [
+        -14,
+        25,
+        -26
+       ],
+       [
+        -8,
+        17,
+        -24
+       ],
+       [
+        2,
+        14.7,
+        -25
+       ]
+      ],
+      "from": [
+       0,
+       30,
+       0
+      ]
+     },
+     {
+      "id": "ties",
+      "kind": "tie",
+      "code": "400-3003",
+      "step": "S8",
+      "order": 1,
+      "at": [
+       [
+        86,
+        15.6,
+        -52
+       ],
+       [
+        93,
+        15.4,
+        -38
+       ],
+       [
+        -12,
+        21,
+        -25
+       ],
+       [
+        16,
+        17,
+        60
+       ]
+      ],
+      "from": 25
+     },
+     {
+      "id": "cover",
+      "kind": "cover",
+      "code": "200-1003",
+      "step": "S9",
+      "pos": [
+       0,
+       57.75,
+       -5
+      ],
+      "size": [
+       243,
+       111.5,
+       170
+      ],
+      "t": 1.5,
+      "from": [
+       0,
+       150,
+       0
+      ]
+     },
+     {
+      "id": "S9-100-0234",
+      "kind": "fastener",
+      "code": "100-0234",
+      "step": "S9",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -80,
+        113.5,
+        -82
+       ],
+       [
+        0,
+        113.5,
+        -82
+       ],
+       [
+        80,
+        113.5,
+        -82
+       ],
+       [
+        -80,
+        113.5,
+        74
+       ],
+       [
+        0,
+        113.5,
+        74
+       ],
+       [
+        80,
+        113.5,
+        74
+       ]
+      ],
+      "from": 45,
+      "order": 1
+     },
+     {
+      "id": "label",
+      "kind": "label",
+      "code": "500-4002",
+      "step": "S10",
+      "pos": [
+       60,
+       95,
+       -90.15
+      ],
+      "size": [
+       64,
+       26
+      ],
+      "normal": [
+       0,
+       0,
+       -1
+      ],
+      "text": [
+       "NOVA-1 DEMO CONSOLE",
+       "24 V DC  6.25 A",
+       "SN NV1-000123",
+       "FICTIONAL TRAINING UNIT"
+      ],
+      "from": [
+       0,
+       0,
+       -45
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "RightPart: the right part, every time",
+  "short_name": "RightPart",
+  "description": "One code for every part, 3D step-by-step build guides, look-alike warnings, bench verification and an integrity check for BOMs and work instructions.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F4F6F9",
+  "theme_color": "#1D5BD8",
+  "categories": ["productivity", "business", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

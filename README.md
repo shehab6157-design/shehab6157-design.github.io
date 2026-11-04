@@ -24,6 +24,7 @@ The intro score is played from real recorded samples: [VSCO 2 Community Edition]
 - `shehab-shibli.webp`: the About portrait. `shehab-shibli.jpg` is the same photo for search-engine data.
 - `404.html`: the "This cell is empty" page GitHub Pages shows for missing URLs.
 - `MASTER.md`: design system and motion rules.
+- `rightpart/`: **RightPart**, a separate app at [/rightpart/](https://shehab6157-design.github.io/rightpart/): digital assembly instructions that know every code a part goes by, show each step in 3D, stop the wrong bin at the bench and check the BOM against the instructions. Demo data only (a fictional device). Its own README explains it: [`rightpart/README.md`](rightpart/README.md).
 - Every animation runs live in the browser (WebGL for the hive, Canvas 2D for the project sketches), only while it is on screen, and stops when the tab is hidden. Visitors with "reduce motion" turned on (or who press the pause button) see still frames instead.
 - Hosted with GitHub Pages straight from the `main` branch. To run it locally, serve the folder with any static server (for example `python3 -m http.server`) and open it in a browser.
 
