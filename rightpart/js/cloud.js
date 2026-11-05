@@ -7,6 +7,7 @@
 
 import config from './config.js';
 import { settings, setSetting, addWorkspace, workspaces, updateWorkspace, currentWorkspace, saveLibrary, libraryMeta, all, put } from './store.js';
+import { t } from './core/i18n.js';
 
 export const ROLES = {
   owner: 'Owner: everything, including who is owner',
@@ -16,6 +17,10 @@ export const ROLES = {
   operator: 'Operator: builds, scans, reports doubts',
   viewer: 'Viewer: reads only',
 };
+// Shown in the interface: the role names stay as stored, their names and descriptions follow the language.
+export const ROLE_NAMES = { owner: () => t('role::Owner'), admin: () => t('role::Admin'), engineer: () => t('role::Engineer'), supervisor: () => t('role::Supervisor'), operator: () => t('role::Operator'), viewer: () => t('role::Viewer') };
+export const ROLE_HELP = { owner: () => t('everything, including who is owner'), admin: () => t('invites people and sets roles'), engineer: () => t('edits and publishes the library'), supervisor: () => t("sees everyone's build records and reports"), operator: () => t('builds, scans, reports doubts'), viewer: () => t('reads only') };
+export const roleName = (r) => ROLE_NAMES[r]?.() || r || '';
 export const canPublish = (role) => ['owner', 'admin', 'engineer'].includes(role);
 export const canManage = (role) => ['owner', 'admin'].includes(role);
 
@@ -30,8 +35,8 @@ export function serverConfig() {
 export function setServerConfig({ url, anonKey }) {
   url = String(url || '').trim().replace(/\/+$/, '');
   anonKey = String(anonKey || '').trim();
-  if (!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(url)) throw new Error('The server address must look like https://your-project.supabase.co');
-  if (anonKey.length < 20) throw new Error('The public (anon) key looks too short');
+  if (!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(url)) throw new Error(t('The server address must look like https://your-project.supabase.co'));
+  if (anonKey.length < 20) throw new Error(t('The public (anon) key looks too short'));
   setSetting('cloud', { url, anonKey });
   clientPromise = null;
 }
@@ -52,14 +57,14 @@ function loadScript(src) {
     const s = document.createElement('script');
     s.src = src;
     s.onload = () => resolve();
-    s.onerror = () => reject(new Error('The sign-in library could not be loaded'));
+    s.onerror = () => reject(new Error(t('The sign-in library could not be loaded')));
     document.head.append(s);
   });
 }
 
 async function client() {
   const cfg = serverConfig();
-  if (!cfg) throw new Error('No company server is set up on this copy of RightPart.');
+  if (!cfg) throw new Error(t('No company server is set up on this copy of RightPart.'));
   if (!clientPromise) {
     clientPromise = (async () => {
       await loadScript(new URL('../vendor/supabase/supabase.js', import.meta.url).href);
@@ -71,16 +76,16 @@ async function client() {
   return clientPromise;
 }
 
-function friendly(error, fallback = 'The company server did not accept that.') {
+function friendly(error, fallback = t('The company server did not accept that.')) {
   if (!error) return null;
-  if (!navigator.onLine) return new Error('You are offline. Your work is kept on this device and syncs when you are back online.');
+  if (!navigator.onLine) return new Error(t('You are offline. Your work is kept on this device and syncs when you are back online.'));
   const m = String(error.message || '');
-  if (/Invalid login credentials/i.test(m)) return new Error('Wrong e-mail or password.');
-  if (/Email not confirmed/i.test(m)) return new Error('Confirm your e-mail first: open the link we sent you.');
-  if (/User already registered/i.test(m)) return new Error('This e-mail already has an account: sign in instead.');
-  if (error.code === '40001') return Object.assign(new Error('Someone published a newer version while you were editing. Download it, apply your changes again, then publish.'), { conflict: true });
-  if (error.code === '42501') return new Error(m || 'Your role does not allow this.');
-  if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return new Error('The company server cannot be reached.');
+  if (/Invalid login credentials/i.test(m)) return new Error(t('Wrong e-mail or password.'));
+  if (/Email not confirmed/i.test(m)) return new Error(t('Confirm your e-mail first: open the link we sent you.'));
+  if (/User already registered/i.test(m)) return new Error(t('This e-mail already has an account: sign in instead.'));
+  if (error.code === '40001') return Object.assign(new Error(t('Someone published a newer version while you were editing. Download it, apply your changes again, then publish.')), { conflict: true });
+  if (error.code === '42501') return new Error(m || t('Your role does not allow this.'));
+  if (/Failed to fetch|NetworkError|Load failed/i.test(m)) return new Error(t('The company server cannot be reached.'));
   return new Error(m || fallback);
 }
 
@@ -162,7 +167,7 @@ export async function setRole(orgId, userId, role) {
   const c = await client();
   const { data, error } = await c.from('memberships').update({ role }).eq('org_id', orgId).eq('user_id', userId).select();
   if (error) throw friendly(error);
-  if (!data?.length) throw new Error('Your role does not allow this change.');
+  if (!data?.length) throw new Error(t('Your role does not allow this change.'));
 }
 
 export async function removeMember(orgId, userId) {
@@ -226,7 +231,7 @@ export async function syncRecords() {
   if (ws.kind !== 'cloud') return { uploaded: 0, downloaded: 0 };
   const c = await client();
   const session = await getSession();
-  if (!session) throw new Error('Sign in to sync records.');
+  if (!session) throw new Error(t('Sign in to sync records.'));
   const local = await all('records');
   let uploaded = 0;
   for (const r of local.filter((x) => !x.synced && !x.remoteBy)) {
@@ -263,20 +268,20 @@ export async function backgroundSync() {
     const { reloadLibrary } = await import('./app.js');
     const { toast } = await import('./ui.js');
     await reloadLibrary();
-    toast(`Library updated to version ${r.version}${r.note ? `: ${r.note}` : ''}.`, 'ok', 5000);
+    toast(r.note ? t('Library updated to version {v}: {note}.', { v: r.version, note: r.note }) : t('Library updated to version {v}.', { v: r.version }), 'ok', 5000);
   }
 }
 
 // ---------- AI answers (optional, needs the "ask" function on the server) ----------
-export async function askAI({ question, records }) {
+export async function askAI({ question, records, language = 'en' }) {
   const ws = currentWorkspace();
-  if (ws.kind !== 'cloud') throw new Error('AI answers need a signed-in company.');
+  if (ws.kind !== 'cloud') throw new Error(t('AI answers need a signed-in company.'));
   const c = await client();
-  const { data, error } = await c.functions.invoke('ask', { body: { orgId: ws.org.id, question, records } });
+  const { data, error } = await c.functions.invoke('ask', { body: { orgId: ws.org.id, question, records, language } });
   if (error) {
     let msg = error.message;
     try { msg = (await error.context?.json?.())?.error || msg; } catch { /* keep message */ }
-    throw new Error(msg || 'The AI answer is not available.');
+    throw new Error(msg || t('The AI answer is not available.'));
   }
   return data;
 }

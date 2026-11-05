@@ -3,16 +3,17 @@
 
 import { decodeDesignation, decodedSpec } from './decode.js';
 import { HEADS, DRIVES, MATERIALS, CATEGORY_LABELS, driveWord } from './dims.js';
+import { N_, localize, t, lower } from './i18n.js';
 
-export const CODE_TYPES = {
-  internal: 'Internal code',
-  customer: 'Customer code',
-  supplier: 'Supplier code',
-  manufacturer: 'Manufacturer code',
-  drawing: 'Drawing callout',
-  legacy: 'Old code (retired)',
-  designation: 'Standard designation',
-};
+export const CODE_TYPES = localize({
+  internal: N_('Internal code'),
+  customer: N_('Customer code'),
+  supplier: N_('Supplier code'),
+  manufacturer: N_('Manufacturer code'),
+  drawing: N_('Drawing callout'),
+  legacy: N_('Old code (retired)'),
+  designation: N_('Standard designation'),
+});
 
 /** Codes are compared without case, spaces or separators: "100-0233" = "100 0233" = "1000233". */
 export function normCode(s) {
@@ -93,20 +94,21 @@ export function matchSpec(part, ds) {
   const sp = part.spec || {};
   const res = { matched: 0, missed: 0, total: 0, hits: [], misses: [] };
   const check = (ok, hit, miss) => { res.total++; if (ok) { res.matched++; res.hits.push(hit); } else { res.missed++; res.misses.push(miss); } };
-  if (ds.category) check(part.category === ds.category, CATEGORY_LABELS[ds.category]?.toLowerCase() || ds.category, `${CATEGORY_LABELS[part.category]?.toLowerCase() || part.category}`);
-  if (ds.d != null) check(sp.d != null && Math.abs(sp.d - ds.d) < 0.01 && (sp.system || 'metric') === (ds.system || 'metric'), threadText(ds), `thread ${sp.thread || (sp.d ? 'M' + sp.d : 'none')}`);
-  if (ds.pitch != null) check(sp.pitch != null && Math.abs(sp.pitch - ds.pitch) < 0.002, `pitch ${ds.pitch}`, `pitch ${sp.pitch ?? '?'}`);
-  if (ds.length != null) check(sp.length != null && Math.abs(sp.length - ds.length) < 0.01, `${ds.length} mm`, `length ${sp.length ?? '?'} mm`);
-  if (ds.head) check(sp.head === ds.head, HEADS[ds.head]?.label.toLowerCase(), HEADS[sp.head]?.label.toLowerCase() || 'no head');
-  if (ds.drive) check(sp.drive === ds.drive, driveWord(ds.drive), sp.drive ? driveWord(sp.drive) : 'no drive');
-  if (ds.variant) check((sp.variant || null) === ds.variant, ds.variant, sp.variant || 'other type');
+  const low = (x) => (x == null ? x : lower(x));
+  if (ds.category) check(part.category === ds.category, low(CATEGORY_LABELS[ds.category]) || ds.category, low(CATEGORY_LABELS[part.category]) || part.category);
+  if (ds.d != null) check(sp.d != null && Math.abs(sp.d - ds.d) < 0.01 && (sp.system || 'metric') === (ds.system || 'metric'), threadText(ds), sp.thread || sp.d ? t('thread {thread}', { thread: sp.thread || 'M' + sp.d }) : t('no thread'));
+  if (ds.pitch != null) check(sp.pitch != null && Math.abs(sp.pitch - ds.pitch) < 0.002, t('pitch {n}', { n: ds.pitch }), t('pitch {n}', { n: sp.pitch ?? '?' }));
+  if (ds.length != null) check(sp.length != null && Math.abs(sp.length - ds.length) < 0.01, t('{n} mm', { n: ds.length }), t('length {n} mm', { n: sp.length ?? '?' }));
+  if (ds.head) check(sp.head === ds.head, low(HEADS[ds.head]?.label), low(HEADS[sp.head]?.label) || t('no head'));
+  if (ds.drive) check(sp.drive === ds.drive, driveWord(ds.drive), sp.drive ? driveWord(sp.drive) : t('no drive'));
+  if (ds.variant) check((sp.variant || null) === ds.variant, ds.variant, sp.variant || t('other type'));
   if (ds.gender) check(sp.gender === ds.gender, ds.gender, sp.gender || '?');
-  if (ds.material) check(compatibleMaterial(sp.material, ds.material) && !!sp.material, MATERIALS[ds.material]?.label.toLowerCase() || ds.material, MATERIALS[sp.material]?.label.toLowerCase() || 'no material');
+  if (ds.material) check(compatibleMaterial(sp.material, ds.material) && !!sp.material, low(MATERIALS[ds.material]?.label) || ds.material, low(MATERIALS[sp.material]?.label) || t('no material'));
   res.ratio = res.total ? res.matched / res.total : 0;
   return res;
 }
 
-const threadText = (ds) => (ds.system === 'unified' ? `${ds.d} mm inch thread` : 'M' + ds.d);
+const threadText = (ds) => (ds.system === 'unified' ? t('{n} mm inch thread', { n: ds.d }) : 'M' + ds.d);
 
 function editDistance(a, b, max) {
   if (Math.abs(a.length - b.length) > max) return max + 1;
@@ -152,14 +154,14 @@ export function search(index, query, { limit = 40 } = {}) {
 
   const exact = resolveCode(index, q);
   out.exact = exact;
-  for (const m of exact.matches) bump(m.part, 100, { kind: 'code', alias: m.alias, text: `${CODE_TYPES[m.alias.type] || m.alias.type} ${m.alias.code}${m.alias.source ? ` (${m.alias.source})` : ''}` });
+  for (const m of exact.matches) bump(m.part, 100, { kind: 'code', alias: m.alias, text: m.alias.source ? t('{type} {code} ({source})', { type: CODE_TYPES[m.alias.type] || m.alias.type, code: m.alias.code, source: m.alias.source }) : t('{type} {code}', { type: CODE_TYPES[m.alias.type] || m.alias.type, code: m.alias.code }) });
 
   if (norm.length >= 3) {
     for (const [code, entries] of index.byCode) {
       if (code === norm || !code.includes(norm)) continue;
       for (const e of entries) {
         const part = index.parts.get(e.partId);
-        if (part) bump(part, 70 - Math.min(20, code.length - norm.length), { kind: 'code-partial', alias: e.alias, text: `${CODE_TYPES[e.alias.type] || e.alias.type} ${e.alias.code}` });
+        if (part) bump(part, 70 - Math.min(20, code.length - norm.length), { kind: 'code-partial', alias: e.alias, text: t('{type} {code}', { type: CODE_TYPES[e.alias.type] || e.alias.type, code: e.alias.code }) });
       }
     }
   }
@@ -174,22 +176,23 @@ export function search(index, query, { limit = 40 } = {}) {
       const m = matchSpec(p, ds);
       if (!m.total) continue;
       const hits = m.hits.length > 1 && ds.category ? m.hits.slice(1) : m.hits;
-      if (m.missed === 0) bump(p, 60 + 30 * m.ratio, { kind: 'spec', text: 'Matches ' + hits.join(', ') });
-      else if (m.total >= 3 && m.missed === 1 && m.matched >= 2) bump(p, 32 + 10 * m.ratio, { kind: 'near', text: `Close, but ${m.misses.join(', ')}` });
+      if (m.missed === 0) bump(p, 60 + 30 * m.ratio, { kind: 'spec', text: t('Matches {what}', { what: hits.join(', ') }) });
+      else if (m.total >= 3 && m.missed === 1 && m.matched >= 2) bump(p, 32 + 10 * m.ratio, { kind: 'near', text: t('Close, but {what}', { what: m.misses.join(', ') }) });
     }
   }
 
   const tokens = q.toLowerCase().split(/[\s,;/]+/).filter((t) => t.length >= 2);
   if (tokens.length) {
     for (const p of index.partList) {
+      // The category in English and in the current language, so "בורג" finds screws as well as "screw".
       const title = [p.name, p.designation, p.category, CATEGORY_LABELS[p.category], ...(p.tags || []), p.spec?.thread].filter(Boolean).join(' ').toLowerCase();
       const body = [p.details?.function, p.details?.why].filter(Boolean).join(' ').toLowerCase();
       const inTitle = tokens.filter((t) => title.includes(t)).length;
       const inAny = tokens.filter((t) => title.includes(t) || body.includes(t)).length;
       if (!inAny) continue;
-      if (inTitle === tokens.length) bump(p, 50 + Math.min(10, tokens.length * 3), { kind: 'text', text: 'Name matches' });
-      else if (inAny === tokens.length) bump(p, 30 + Math.min(6, tokens.length * 2), { kind: 'text', text: 'Mentioned in the description' });
-      else if (tokens.length >= 2 && inAny / tokens.length >= 0.5) bump(p, 18 + 10 * (inAny / tokens.length), { kind: 'text', text: 'Partly matches' });
+      if (inTitle === tokens.length) bump(p, 50 + Math.min(10, tokens.length * 3), { kind: 'text', text: t('Name matches') });
+      else if (inAny === tokens.length) bump(p, 30 + Math.min(6, tokens.length * 2), { kind: 'text', text: t('Mentioned in the description') });
+      else if (tokens.length >= 2 && inAny / tokens.length >= 0.5) bump(p, 18 + 10 * (inAny / tokens.length), { kind: 'text', text: t('Partly matches') });
     }
   }
 
@@ -201,7 +204,7 @@ export function search(index, query, { limit = 40 } = {}) {
       if (!close || code === norm) continue;
       for (const e of entries) {
         const part = index.parts.get(e.partId);
-        if (part) bump(part, 30, { kind: 'fuzzy', alias: e.alias, text: `Did you mean ${e.alias.code}?` });
+        if (part) bump(part, 30, { kind: 'fuzzy', alias: e.alias, text: t('Did you mean {code}?', { code: e.alias.code }) });
       }
     }
   }

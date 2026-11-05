@@ -1,4 +1,5 @@
-// Small UI helpers: safe HTML templating, icons, toasts, dialogs, sound.
+// Small UI helpers: safe HTML templating, translated markup, icons, toasts, dialogs, sound.
+import { tr, format, t, getLanguage } from './core/i18n.js';
 
 const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
@@ -22,6 +23,25 @@ function render(v) {
   if (Array.isArray(v)) return v.map(render).join('');
   return esc(v);
 }
+
+const RTL_CHAR = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+/** A value inside translated text, isolated so a code or a size can never be reordered by right-to-left text. */
+function isolate(v) {
+  if (v instanceof Raw) return v.s;
+  if (v == null || v === false) return '';
+  if (Array.isArray(v)) return v.map(isolate).join('');
+  const s = String(v);
+  return RTL_CHAR.test(s) ? `<bdi>${esc(s)}</bdi>` : `<bdi dir="ltr">${esc(s)}</bdi>`;
+}
+
+/**
+ * Translated markup: th('Recording build {serial}', { serial: html`<b>${s}</b>` }).
+ * The translation is escaped; values are escaped unless wrapped in raw()/html``.
+ */
+export function th(src, vars) {
+  return raw(format(tr(src), vars, { text: esc, value: isolate }));
+}
+export { t };
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -89,6 +109,7 @@ const P = {
   lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   sync: '<path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 20v-4h-4"/>',
   send: '<path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 9-9"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/>',
   arrowUp: '<path d="M12 19V5M6 11l6-6 6 6"/>',
   grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
@@ -117,11 +138,11 @@ export function toast(message, type = 'info', ms = 3200) {
  * openDialog({ title, body (html string), wide, actions: [{label, value, primary, danger}], onMount(el, close), onClose(el, value) })
  * Resolves with the clicked action value (or null when dismissed).
  */
-export function openDialog({ title, body, wide = false, actions = [{ label: 'Close', value: null }], onMount, onClose }) {
+export function openDialog({ title, body, wide = false, actions = [{ label: t('Close'), value: null }], onMount, onClose }) {
   return new Promise((resolve) => {
     const d = document.createElement('dialog');
     d.className = 'dlg' + (wide ? ' wide' : '');
-    d.innerHTML = `<div class="dh"><h2>${esc(title)}</h2><button class="icon-btn" data-close aria-label="Close">${icon('x')}</button></div>
+    d.innerHTML = `<div class="dh"><h2>${esc(title)}</h2><button class="icon-btn" data-close aria-label="${esc(t('Close'))}">${icon('x')}</button></div>
       <div class="db">${body}</div>
       ${actions.length ? `<div class="df">${actions.map((a, i) => `<button class="btn ${a.primary ? 'primary' : ''} ${a.danger ? 'danger' : ''}" data-act="${i}">${esc(a.label)}</button>`).join('')}</div>` : ''}`;
     document.body.append(d);
@@ -140,14 +161,14 @@ export function openDialog({ title, body, wide = false, actions = [{ label: 'Clo
   });
 }
 
-export async function confirmDialog(title, text, okLabel = 'OK', danger = false) {
-  const v = await openDialog({ title, body: `<p>${esc(text)}</p>`, actions: [{ label: 'Cancel', value: false }, { label: okLabel, value: true, primary: !danger, danger }] });
+export async function confirmDialog(title, text, okLabel = t('OK'), danger = false) {
+  const v = await openDialog({ title, body: `<p>${esc(text)}</p>`, actions: [{ label: t('Cancel'), value: false }, { label: okLabel, value: true, primary: !danger, danger }] });
   return v === true;
 }
 
 export async function copyText(text) {
-  try { await navigator.clipboard.writeText(text); toast(`Copied ${text}`, 'ok', 1800); }
-  catch { toast('Copy is not available here', 'bad'); }
+  try { await navigator.clipboard.writeText(text); toast(t('Copied {text}', { text }), 'ok', 1800); }
+  catch { toast(t('Copy is not available here'), 'bad'); }
 }
 
 export function download(filename, content, type = 'application/json') {
@@ -192,5 +213,5 @@ export function beep(kind = 'ok') {
 export const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 export function fmtDate(ts) {
-  try { return new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }); } catch { return String(ts); }
+  try { return new Date(ts).toLocaleString(getLanguage(), { dateStyle: 'medium', timeStyle: 'short', numberingSystem: 'latn' }); } catch { return String(ts); }
 }

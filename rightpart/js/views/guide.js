@@ -1,4 +1,8 @@
-import { html, raw, icon, toast, beep, openDialog, fmtDate } from '../ui.js';
+import { html, th, raw, icon, toast, beep, openDialog, fmtDate } from '../ui.js';
+import { t, lower, listJoin } from '../core/i18n.js';
+import { esc } from '../ui.js';
+import { stepText, partText } from '../core/content.js';
+import { languageInfo, englishName } from '../lang.js';
 import { stepParts, resolveCode, otherCodes, torqueText, CODE_TYPES } from '../core/model.js';
 import { findLookalikes, shortDifference } from '../core/lookalike.js';
 import { isFastener, sizeLabel } from '../core/dims.js';
@@ -14,11 +18,12 @@ const keep = { deviceId: null, el: null, viewer: null, timer: 0 };
 
 export default async function guide({ app, params, query, navigate }) {
   const dev = app.index.devices.get(params.device);
-  if (!dev) return { title: 'Not found', html: html`<div class="page narrow"><div class="empty">No device ${params.device}.</div></div>` };
+  if (!dev) return { title: t('Not found'), html: html`<div class="page narrow"><div class="empty">${th('No device {id}.', { id: params.device })}</div></div>` };
   const steps = dev.instructions?.steps || [];
   if (!params.step) { setTimeout(() => navigate(stepHref(dev.id, steps[0].id, query.get('mode'))), 0); return { title: dev.name, html: '' }; }
   const idx = Math.max(0, steps.findIndex((s) => s.id === params.step));
   const step = steps[idx];
+  const txt = stepText(step, app.lib); // the step's words in the reader's language (codes and numbers come from the data)
   const mode = query.get('mode') === 'build' ? 'build' : 'learn';
   const buildId = query.get('build');
   const record = buildId ? await get('records', buildId) : null;
@@ -38,60 +43,73 @@ export default async function guide({ app, params, query, navigate }) {
 
   const partBlock = (sp, i) => {
     const p = sp.part;
-    if (!p) return html`<div class="steppart bad"><div class="thumb"></div><div><div class="t">Unknown code <span class="code">${sp.ref.code}</span></div><div class="s">${sp.resolution.status === 'ambiguous' ? 'This code points to several parts.' : 'This code is not in the library.'}</div></div><span class="qty">${sp.qty}</span></div>`;
+    if (!p) return html`<div class="steppart bad"><div class="thumb"></div><div><div class="t">${th('Unknown code {code}', { code: html`<span class="code">${sp.ref.code}</span>` })}</div><div class="s">${sp.resolution.status === 'ambiguous' ? t('This code points to several parts.') : t('This code is not in the library.')}</div></div><span class="qty">${sp.qty}</span></div>`;
     const looks = findLookalikes(app.lib.parts, p).filter((l) => l.score >= 0.75 && (usedInDevice.has(l.part.id) || l.score >= 0.85)).slice(0, 2);
     const flagged = disputedPart && p.id === disputedPart;
     const needsScan = build && isFastener(p);
     const ev = lastEvents.get(i);
     const legacy = sp.resolution.legacy;
     const others = otherCodes(p).slice(0, 4);
+    const pt = partText(p, app.lib);
+    const code = (c) => html`<span class="code">${c}</span>`;
     return html`<div class="steppart ${flagged ? 'flag' : ''} ${ev?.result === 'ok' ? 'ok' : ''}" data-ref="${i}">
-      <a class="thumb" href="${partHref(p.id)}" aria-label="Open ${p.name}">${thumb(p)}</a>
+      <a class="thumb" href="${partHref(p.id)}" aria-label="${t('Open {name}', { name: pt.name })}">${thumb(p)}</a>
       <div>
-        <div class="t"><a href="${partHref(p.id)}" style="color:inherit;text-decoration:none">${p.name}</a></div>
-        <div class="s"><span class="code">${p.id}</span>${sizeLabel(p) ? ` · ${sizeLabel(p)}` : ''}${torqueText(sp.torque) ? html` · <b>${torqueText(sp.torque)}</b>` : ''}${sp.ref.note ? ` · ${sp.ref.note}` : ''}</div>
-        ${legacy ? html`<div class="warnline">${icon('history')}<span>The instructions use the old code ${sp.ref.code}.</span></div>` : ''}
-        ${others.length ? html`<div class="alias">Bin or bag may read: ${others.map((a, k) => html`${k ? ', ' : ''}<span class="code">${a.code}</span>`)}</div>` : ''}
-        ${flagged ? html`<div class="warnline" style="color:var(--bad)">${icon('stop')}<span>BOM rev ${dev.bom?.rev} asks for <a href="${partHref(bomPart)}">${bomPart}</a> (${sizeLabel(app.index.parts.get(bomPart))}) here.</span></div>` : ''}
-        ${looks.map((l) => html`<div class="warnline">${icon('alert')}<span>Don't confuse with <a href="${partHref(l.part.id)}">${l.part.id}</a> (${sizeLabel(l.part) || l.part.name}): ${shortDifference(p, l.part)}${usedInDevice.has(l.part.id) ? ', also in this device' : ''}.</span></div>`)}
+        <div class="t"><a href="${partHref(p.id)}" style="color:inherit;text-decoration:none">${pt.name}</a></div>
+        <div class="s"><span class="code">${p.id}</span>${sizeLabel(p) ? html` · <span class="code">${sizeLabel(p)}</span>` : ''}${torqueText(sp.torque) ? html` · <b class="code">${torqueText(sp.torque)}</b>` : ''}${sp.ref.note ? ` · ${sp.ref.note}` : ''}</div>
+        ${legacy ? html`<div class="warnline">${icon('history')}<span>${th('The instructions use the old code {code}.', { code: code(sp.ref.code) })}</span></div>` : ''}
+        ${others.length ? html`<div class="alias">${t('Bin or bag may read:')} ${others.map((a, k) => html`${k ? ', ' : ''}<span class="code">${a.code}</span>`)}</div>` : ''}
+        ${flagged ? html`<div class="warnline" style="color:var(--bad)">${icon('stop')}<span>${th('BOM rev {rev} asks for {part} ({size}) here.', { rev: dev.bom?.rev, part: html`<a href="${partHref(bomPart)}" class="code">${bomPart}</a>`, size: sizeLabel(app.index.parts.get(bomPart)) })}</span></div>` : ''}
+        ${looks.map((l) => html`<div class="warnline">${icon('alert')}<span>${usedInDevice.has(l.part.id)
+          ? th("Don't confuse with {part} ({size}): {diff}, also in this device.", { part: html`<a href="${partHref(l.part.id)}" class="code">${l.part.id}</a>`, size: sizeLabel(l.part) || l.part.name, diff: shortDifference(p, l.part) })
+          : th("Don't confuse with {part} ({size}): {diff}.", { part: html`<a href="${partHref(l.part.id)}" class="code">${l.part.id}</a>`, size: sizeLabel(l.part) || l.part.name, diff: shortDifference(p, l.part) })}</span></div>`)}
       </div>
-      <span class="qty ${sp.qty === 'A/R' ? 'ar' : ''}" title="Quantity">${sp.qty === 'A/R' ? 'A/R' : `×${sp.qty}`}</span>
-      ${!build && (p.details?.function || p.details?.ifWrong) ? html`<details class="more verify"><summary><span class="ic">${icon('info')}</span>More about this part<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body" style="padding-left:16px">
-          ${p.details?.function ? html`<p><b>What it does.</b> ${p.details.function}</p>` : ''}
-          ${p.details?.why ? html`<p style="margin-top:6px"><b>Why this one.</b> ${p.details.why}</p>` : ''}
-          ${p.details?.ifWrong ? html`<p style="margin-top:6px;color:var(--bad)"><b>If it's wrong.</b> ${p.details.ifWrong}</p>` : ''}
-          ${p.tool ? html`<p style="margin-top:6px"><b>Tool.</b> ${p.tool}</p>` : ''}
+      <span class="qty ${sp.qty === 'A/R' ? 'ar' : ''}" title="${t('Quantity')}">${sp.qty === 'A/R' ? t('qty::A/R') : `×${sp.qty}`}</span>
+      ${!build && (pt.function || pt.ifWrong) ? html`<details class="more verify"><summary><span class="ic">${icon('info')}</span>${t('More about this part')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body" style="padding-inline-start:16px">
+          ${pt.function ? html`<p><b>${t('What it does.')}</b> ${pt.function}</p>` : ''}
+          ${pt.why ? html`<p style="margin-top:6px"><b>${t('Why this one.')}</b> ${pt.why}</p>` : ''}
+          ${pt.ifWrong ? html`<p style="margin-top:6px;color:var(--bad)"><b>${t("If it's wrong.")}</b> ${pt.ifWrong}</p>` : ''}
+          ${p.tool ? html`<p style="margin-top:6px"><b>${t('Tool.')}</b> ${p.tool}</p>` : ''}
         </div></details>` : ''}
       ${needsScan ? html`<div class="verify">
           <form class="verify-row" data-verify="${i}" autocomplete="off">
-            <input type="text" inputmode="text" autocapitalize="characters" spellcheck="false" placeholder="Scan or type the bin code" aria-label="Code on the bin for ${p.name}" value="${ev?.code || ''}">
-            <button class="btn" type="button" data-cam="${i}" aria-label="Scan with the camera">${icon('scan')}</button>
-            <button class="btn primary" type="submit">Check</button>
+            <input type="text" inputmode="text" autocapitalize="characters" spellcheck="false" dir="ltr" placeholder="${t('Scan or type the bin code')}" aria-label="${t('Code on the bin for {name}', { name: pt.name })}" value="${ev?.code || ''}">
+            <button class="btn" type="button" data-cam="${i}" aria-label="${t('Scan with the camera')}">${icon('scan')}</button>
+            <button class="btn primary" type="submit">${t('verb::Check')}</button>
           </form>
           <div class="vslot" aria-live="assertive">${ev ? raw(verdictHTML(ev, app)) : ''}</div>
-        </div>` : build ? html`<div class="verify"><label class="check ${ev?.result === 'ok' ? 'done' : ''}"><input type="checkbox" data-pick="${i}" ${ev?.result === 'ok' ? 'checked' : ''}><span>Picked ${sp.qty === 'A/R' ? 'as required' : `${sp.qty} × ${p.name}`}</span></label></div>` : ''}
+        </div>` : build ? html`<div class="verify"><label class="check ${ev?.result === 'ok' ? 'done' : ''}"><input type="checkbox" data-pick="${i}" ${ev?.result === 'ok' ? 'checked' : ''}><span>${sp.qty === 'A/R' ? t('Picked as required') : th('Picked {qty} × {name}', { qty: sp.qty, name: pt.name })}</span></label></div>` : ''}
     </div>`;
   };
 
-  const rail = html`<nav class="steps-rail" aria-label="Steps">${steps.map((s, i) => {
+  const rail = html`<nav class="steps-rail" aria-label="${t('Steps')}">${steps.map((s, i) => {
     const fl = (app.audit.byStep.get(`${dev.id}/${s.id}`) || []).some((f) => f.severity === 'critical');
-    return html`<a href="${hrefStep(s)}" ${i === idx ? html`aria-current="step"` : ''} class="${doneSteps.has(s.id) ? 'done' : ''} ${fl ? 'flag' : ''}" title="${s.title}">${doneSteps.has(s.id) ? icon('check') : i + 1}</a>`;
+    return html`<a href="${hrefStep(s)}" ${i === idx ? html`aria-current="step"` : ''} class="${doneSteps.has(s.id) ? 'done' : ''} ${fl ? 'flag' : ''}" title="${stepText(s, app.lib).title}">${doneSteps.has(s.id) ? icon('check') : i + 1}</a>`;
   })}</nav>`;
+  const langName = (code) => { try { return new Intl.DisplayNames([document.documentElement.lang || 'en'], { type: 'language' }).of(code); } catch { return englishName(code); } };
+  // Where the step's words come from: the original, a translation (checked or not), or the original because there is no translation yet.
+  const textNote = txt.state === 'held'
+    ? html`<div class="callout bad lang-note" role="note">${icon('globe')}<div><p class="t">${t('Translation held back')}</p><p>${t('The {language} translation of this step gives a number that is not in the original, so the original ({source}) is shown instead. Ask your supervisor if anything is unclear.', { language: languageInfo().native, source: langName(txt.source) })}</p></div></div>`
+    : txt.state === 'missing'
+    ? html`<div class="callout info lang-note" role="note">${icon('globe')}<div><p>${t('This step is not translated into {language} yet. The text below is the original ({source}). Part codes, quantities and torques are the same in every language.', { language: languageInfo().native, source: langName(txt.source) })}</p></div></div>`
+    : txt.state === 'translated' && (txt.outdated || !txt.reviewed)
+      ? html`<div class="callout warn lang-note" role="note">${icon('globe')}<div><p>${txt.outdated ? t('The original step changed after this translation was made. Follow the original ({source}) where they differ, and ask for the translation to be updated.', { source: langName(txt.source) }) : t('This translation has not been checked yet. If anything is unclear, compare it with the original ({source}) or ask your supervisor.', { source: langName(txt.source) })}</p></div></div>`
+      : '';
 
   const progress = build ? (doneSteps.size / steps.length) * 100 : ((idx + 1) / steps.length) * 100;
 
   return {
-    title: `Step ${idx + 1}: ${step.title}`,
+    title: t('Step {n}: {title}', { n: idx + 1, title: txt.title }),
     html: html`<div class="page">
       <div class="row between">
-        <div class="crumbs" style="margin:0"><a href="#/devices">Build</a><span>/</span><a href="#/device/${encodeURIComponent(dev.id)}">${dev.name}</a></div>
-        <div class="seg" role="group" aria-label="Mode">
-          <a href="${stepHref(dev.id, step.id)}?mode=learn" ${!build ? html`aria-current="page"` : ''}>${icon('learn')}Learn</a>
-          <a href="${build ? '#' : stepHref(dev.id, step.id) + '?mode=build'}" id="toBuild" ${build ? html`aria-current="page"` : ''}>${icon('scan')}Build</a>
+        <div class="crumbs" style="margin:0"><a href="#/devices">${t('nav::Build')}</a><span>/</span><a href="#/device/${encodeURIComponent(dev.id)}">${dev.name}</a></div>
+        <div class="seg" role="group" aria-label="${t('Mode')}">
+          <a href="${stepHref(dev.id, step.id)}?mode=learn" ${!build ? html`aria-current="page"` : ''}>${icon('learn')}${t('mode::Learn')}</a>
+          <a href="${build ? '#' : stepHref(dev.id, step.id) + '?mode=build'}" id="toBuild" ${build ? html`aria-current="page"` : ''}>${icon('scan')}${t('mode::Build')}</a>
         </div>
       </div>
-      ${build && record ? html`<div class="demo-banner" style="background:var(--surface-2);color:var(--text-2)">${icon('history')}<span>Recording build <b class="code">${record.serial || 'no serial'}</b>${record.operator ? ` · ${record.operator}` : ''} · started ${fmtDate(record.createdAt)} · ${doneSteps.size}/${steps.length} steps done</span></div>` : ''}
-      ${build && !record ? html`<div class="callout info">${icon('info')}<div><p class="t">Build mode without a record</p><p>Checks still work, but nothing is saved. Start a build to record the serial number and every step.</p><div class="acts"><button class="btn sm primary" type="button" id="startRec">Start a build</button></div></div></div>` : ''}
+      ${build && record ? html`<div class="demo-banner" style="background:var(--surface-2);color:var(--text-2)">${icon('history')}<span>${th('Recording build {serial}', { serial: html`<b class="code">${record.serial || t('no serial')}</b>` })}${record.operator ? ` · ${record.operator}` : ''} · ${t('started {date}', { date: fmtDate(record.createdAt) })} · ${t('{done}/{total} steps done', { done: doneSteps.size, total: steps.length })}</span></div>` : ''}
+      ${build && !record ? html`<div class="callout info">${icon('info')}<div><p class="t">${t('Build mode without a record')}</p><p>${t('Checks still work, but nothing is saved. Start a build to record the serial number and every step.')}</p><div class="acts"><button class="btn sm primary" type="button" id="startRec">${t('Start a build')}</button></div></div></div>` : ''}
       <div class="guide">
         <div class="viewer-card">
           <div class="viewer" id="viewerSlot"></div>
@@ -100,42 +118,43 @@ export default async function guide({ app, params, query, navigate }) {
           ${rail}
           <div class="progress" aria-hidden="true"><i style="width:${progress}%"></i></div>
           <div class="step-title">
-            <span class="no">Step ${idx + 1} of ${steps.length}${step.critical ? ' · safety critical' : ''}${step.esd ? ' · static-sensitive' : ''}</span>
-            <h1>${step.title}</h1>
-            <p>${step.summary || ''}</p>
+            <span class="no">${t('Step {n} of {total}', { n: idx + 1, total: steps.length })}${step.critical ? ` · ${t('safety critical')}` : ''}${step.esd ? ` · ${t('static-sensitive')}` : ''}</span>
+            <h1>${txt.title}</h1>
+            <p>${txt.summary || ''}</p>
           </div>
 
           ${findings.filter((f) => f.severity === 'critical').map((f) => html`<div class="callout bad" role="alert">${sevIcon(f.severity)}<div>
-            <p class="t">Stop. ${f.title}</p>
+            <p class="t">${t('Stop. {problem}', { problem: f.title })}</p>
             <p>${f.detail}</p>
-            <p style="margin-top:6px"><b>What to do:</b> ${f.suggestion}</p>
-            <div class="acts"><a class="btn sm" href="#/audit">${icon('shield')}${CHECKS[f.check]?.label || 'Integrity check'}</a><button class="btn sm" type="button" data-report="${f.title}">${icon('flag')}Report it</button></div>
+            <p style="margin-top:6px"><b>${t('What to do:')}</b> ${f.suggestion}</p>
+            <div class="acts"><a class="btn sm" href="#/audit">${icon('shield')}${CHECKS[f.check]?.label || t('Integrity check')}</a><button class="btn sm" type="button" data-report="${f.title}">${icon('flag')}${t('Report it')}</button></div>
           </div></div>`)}
-          ${step.draft ? html`<div class="callout warn" role="note">${icon('alert')}<div><p class="t">Draft: not reviewed yet</p><p>This step was read automatically from ${step.source?.file || 'a PDF'}${step.source?.page ? `, page ${step.source.page}` : ''}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.</p></div></div>` : ''}
-          ${findings.some((f) => f.severity === 'warning' && f.check !== 'draft-steps') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">Also checked for this step</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning' && f.check !== 'draft-steps').map((f) => html`<li>${f.title}</li>`)}</ul></div></div>` : ''}
+          ${step.draft ? html`<div class="callout warn" role="note">${icon('alert')}<div><p class="t">${t('Draft: not reviewed yet')}</p><p>${step.source?.page ? t('This step was read automatically from {file}, page {page}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.', { file: step.source?.file || t('a PDF'), page: step.source.page }) : t('This step was read automatically from {file}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.', { file: step.source?.file || t('a PDF') })}</p></div></div>` : ''}
+          ${textNote}
+          ${findings.some((f) => f.severity === 'warning' && f.check !== 'draft-steps') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">${t('Also checked for this step')}</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning' && f.check !== 'draft-steps').map((f) => html`<li>${f.title}</li>`)}</ul></div></div>` : ''}
 
-          ${(step.warnings || []).map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${w.text}</span></div>`)}
+          ${txt.warnings.map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${w.text}</span></div>`)}
 
           <section class="stack" aria-labelledby="partsH">
-            <div class="row between"><h2 id="partsH">Parts for this step</h2>${build ? html`<span class="tiny muted">Scan the bin before you fit the part. A USB scanner types into the box.</span>` : ''}</div>
+            <div class="row between"><h2 id="partsH">${t('Parts for this step')}</h2>${build ? html`<span class="tiny muted">${t('Scan the bin before you fit the part. A USB scanner types into the box.')}</span>` : ''}</div>
             ${sps.map(partBlock)}
           </section>
 
-          ${step.tools?.length ? html`<section class="stack tight"><h3>Tools</h3><div class="tools">${step.tools.map((t) => html`<span class="chip">${icon('wrench')}${t}</span>`)}</div></section>` : ''}
+          ${step.tools?.length ? html`<section class="stack tight"><h3>${t('Tools')}</h3><div class="tools">${step.tools.map((tool) => html`<span class="chip">${icon('wrench')}${tool}</span>`)}</div></section>` : ''}
 
-          <section class="stack tight"><h3>How</h3><ol class="instr">${(step.instructions || []).map((s) => html`<li>${s}</li>`)}</ol></section>
+          <section class="stack tight"><h3>${t('How')}</h3><ol class="instr">${txt.instructions.map((s) => html`<li>${s}</li>`)}</ol></section>
 
-          ${step.why ? (build ? html`<details class="more"><summary><span class="ic">${icon('info')}</span>Why this step matters<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${step.why}</p></div></details>` : html`<div class="why-box"><div class="t">Why this step matters</div><p>${step.why}</p></div>`) : ''}
+          ${txt.why ? (build ? html`<details class="more"><summary><span class="ic">${icon('info')}</span>${t('Why this step matters')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${txt.why}</p></div></details>` : html`<div class="why-box"><div class="t">${t('Why this step matters')}</div><p>${txt.why}</p></div>`) : ''}
 
-          ${step.checks?.length ? html`<section class="stack tight"><h3>${build ? 'Check before you continue' : 'What to check'}</h3><div class="checks">${step.checks.map((c, i) => build ? html`<label class="check"><input type="checkbox" data-check="${i}"><span>${c}</span></label>` : html`<div class="check" style="cursor:default">${icon('checkCircle')}<span>${c}</span></div>`)}</div></section>` : ''}
+          ${txt.checks.length ? html`<section class="stack tight"><h3>${build ? t('Check before you continue') : t('What to check')}</h3><div class="checks">${txt.checks.map((c, i) => build ? html`<label class="check"><input type="checkbox" data-check="${i}"><span>${c}</span></label>` : html`<div class="check" style="cursor:default">${icon('checkCircle')}<span>${c}</span></div>`)}</div></section>` : ''}
 
-          <div class="row"><button class="btn sm ghost" type="button" id="reportStep">${icon('flag')}Report a doubt about this step</button></div>
+          <div class="row"><button class="btn sm ghost" type="button" id="reportStep">${icon('flag')}${t('Report a doubt about this step')}</button></div>
 
           <div class="step-nav">
-            ${idx > 0 ? html`<a class="btn big" href="${hrefStep(steps[idx - 1])}">${icon('chevronLeft')}Back</a>` : html`<a class="btn big" href="#/device/${encodeURIComponent(dev.id)}">${icon('chevronLeft')}Overview</a>`}
+            ${idx > 0 ? html`<a class="btn big" href="${hrefStep(steps[idx - 1])}">${icon('chevronLeft', 'flip')}${t('Back')}</a>` : html`<a class="btn big" href="#/device/${encodeURIComponent(dev.id)}">${icon('chevronLeft', 'flip')}${t('Overview')}</a>`}
             ${build
-              ? html`<button class="btn big ok" type="button" id="complete" disabled>${icon('check')}${idx === steps.length - 1 ? 'Finish build' : 'Step done'}</button>`
-              : idx < steps.length - 1 ? html`<a class="btn big primary" href="${hrefStep(steps[idx + 1])}">Next${icon('chevronRight')}</a>` : html`<a class="btn big primary" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}Take the quiz</a>`}
+              ? html`<button class="btn big ok" type="button" id="complete" disabled>${icon('check')}${idx === steps.length - 1 ? t('Finish build') : t('Step done')}</button>`
+              : idx < steps.length - 1 ? html`<a class="btn big primary" href="${hrefStep(steps[idx + 1])}">${t('Next')}${icon('chevronRight', 'flip')}</a>` : html`<a class="btn big primary" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}${t('Take the quiz')}</a>`}
           </div>
         </div>
       </div>
@@ -156,7 +175,7 @@ export default async function guide({ app, params, query, navigate }) {
         disposeKeep();
         keep.deviceId = dev.id;
         keep.el = slot;
-        slot.innerHTML = String(html`<div class="vhint">Drag to turn · tap a part</div><div class="vbar"><div class="grp"><button class="vbtn" type="button" data-v="play">${icon('replay')}Replay</button><button class="vbtn" type="button" data-v="ghost" aria-pressed="false">${icon('eye')}Show all</button></div><div class="grp"><button class="vbtn" type="button" data-v="reset">${icon('reset')}View</button></div></div>`);
+        slot.innerHTML = String(html`<div class="vhint">${t('Drag to turn · tap a part')}</div><div class="vbar"><div class="grp"><button class="vbtn" type="button" data-v="play">${icon('replay')}${t('Replay')}</button><button class="vbtn" type="button" data-v="ghost" aria-pressed="false">${icon('eye')}${t('Show all')}</button></div><div class="grp"><button class="vbtn" type="button" data-v="reset">${icon('reset')}${t('View')}</button></div></div>`);
         import('../viewer3d.js').then(({ createViewer }) => {
           if (keep.el !== slot) return;
           keep.viewer = createViewer(slot, { app, device: dev, onPick: (part) => pickToast(part) });
@@ -217,7 +236,7 @@ export default async function guide({ app, params, query, navigate }) {
       });
       root.querySelectorAll('[data-cam]').forEach((b) => b.addEventListener('click', async () => {
         const { scanDialog } = await import('../scan.js');
-        const code = await scanDialog({ title: 'Scan the bin', hint: 'Hold the label inside the frame.' });
+        const code = await scanDialog({ title: t('Scan the bin'), hint: t('Hold the label inside the frame.') });
         if (code) { const inp = root.querySelector(`[data-verify="${b.dataset.cam}"] input`); inp.value = code; verify(+b.dataset.cam, code); }
       }));
       root.querySelectorAll('[data-pick]').forEach((c) => c.addEventListener('change', async () => {
@@ -239,13 +258,13 @@ export default async function guide({ app, params, query, navigate }) {
         if (findings.some((f) => f.severity === 'critical')) {
           let who = '', why = '';
           const ok = await openDialog({
-            title: 'This step has a critical issue',
-            body: String(html`<p>The integrity check found a problem with this step. Continue only if a supervisor or engineer has confirmed what to fit.</p><div class="field"><label for="ovWho">Confirmed by</label><input id="ovWho" type="text"></div><div class="field"><label for="ovWhy">What was decided</label><textarea id="ovWhy" placeholder="Example: engineering confirmed 100-0233 (M3 × 8) per BOM rev C"></textarea></div>`),
-            actions: [{ label: 'Go back', value: false }, { label: 'Record and continue', value: true, danger: true }],
+            title: t('This step has a critical issue'),
+            body: String(html`<p>${t('The integrity check found a problem with this step. Continue only if a supervisor or engineer has confirmed what to fit.')}</p><div class="field"><label for="ovWho">${t('Confirmed by')}</label><input id="ovWho" type="text"></div><div class="field"><label for="ovWhy">${t('What was decided')}</label><textarea id="ovWhy" placeholder="${t('Example: engineering confirmed 100-0233 (M3 × 8) per BOM rev C')}"></textarea></div>`),
+            actions: [{ label: t('Go back'), value: false }, { label: t('Record and continue'), value: true, danger: true }],
             onClose(d) { who = d.querySelector('#ovWho').value.trim(); why = d.querySelector('#ovWhy').value.trim(); },
           });
           if (!ok) return;
-          if (!who || !why) { toast('Both fields are needed to continue past a critical issue.', 'bad'); return; }
+          if (!who || !why) { toast(t('Both fields are needed to continue past a critical issue.'), 'bad'); return; }
           await logEvent({ ref: -1, result: 'override', who, why });
         }
         if (record) {
@@ -257,7 +276,7 @@ export default async function guide({ app, params, query, navigate }) {
         if (idx < steps.length - 1) navigate(hrefStep(steps[idx + 1]));
         else {
           const wrong = (record?.events || []).filter((e) => e.result === 'wrong').length;
-          await openDialog({ title: 'Build complete', body: String(html`<div class="callout ok">${icon('checkCircle')}<div><p class="t">${record?.serial || dev.name} is complete</p><p>${steps.length} steps recorded${wrong ? `, ${wrong} wrong part${wrong > 1 ? 's' : ''} stopped at the bench before fitting` : ''}.</p></div></div>`), actions: [{ label: 'Done', value: true, primary: true }] });
+          await openDialog({ title: t('Build complete'), body: String(html`<div class="callout ok">${icon('checkCircle')}<div><p class="t">${t('{what} is complete', { what: record?.serial || dev.name })}</p><p>${wrong ? t('{steps} steps recorded, {wrong, plural, one {# wrong part stopped at the bench before fitting} other {# wrong parts stopped at the bench before fitting}}.', { steps: steps.length, wrong }) : t('{steps} steps recorded.', { steps: steps.length })}</p></div></div>`), actions: [{ label: t('Done'), value: true, primary: true }] });
           navigate(`#/device/${encodeURIComponent(dev.id)}`);
         }
       });
@@ -268,13 +287,17 @@ export default async function guide({ app, params, query, navigate }) {
         startBuild(app, dev, navigate);
       });
       root.querySelector('#startRec')?.addEventListener('click', () => startBuild(app, dev, navigate));
-      root.querySelector('#reportStep')?.addEventListener('click', () => reportDialog({ deviceId: dev.id, stepId: step.id, preset: `Step ${idx + 1} (${step.title}): ` }));
-      root.querySelectorAll('[data-report]').forEach((b) => b.addEventListener('click', () => reportDialog({ deviceId: dev.id, stepId: step.id, part: disputedPart ? app.index.parts.get(disputedPart) : null, preset: `Step ${idx + 1}: ${b.dataset.report}. ` })));
+      root.querySelector('#reportStep')?.addEventListener('click', () => reportDialog({ deviceId: dev.id, stepId: step.id, preset: `${t('Step {n}', { n: idx + 1 })} (${txt.title}): ` }));
+      root.querySelectorAll('[data-report]').forEach((b) => b.addEventListener('click', () => reportDialog({ deviceId: dev.id, stepId: step.id, part: disputedPart ? app.index.parts.get(disputedPart) : null, preset: `${t('Step {n}', { n: idx + 1 })}: ${b.dataset.report}. ` })));
 
       const onKey = (e) => {
         if (e.target.closest('input, textarea, select, dialog')) return;
-        if (!build && e.key === 'ArrowRight' && idx < steps.length - 1) navigate(hrefStep(steps[idx + 1]));
-        if (e.key === 'ArrowLeft' && idx > 0) navigate(hrefStep(steps[idx - 1]));
+        // In right-to-left languages the next step is to the left.
+        const rtl = document.documentElement.dir === 'rtl';
+        const fwd = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+        if (!build && e.key === fwd && idx < steps.length - 1) navigate(hrefStep(steps[idx + 1]));
+        if (e.key === back && idx > 0) navigate(hrefStep(steps[idx - 1]));
         if (e.key === ' ' && keep.viewer) { e.preventDefault(); keep.viewer.play(); }
       };
       document.addEventListener('keydown', onKey);
@@ -293,8 +316,8 @@ export default async function guide({ app, params, query, navigate }) {
 /** The kit for a step, for devices without a 3D model: photos (if any) and every part with its count. */
 export function stepBoard(app, step, flaggedPart) {
   const sps = stepParts(app.index, step);
-  return html`${(step.images || []).map((src) => html`<img class="step-photo" src="${src}" alt="Photo for step: ${step.title}" loading="lazy">`)}
-    <div class="board">${sps.map((sp) => sp.part ? html`<a class="kit ${flaggedPart === sp.part.id ? 'flag' : ''}" href="${partHref(sp.part.id)}">${raw(drawPart(sp.part, { view: 'auto' }))}<span class="q">${sp.qty === 'A/R' ? 'A/R' : `×${sp.qty}`}</span><span class="n">${sp.part.name}</span><span class="tiny muted code">${sp.part.id}</span></a>` : html`<div class="kit flag"><span class="q">?</span><span class="n">Unknown code ${sp.ref.code}</span></div>`)}</div>`;
+  return html`${(step.images || []).map((src) => html`<img class="step-photo" src="${src}" alt="${t('Photo for step: {title}', { title: stepText(step, app.lib).title })}" loading="lazy">`)}
+    <div class="board">${sps.map((sp) => sp.part ? html`<a class="kit ${flaggedPart === sp.part.id ? 'flag' : ''}" href="${partHref(sp.part.id)}">${raw(drawPart(sp.part, { view: 'auto' }))}<span class="q">${sp.qty === 'A/R' ? t('qty::A/R') : `×${sp.qty}`}</span><span class="n">${partText(sp.part, app.lib).name}</span><span class="tiny muted code">${sp.part.id}</span></a>` : html`<div class="kit flag"><span class="q">?</span><span class="n">${th('Unknown code {code}', { code: sp.ref.code })}</span></div>`)}</div>`;
 }
 
 function disposeKeep() {
@@ -303,7 +326,7 @@ function disposeKeep() {
 }
 
 function pickToast(part) {
-  toast(`${part.id}: ${part.name}`);
+  toast(`${part.id}: ${part.name}`); // name shown as recorded: this toast names what was tapped in the model
 }
 
 /** Decide whether a scanned or typed code is the right part for this step. */
@@ -327,13 +350,15 @@ export function verdictHTML(ev, app) {
   const P = (id) => app.index.parts.get(id);
   const exp = P(ev.partId);
   const got = ev.scanned ? P(ev.scanned) : null;
-  const viaText = ev.via && ev.via.type !== 'internal' ? ` (${(CODE_TYPES[ev.via.type] || ev.via.type).toLowerCase()} ${ev.via.code})` : '';
-  if (ev.result === 'ok') return String(html`<div class="verdict ok">${icon('checkCircle')}<div><p class="t">Right part</p><p>${ev.code === 'picked' ? 'Picked.' : html`<span class="code">${ev.code}</span> is ${exp?.id}${viaText}.`}${ev.legacy ? ' The bin carries an old code: ask for a new label.' : ''}</p></div></div>`);
-  if (ev.result === 'wrong') return String(html`<div class="verdict bad">${icon('xCircle')}<div><p class="t">Wrong part: do not fit it</p><p>You scanned <span class="code">${ev.code}</span> = <b>${got?.id}</b> ${got?.name}${sizeLabel(got) ? ` (${sizeLabel(got)})` : ''}. This step needs <b>${exp?.id}</b>${sizeLabel(exp) ? ` (${sizeLabel(exp)})` : ''}. ${got && exp ? `Difference: ${shortDifference(exp, got)}.` : ''}</p><div class="vdraw">${raw(`<div>${drawPart(exp, { view: 'auto' })}<div class="tiny center">needed</div></div><div>${got ? drawPart(got, { view: 'auto' }) : ''}<div class="tiny center">scanned</div></div>`)}</div></div></div>`);
-  if (ev.result === 'unknown') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">Unknown code</p><p><span class="code">${ev.code}</span> is not in the library. Check the label, try another code on the bin, or report it.</p></div></div>`);
-  if (ev.result === 'ambiguous') return String(html`<div class="verdict bad">${icon('stop')}<div><p class="t">This code points to ${ev.matches.length} parts</p><p><span class="code">${ev.code}</span> is recorded for ${ev.matches.join(' and ')}. It cannot prove which part is in the bin: scan another code on the label or ask your supervisor.</p></div></div>`);
-  if (ev.result === 'conflict') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">Matches the instructions, not the BOM</p><p><span class="code">${ev.code}</span> is ${got?.id} (${sizeLabel(got)}), as the instructions say. But BOM rev ${ev.devRev} asks for ${ev.bomPart} here. Stop and ask before fitting.</p></div></div>`);
-  if (ev.result === 'conflict-bom') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">Matches the BOM, not the instructions</p><p><span class="code">${ev.code}</span> is ${got?.id} (${sizeLabel(got)}), which BOM rev ${ev.devRev} asks for. The instructions are out of date here: confirm with your supervisor.</p></div></div>`);
+  const code = (c) => html`<span class="code">${c}</span>`;
+  const sized = (p) => (p ? html`<b class="code">${p.id}</b>${sizeLabel(p) ? html` (<span class="code">${sizeLabel(p)}</span>)` : ''}` : '');
+  const via = ev.via && ev.via.type !== 'internal' ? `${lower(CODE_TYPES[ev.via.type] || ev.via.type)} ${ev.via.code}` : '';
+  if (ev.result === 'ok') return String(html`<div class="verdict ok">${icon('checkCircle')}<div><p class="t">${t('Right part')}</p><p>${ev.code === 'picked' ? t('Picked.') : via ? th('{code} is {id} ({via}).', { code: code(ev.code), id: code(exp?.id), via }) : th('{code} is {id}.', { code: code(ev.code), id: code(exp?.id) })}${ev.legacy ? ` ${t('The bin carries an old code: ask for a new label.')}` : ''}</p></div></div>`);
+  if (ev.result === 'wrong') return String(html`<div class="verdict bad">${icon('xCircle')}<div><p class="t">${t('Wrong part: do not fit it')}</p><p>${th('You scanned {code} = {part} {name}.', { code: code(ev.code), part: sized(got), name: got ? partText(got, app.lib).name : '' })} ${th('This step needs {part}.', { part: sized(exp) })} ${got && exp ? t('Difference: {diff}.', { diff: shortDifference(exp, got) }) : ''}</p><div class="vdraw">${raw(`<div>${drawPart(exp, { view: 'auto' })}<div class="tiny center">${esc(t('needed'))}</div></div><div>${got ? drawPart(got, { view: 'auto' }) : ''}<div class="tiny center">${esc(t('scanned'))}</div></div>`)}</div></div></div>`);
+  if (ev.result === 'unknown') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">${t('Unknown code')}</p><p>${th('{code} is not in the library. Check the label, try another code on the bin, or report it.', { code: code(ev.code) })}</p></div></div>`);
+  if (ev.result === 'ambiguous') return String(html`<div class="verdict bad">${icon('stop')}<div><p class="t">${t('This code points to {n} parts', { n: ev.matches.length })}</p><p>${th('{code} is recorded for {parts}. It cannot prove which part is in the bin: scan another code on the label or ask your supervisor.', { code: code(ev.code), parts: listJoin(ev.matches) })}</p></div></div>`);
+  if (ev.result === 'conflict') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">${t('Matches the instructions, not the BOM')}</p><p>${th('{code} is {part}, as the instructions say. But BOM rev {rev} asks for {bom} here. Stop and ask before fitting.', { code: code(ev.code), part: sized(got), rev: ev.devRev, bom: code(ev.bomPart) })}</p></div></div>`);
+  if (ev.result === 'conflict-bom') return String(html`<div class="verdict warn">${icon('alert')}<div><p class="t">${t('Matches the BOM, not the instructions')}</p><p>${th('{code} is {part}, which BOM rev {rev} asks for. The instructions are out of date here: confirm with your supervisor.', { code: code(ev.code), part: sized(got), rev: ev.devRev })}</p></div></div>`);
   return '';
 }
 

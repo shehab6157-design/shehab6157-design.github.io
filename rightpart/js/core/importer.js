@@ -5,6 +5,7 @@
 import { parseCSVObjects, toCSV } from './csv.js';
 import { decodeDesignation, decodedSpec } from './decode.js';
 import { coarsePitch } from './dims.js';
+import { t } from './i18n.js';
 
 const CODE_COLS = { customer_codes: 'customer', supplier_codes: 'supplier', manufacturer_codes: 'manufacturer', drawing_codes: 'drawing', legacy_codes: 'legacy', other_codes: 'supplier' };
 export const PART_COLUMNS = ['id', 'category', 'name', 'designation', 'thread', 'd_mm', 'pitch_mm', 'length_mm', 'head', 'drive', 'drive_size', 'material', 'torque_nm', 'tool', 'status', 'replaced_by', 'function', 'why', 'if_wrong', 'tips', ...Object.keys(CODE_COLS)];
@@ -36,7 +37,7 @@ export function partsFromCSV(text) {
   const warnings = [];
   rows.forEach((r, i) => {
     const line = i + 2;
-    if (!r.id) { warnings.push(`Row ${line}: no id / part number, skipped.`); return; }
+    if (!r.id) { warnings.push(t('Row {row}: no id / part number, skipped.', { row: line })); return; }
     const dec = decodeDesignation(r.designation || '') || decodeDesignation(r.name || '');
     const ds = decodedSpec(dec);
     const category = (r.category || ds.category || (dec ? 'screw' : 'mechanical')).toLowerCase();
@@ -55,7 +56,7 @@ export function partsFromCSV(text) {
       if (r.drive_size) spec.driveSize = r.drive_size;
       if (ds.variant) spec.variant = ds.variant;
       if (ds.gender) spec.gender = ds.gender;
-      if (category === 'screw' && (spec.d == null || spec.length == null)) warnings.push(`Row ${line} (${r.id}): screw without ${spec.d == null ? 'thread' : 'length'}; add it so look-alikes can be checked.`);
+      if (category === 'screw' && (spec.d == null || spec.length == null)) warnings.push(spec.d == null ? t('Row {row} ({id}): screw without thread; add it so look-alikes can be checked.', { row: line, id: r.id }) : t('Row {row} ({id}): screw without length; add it so look-alikes can be checked.', { row: line, id: r.id }));
     }
     const material = r.material || ds.material;
     if (material) spec.material = material;
@@ -96,7 +97,7 @@ export function bomFromCSV(text) {
   rows.forEach((r, i) => {
     const id = r.device_id || r.device || r.product;
     const code = r.code || r.part_number || r.pn || r.component;
-    if (!id || !code) { warnings.push(`Row ${i + 2}: needs device_id and code.`); return; }
+    if (!id || !code) { warnings.push(t('Row {row}: needs device_id and code.', { row: i + 2 })); return; }
     const d = devices.get(id) || { id, name: r.device_name || id, rev: r.bom_rev || r.rev || '', lines: [] };
     const q = String(r.qty ?? r.quantity ?? '').trim();
     d.lines.push({ item: num(r.item) ?? d.lines.length + 1, code, qty: /^\d+$/.test(q) ? parseInt(q, 10) : q || 'A/R', where: r.where || r.position || r.ref || '' });
@@ -117,12 +118,12 @@ export function mergeBOM(lib, boms) {
 }
 
 export function validateLibrary(obj) {
-  if (!obj || typeof obj !== 'object') throw new Error('Not a JSON object');
-  if (!Array.isArray(obj.parts)) throw new Error('The file has no "parts" list');
+  if (!obj || typeof obj !== 'object') throw new Error(t('Not a JSON object'));
+  if (!Array.isArray(obj.parts)) throw new Error(t('The file has no "parts" list'));
   const ids = new Set();
   for (const [i, p] of obj.parts.entries()) {
-    if (!p.id) throw new Error(`Part #${i + 1} has no id`);
-    if (ids.has(p.id)) throw new Error(`Part id ${p.id} appears twice`);
+    if (!p.id) throw new Error(t('Part #{n} has no id', { n: i + 1 }));
+    if (ids.has(p.id)) throw new Error(t('Part id {id} appears twice', { id: p.id }));
     ids.add(p.id);
     p.aliases = p.aliases || [];
     p.spec = p.spec || {};
@@ -184,14 +185,14 @@ export function stepsFromCSV(text) {
   rows.forEach((r, i) => {
     const line = i + 2;
     const id = r.device_id || r.device || r.product;
-    if (!id) { warnings.push(`Row ${line}: no device_id, skipped.`); return; }
-    if (!r.title && !r.instructions) { warnings.push(`Row ${line}: no title or instructions, skipped.`); return; }
+    if (!id) { warnings.push(t('Row {row}: no device_id, skipped.', { row: line })); return; }
+    if (!r.title && !r.instructions) { warnings.push(t('Row {row}: no title or instructions, skipped.', { row: line })); return; }
     const d = devices.get(id) || { id, name: r.device_name || id, rev: r.instructions_rev || '', steps: [] };
     if (r.device_name && d.name === id) d.name = r.device_name;
     if (r.instructions_rev && !d.rev) d.rev = r.instructions_rev;
     const n = d.steps.length + 1;
     const stepId = r.step && !/^\d+$/.test(r.step) ? r.step : `S${r.step && /^\d+$/.test(r.step) ? parseInt(r.step, 10) : n}`;
-    if (d.steps.some((s) => s.id === stepId)) warnings.push(`Row ${line}: step ${stepId} appears twice for ${id}.`);
+    if (d.steps.some((s) => s.id === stepId)) warnings.push(t('Row {row}: step {step} appears twice for {device}.', { row: line, step: stepId, device: id }));
     const step = {
       id: stepId,
       title: r.title || `Step ${n}`,
@@ -209,7 +210,7 @@ export function stepsFromCSV(text) {
     if (yes(r.critical)) step.critical = true;
     if (yes(r.esd)) step.esd = true;
     if (r.image) step.images = list(r.image);
-    if (!step.parts.length) warnings.push(`Row ${line} (${id} ${stepId}): no parts listed.`);
+    if (!step.parts.length) warnings.push(t('Row {row} ({device} {step}): no parts listed.', { row: line, device: id, step: stepId }));
     d.steps.push(step);
     devices.set(id, d);
   });

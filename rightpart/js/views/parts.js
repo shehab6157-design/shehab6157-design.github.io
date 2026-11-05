@@ -1,9 +1,10 @@
 import { html, icon } from '../ui.js';
+import { t } from '../core/i18n.js';
 import { partCard, emptyState } from '../components.js';
 import { CATEGORY_LABELS } from '../core/dims.js';
 
 const CATS = [
-  ['all', 'All'], ['screw', 'Screws'], ['nut', 'Nuts'], ['washer', 'Washers'], ['standoff', 'Standoffs'], ['other', 'Other parts'],
+  ['all', () => t('All')], ['screw', () => t('Screws')], ['nut', () => t('Nuts')], ['washer', () => t('Washers')], ['standoff', () => t('Standoffs')], ['other', () => t('Other parts')],
 ];
 
 export default async function parts({ app, query }) {
@@ -21,26 +22,26 @@ export default async function parts({ app, query }) {
   list.sort((a, b) => (order[a.category] ?? 9) - (order[b.category] ?? 9) || a.id.localeCompare(b.id));
   const link = (c, o) => `#/parts?cat=${c}${o ? '&only=' + o : ''}`;
   return {
-    title: 'Parts',
+    title: t('Parts'),
     html: html`<div class="page">
       <div class="page-head">
         <div>
-          <h1>Parts library</h1>
-          <p class="lede">${app.lib.parts.length} parts under ${app.index.byCode.size} codes. Open a part to see every code it goes by, a true-scale drawing, what it does and which parts it is easy to confuse with.</p>
+          <h1>${t('Parts library')}</h1>
+          <p class="lede">${t('{parts} parts under {codes} codes. Open a part to see every code it goes by, a true-scale drawing, what it does and which parts it is easy to confuse with.', { parts: app.lib.parts.length, codes: app.index.byCode.size })}</p>
         </div>
         <div class="row">
-          <a class="btn" href="#/labels?ids=${encodeURIComponent(list.filter((p) => ['screw', 'nut', 'washer', 'standoff'].includes(p.category)).map((p) => p.id).join(','))}">${icon('print')}Bin labels</a>
-          <a class="btn" href="#/data">${icon('upload')}Import</a>
+          <a class="btn" href="#/labels?ids=${encodeURIComponent(list.filter((p) => ['screw', 'nut', 'washer', 'standoff'].includes(p.category)).map((p) => p.id).join(','))}">${icon('print')}${t('Bin labels')}</a>
+          <a class="btn" href="#/data">${icon('upload')}${t('Import')}</a>
         </div>
       </div>
-      <div class="filters" role="group" aria-label="Filter by type">
-        ${CATS.map(([c, l]) => html`<a class="chip" href="${link(c, only)}" ${c === cat ? html`aria-current="page" style="background:var(--brand);border-color:var(--brand);color:var(--brand-ink)"` : ''}>${l}</a>`)}
+      <div class="filters" role="group" aria-label="${t('Filter by type')}">
+        ${CATS.map(([c, l]) => html`<a class="chip" href="${link(c, only)}" ${c === cat ? html`aria-current="page" style="background:var(--brand);border-color:var(--brand);color:var(--brand-ink)"` : ''}>${l()}</a>`)}
         <span style="flex:1"></span>
-        <a class="chip" href="${link(cat, only === 'used' ? '' : 'used')}" ${only === 'used' ? html`style="background:var(--brand-soft);border-color:var(--brand)"` : ''}>${icon('cube')}Used in a device</a>
-        <a class="chip" href="${link(cat, only === 'issues' ? '' : 'issues')}" ${only === 'issues' ? html`style="background:var(--bad-soft);border-color:var(--bad)"` : ''}>${icon('alert')}With issues</a>
+        <a class="chip" href="${link(cat, only === 'used' ? '' : 'used')}" ${only === 'used' ? html`style="background:var(--brand-soft);border-color:var(--brand)"` : ''}>${icon('cube')}${t('Used in a device')}</a>
+        <a class="chip" href="${link(cat, only === 'issues' ? '' : 'issues')}" ${only === 'issues' ? html`style="background:var(--bad-soft);border-color:var(--bad)"` : ''}>${icon('alert')}${t('With issues')}</a>
       </div>
-      ${list.length ? html`<div class="parts-grid">${list.map((p) => partCard(p, { app }))}</div>` : emptyState('No parts match these filters.', html`<a class="btn" href="#/parts">Show all</a>`)}
-      <p class="tiny muted">Categories: ${Object.values(CATEGORY_LABELS).join(', ')}.</p>
+      ${list.length ? html`<div class="parts-grid">${list.map((p) => partCard(p, { app }))}</div>` : emptyState(t('No parts match these filters.'), html`<a class="btn" href="#/parts">${t('Show all')}</a>`)}
+      <p class="tiny muted">${t('Categories: {list}.', { list: Object.values(CATEGORY_LABELS).join(', ') })}</p>
     </div>`,
   };
 }

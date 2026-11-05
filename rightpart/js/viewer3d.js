@@ -3,6 +3,7 @@
 // so the model shows exactly the screw the data says: an M3 x 10 really is 10 mm long.
 
 import * as T from '../vendor/three/three.bundle.js';
+import { t } from './core/i18n.js';
 import { headDims, nutDims, washerDims, MATERIALS, sizeLabel } from './core/dims.js';
 import { resolveCode } from './core/model.js';
 
@@ -425,7 +426,7 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = T.PCFShadowMap;
   const canvas = renderer.domElement;
-  canvas.setAttribute('aria-label', `3D model of the ${device.name}. Drag to turn, pinch or scroll to zoom.`);
+  canvas.setAttribute('aria-label', t('3D model of the {device}. Drag to turn, pinch or scroll to zoom.', { device: device.name }));
   canvas.setAttribute('role', 'img');
   canvas.tabIndex = 0;
   container.prepend(canvas);
@@ -732,7 +733,7 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
     tip.innerHTML = '';
     const a = document.createElement('div'); a.textContent = name;
     tip.append(a);
-    if (p.entry.part) { const c = document.createElement('div'); c.className = 'c'; c.textContent = p.entry.part.id + (p.entry.stepIdx >= 0 ? ` · step ${p.entry.stepIdx + 1}` : ''); tip.append(c); }
+    if (p.entry.part) { const c = document.createElement('div'); c.className = 'c'; c.textContent = p.entry.part.id + (p.entry.stepIdx >= 0 ? ` · ${t('step {n}', { n: p.entry.stepIdx + 1 })}` : ''); tip.append(c); }
     tip.style.left = `${p.x}px`; tip.style.top = `${p.y}px`;
     tip.classList.remove('hidden');
   };

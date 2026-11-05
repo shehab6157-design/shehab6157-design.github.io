@@ -3,38 +3,39 @@
 // and explains every piece in plain words. Pure functions, no DOM.
 
 import { coarsePitch, UNIFIED_TPI, HEADS, DRIVES, MATERIALS, driveSize } from './dims.js';
+import { N_, localize, t, lower } from './i18n.js';
 
-export const STANDARDS = [
-  { codes: ['ISO 4762', 'DIN 912'], category: 'screw', head: 'socket', drive: 'hex', name: 'Socket head cap screw', note: 'Tall cylindrical head with a hex socket. The strongest common head: used where a high clamp force is needed.' },
-  { codes: ['ISO 7380-1', 'ISO 7380'], category: 'screw', head: 'button', drive: 'hex', name: 'Button head screw, hex socket', note: 'Low domed head with a hex socket. Neat and low, but it takes less torque than a socket cap screw.' },
-  { codes: ['ISO 10642', 'DIN 7991'], category: 'screw', head: 'countersunk', drive: 'hex', name: 'Countersunk screw, hex socket', note: 'A 90° cone head that sits flush with the surface. Its length is measured overall, head included.' },
-  { codes: ['ISO 7045', 'DIN 7985'], category: 'screw', head: 'pan', drive: 'phillips', name: 'Pan head screw, cross recess', note: 'Rounded pan head. The letter after the size tells the cross: H = Phillips, Z = Pozidriv.' },
-  { codes: ['ISO 7046', 'DIN 965'], category: 'screw', head: 'countersunk', drive: 'phillips', name: 'Countersunk screw, cross recess', note: 'Flush 90° head with a cross recess (H = Phillips, Z = Pozidriv). Length includes the head.' },
-  { codes: ['ISO 14583'], category: 'screw', head: 'pan', drive: 'torx', name: 'Pan head screw, Torx (hexalobular) socket', note: 'Pan head with a six-lobe Torx drive, which slips far less than a cross recess.' },
-  { codes: ['ISO 14580'], category: 'screw', head: 'cheese', drive: 'torx', name: 'Cheese head screw, Torx socket', note: 'Cylindrical cheese head with a Torx drive.' },
-  { codes: ['ISO 14581'], category: 'screw', head: 'countersunk', drive: 'torx', name: 'Countersunk screw, Torx socket', note: 'Flush head with a Torx drive. Length includes the head.' },
-  { codes: ['ISO 1207', 'DIN 84'], category: 'screw', head: 'cheese', drive: 'slotted', name: 'Slotted cheese head screw', note: 'Cylinder head with a single slot.' },
-  { codes: ['ISO 1580', 'DIN 85'], category: 'screw', head: 'pan', drive: 'slotted', name: 'Slotted pan head screw', note: 'Low pan head with a single slot.' },
-  { codes: ['ISO 4017', 'DIN 933'], category: 'screw', head: 'hex', drive: 'external', name: 'Hex head screw, fully threaded', note: 'Hexagon head turned with a spanner; thread runs up to the head.' },
-  { codes: ['ISO 4014', 'DIN 931'], category: 'screw', head: 'hex', drive: 'external', name: 'Hex head bolt, part threaded', note: 'Hexagon head with a plain shank under the head.' },
-  { codes: ['ISO 7049', 'DIN 7981'], category: 'screw', head: 'pan', drive: 'phillips', tapping: true, name: 'Pan head tapping screw, cross recess', note: 'Self-tapping: it cuts its own thread in plastic or thin sheet. Never interchangeable with a machine screw.' },
-  { codes: ['ISO 4032', 'DIN 934'], category: 'nut', variant: 'hex', name: 'Hex nut', note: 'Standard hexagon nut.' },
-  { codes: ['ISO 10511', 'DIN 985'], category: 'nut', variant: 'nyloc', name: 'Lock nut with nylon insert (nyloc)', note: 'A nylon ring grips the thread so the nut does not shake loose. Single use: replace it if removed.' },
-  { codes: ['ISO 7089', 'DIN 125-A', 'DIN 125'], category: 'washer', variant: 'flat', name: 'Plain washer, normal series', note: 'Spreads the load under a head or nut and protects the surface.' },
-  { codes: ['ISO 7092', 'DIN 433'], category: 'washer', variant: 'flat', name: 'Plain washer, small series', note: 'Smaller outside diameter, for cheese and pan heads.' },
-  { codes: ['ISO 7093', 'DIN 9021'], category: 'washer', variant: 'flat', name: 'Plain washer, large series', note: 'Large outside diameter, for soft or slotted material.' },
-  { codes: ['DIN 6798-A', 'DIN 6798 A', 'DIN 6798'], category: 'washer', variant: 'star-ext', name: 'Serrated lock washer, external teeth', note: 'Teeth bite into both surfaces. Used for earth (ground) connections because they cut through paint and anodising.' },
-  { codes: ['DIN 6798-J', 'DIN 6798 J'], category: 'washer', variant: 'star-int', name: 'Serrated lock washer, internal teeth', note: 'Teeth on the inside edge, hidden under small heads.' },
-  { codes: ['DIN 127-B', 'DIN 127 B', 'DIN 127'], category: 'washer', variant: 'split', name: 'Spring lock washer (split)', note: 'A split, twisted ring. DIN 127 was withdrawn in 2003 but is still sold. It does not cut through coatings.' },
-];
+export const STANDARDS = localize([
+  { codes: ['ISO 4762', 'DIN 912'], category: 'screw', head: 'socket', drive: 'hex', name: N_('Socket head cap screw'), note: N_('Tall cylindrical head with a hex socket. The strongest common head: used where a high clamp force is needed.') },
+  { codes: ['ISO 7380-1', 'ISO 7380'], category: 'screw', head: 'button', drive: 'hex', name: N_('Button head screw, hex socket'), note: N_('Low domed head with a hex socket. Neat and low, but it takes less torque than a socket cap screw.') },
+  { codes: ['ISO 10642', 'DIN 7991'], category: 'screw', head: 'countersunk', drive: 'hex', name: N_('Countersunk screw, hex socket'), note: N_('A 90° cone head that sits flush with the surface. Its length is measured overall, head included.') },
+  { codes: ['ISO 7045', 'DIN 7985'], category: 'screw', head: 'pan', drive: 'phillips', name: N_('Pan head screw, cross recess'), note: N_('Rounded pan head. The letter after the size tells the cross: H = Phillips, Z = Pozidriv.') },
+  { codes: ['ISO 7046', 'DIN 965'], category: 'screw', head: 'countersunk', drive: 'phillips', name: N_('Countersunk screw, cross recess'), note: N_('Flush 90° head with a cross recess (H = Phillips, Z = Pozidriv). Length includes the head.') },
+  { codes: ['ISO 14583'], category: 'screw', head: 'pan', drive: 'torx', name: N_('Pan head screw, Torx (hexalobular) socket'), note: N_('Pan head with a six-lobe Torx drive, which slips far less than a cross recess.') },
+  { codes: ['ISO 14580'], category: 'screw', head: 'cheese', drive: 'torx', name: N_('Cheese head screw, Torx socket'), note: N_('Cylindrical cheese head with a Torx drive.') },
+  { codes: ['ISO 14581'], category: 'screw', head: 'countersunk', drive: 'torx', name: N_('Countersunk screw, Torx socket'), note: N_('Flush head with a Torx drive. Length includes the head.') },
+  { codes: ['ISO 1207', 'DIN 84'], category: 'screw', head: 'cheese', drive: 'slotted', name: N_('Slotted cheese head screw'), note: N_('Cylinder head with a single slot.') },
+  { codes: ['ISO 1580', 'DIN 85'], category: 'screw', head: 'pan', drive: 'slotted', name: N_('Slotted pan head screw'), note: N_('Low pan head with a single slot.') },
+  { codes: ['ISO 4017', 'DIN 933'], category: 'screw', head: 'hex', drive: 'external', name: N_('Hex head screw, fully threaded'), note: N_('Hexagon head turned with a spanner; thread runs up to the head.') },
+  { codes: ['ISO 4014', 'DIN 931'], category: 'screw', head: 'hex', drive: 'external', name: N_('Hex head bolt, part threaded'), note: N_('Hexagon head with a plain shank under the head.') },
+  { codes: ['ISO 7049', 'DIN 7981'], category: 'screw', head: 'pan', drive: 'phillips', tapping: true, name: N_('Pan head tapping screw, cross recess'), note: N_('Self-tapping: it cuts its own thread in plastic or thin sheet. Never interchangeable with a machine screw.') },
+  { codes: ['ISO 4032', 'DIN 934'], category: 'nut', variant: 'hex', name: N_('Hex nut'), note: N_('Standard hexagon nut.') },
+  { codes: ['ISO 10511', 'DIN 985'], category: 'nut', variant: 'nyloc', name: N_('Lock nut with nylon insert (nyloc)'), note: N_('A nylon ring grips the thread so the nut does not shake loose. Single use: replace it if removed.') },
+  { codes: ['ISO 7089', 'DIN 125-A', 'DIN 125'], category: 'washer', variant: 'flat', name: N_('Plain washer, normal series'), note: N_('Spreads the load under a head or nut and protects the surface.') },
+  { codes: ['ISO 7092', 'DIN 433'], category: 'washer', variant: 'flat', name: N_('Plain washer, small series'), note: N_('Smaller outside diameter, for cheese and pan heads.') },
+  { codes: ['ISO 7093', 'DIN 9021'], category: 'washer', variant: 'flat', name: N_('Plain washer, large series'), note: N_('Large outside diameter, for soft or slotted material.') },
+  { codes: ['DIN 6798-A', 'DIN 6798 A', 'DIN 6798'], category: 'washer', variant: 'star-ext', name: N_('Serrated lock washer, external teeth'), note: N_('Teeth bite into both surfaces. Used for earth (ground) connections because they cut through paint and anodising.') },
+  { codes: ['DIN 6798-J', 'DIN 6798 J'], category: 'washer', variant: 'star-int', name: N_('Serrated lock washer, internal teeth'), note: N_('Teeth on the inside edge, hidden under small heads.') },
+  { codes: ['DIN 127-B', 'DIN 127 B', 'DIN 127'], category: 'washer', variant: 'split', name: N_('Spring lock washer (split)'), note: N_('A split, twisted ring. DIN 127 was withdrawn in 2003 but is still sold. It does not cut through coatings.') },
+], ['name', 'note']);
 
-const ABBREVIATIONS = [
-  { re: /\bSHCS\b/i, head: 'socket', drive: 'hex', text: 'SHCS', meaning: 'Socket head cap screw (US abbreviation).' },
-  { re: /\bBH(?:S)?CS\b/i, head: 'button', drive: 'hex', text: 'BHCS', meaning: 'Button head (socket) cap screw (US abbreviation).' },
-  { re: /\bFH(?:S)?CS\b/i, head: 'countersunk', drive: 'hex', text: 'FHCS', meaning: 'Flat (countersunk) head socket cap screw (US abbreviation).' },
-  { re: /\bP(?:P)?HMS\b|\bPPH\b/i, head: 'pan', drive: 'phillips', text: 'PPH', meaning: 'Pan Phillips head machine screw (US abbreviation).' },
-  { re: /\bF(?:P)?HMS\b|\bFPH\b/i, head: 'countersunk', drive: 'phillips', text: 'FPH', meaning: 'Flat (countersunk) Phillips head machine screw (US abbreviation).' },
-];
+const ABBREVIATIONS = localize([
+  { re: /\bSHCS\b/i, head: 'socket', drive: 'hex', text: 'SHCS', meaning: N_('Socket head cap screw (US abbreviation).') },
+  { re: /\bBH(?:S)?CS\b/i, head: 'button', drive: 'hex', text: 'BHCS', meaning: N_('Button head (socket) cap screw (US abbreviation).') },
+  { re: /\bFH(?:S)?CS\b/i, head: 'countersunk', drive: 'hex', text: 'FHCS', meaning: N_('Flat (countersunk) head socket cap screw (US abbreviation).') },
+  { re: /\bP(?:P)?HMS\b|\bPPH\b/i, head: 'pan', drive: 'phillips', text: 'PPH', meaning: N_('Pan Phillips head machine screw (US abbreviation).') },
+  { re: /\bF(?:P)?HMS\b|\bFPH\b/i, head: 'countersunk', drive: 'phillips', text: 'FPH', meaning: N_('Flat (countersunk) Phillips head machine screw (US abbreviation).') },
+], ['meaning']);
 
 const WORDS = [
   { re: /\bpan\b/i, head: 'pan' },
@@ -73,13 +74,13 @@ const MATERIAL_TOKENS = [
   { re: /\balumin(?:i)?um\b/i, code: 'aluminium' },
 ];
 
-const STEEL_CLASS = {
-  '4.8': 'Steel, property class 4.8: tensile strength 400 MPa, low-strength general purpose.',
-  '5.8': 'Steel, property class 5.8: tensile strength 500 MPa.',
-  '8.8': 'Steel, property class 8.8: tensile strength 800 MPa, yield 640 MPa. The usual "high tensile" grade.',
-  '10.9': 'Steel, property class 10.9: tensile strength 1000 MPa, yield 900 MPa.',
-  '12.9': 'Steel, property class 12.9: tensile strength 1200 MPa, yield 1080 MPa. Typical for socket cap screws.',
-};
+const STEEL_CLASS = localize({
+  '4.8': N_('Steel, property class 4.8: tensile strength 400 MPa, low-strength general purpose.'),
+  '5.8': N_('Steel, property class 5.8: tensile strength 500 MPa.'),
+  '8.8': N_('Steel, property class 8.8: tensile strength 800 MPa, yield 640 MPa. The usual "high tensile" grade.'),
+  '10.9': N_('Steel, property class 10.9: tensile strength 1000 MPa, yield 900 MPa.'),
+  '12.9': N_('Steel, property class 12.9: tensile strength 1200 MPa, yield 1080 MPa. Typical for socket cap screws.'),
+});
 
 const num = (s) => (s == null ? null : parseFloat(String(s).replace(',', '.')));
 
@@ -208,7 +209,7 @@ export function decodeDesignation(input) {
     out.category = s.category; out.head = s.head || null; out.drive = s.drive || null; out.variant = s.variant || null;
     out.tapping = !!s.tapping;
     const others = s.codes.filter((c) => c !== std.code && !c.startsWith(std.code.split(/[- ]/).slice(0, 2).join(' ')));
-    add(std.matched, `${s.name}. ${s.note}${others.length ? ` Same part as ${others.join(' / ')}.` : ''}`, 'standard');
+    add(std.matched, [`${s.name}. ${s.note}`, others.length ? t('Same part as {codes}.', { codes: others.join(' / ') }) : ''].filter(Boolean).join(' '), 'standard');
   }
 
   for (const ab of ABBREVIATIONS) {
@@ -218,16 +219,22 @@ export function decodeDesignation(input) {
 
   const uni = findUnified(text);
   const met = uni ? null : findMetric(text);
-  const th = uni || met;
-  if (th) {
-    out.thread = th.thread;
-    out.length = th.length;
-    out.lengthInch = th.lengthInch || null;
-    const t = th.thread;
-    if (t.system === 'metric') {
-      add(t.label + (t.pitchGiven ? `×${t.pitch}` : ''), `Metric thread, ${t.d} mm outside diameter, ${t.coarse ? `standard coarse pitch ${t.pitch} mm` : `fine pitch ${t.pitch} mm (not the standard ${coarsePitch(t.d)} mm)`}.`, 'thread');
+  const found = uni || met;
+  if (found) {
+    out.thread = found.thread;
+    out.length = found.length;
+    out.lengthInch = found.lengthInch || null;
+    const th = found.thread;
+    const tt = t;
+    if (th.system === 'metric') {
+      add(th.label + (th.pitchGiven ? `×${th.pitch}` : ''), th.coarse
+        ? tt('Metric thread, {d} mm outside diameter, standard coarse pitch {pitch} mm.', { d: th.d, pitch: th.pitch })
+        : tt('Metric thread, {d} mm outside diameter, fine pitch {pitch} mm (not the standard {coarse} mm).', { d: th.d, pitch: th.pitch, coarse: coarsePitch(th.d) }), 'thread');
     } else {
-      add(t.label, `US unified thread: size ${t.label.split('-')[0]} (${t.d} mm, ${t.dInch} in) with ${t.tpi} threads per inch (pitch ${t.pitch} mm), ${t.series === 'UNC' ? 'coarse series' : 'fine series'}. It is not metric: it will not fit an M${Math.round(t.d * 2) / 2} hole even if it looks the same.`, 'thread');
+      const v = { size: th.label.split('-')[0], d: th.d, inch: th.dInch, tpi: th.tpi, pitch: th.pitch, metric: 'M' + Math.round(th.d * 2) / 2 };
+      add(th.label, th.series === 'UNC'
+        ? tt('US unified thread: size {size} ({d} mm, {inch} in) with {tpi} threads per inch (pitch {pitch} mm), coarse series. It is not metric: it will not fit an {metric} hole even if it looks the same.', v)
+        : tt('US unified thread: size {size} ({d} mm, {inch} in) with {tpi} threads per inch (pitch {pitch} mm), fine series. It is not metric: it will not fit an {metric} hole even if it looks the same.', v), 'thread');
     }
   }
 
@@ -245,7 +252,7 @@ export function decodeDesignation(input) {
       if (s) {
         out.standard = { code: s.codes[0], codes: s.codes, name: s.name, guessed: true };
         out.category = out.category || s.category; out.head = out.head || s.head || null; out.drive = out.drive || s.drive || null; out.variant = out.variant || s.variant || null;
-        out.parts.unshift({ token: n, meaning: `Probably ${s.codes[0]} (${s.name.toLowerCase()}): the number ${n} appears in the code. Check it against the part record.`, kind: 'standard' });
+        out.parts.unshift({ token: n, meaning: t('Probably {std} ({name}): the number {n} appears in the code. Check it against the part record.', { std: s.codes[0], name: lower(s.name), n }), kind: 'standard' });
         break;
       }
     }
@@ -265,20 +272,22 @@ export function decodeDesignation(input) {
   const dr = findDrive(text);
   if (dr) {
     out.drive = dr.drive; out.driveSize = dr.size;
-    add(dr.matched, `${DRIVES[dr.drive].label}, size ${dr.size}: use a ${dr.size} bit. ${dr.drive === 'pozidriv' ? 'A Phillips bit slips out of it and damages the head.' : dr.drive === 'phillips' ? 'Not the same as Pozidriv (PZ).' : ''}`.trim(), 'drive');
+    add(dr.matched, [t('{drive}, size {size}: use a {size} bit.', { drive: DRIVES[dr.drive].label, size: dr.size }), dr.drive === 'pozidriv' ? t('A Phillips bit slips out of it and damages the head.') : dr.drive === 'phillips' ? t('Not the same as Pozidriv (PZ).') : ''].filter(Boolean).join(' '), 'drive');
   } else if (out.standard && /^ISO 704[56]$/.test(out.standard.code)) {
     const cl = findCrossLetter(text);
-    if (cl) { out.drive = cl.drive; add(cl.matched, cl.drive === 'phillips' ? 'H = Phillips cross recess.' : 'Z = Pozidriv cross recess (Phillips bits slip out of it).', 'drive'); }
+    if (cl) { out.drive = cl.drive; add(cl.matched, cl.drive === 'phillips' ? t('H = Phillips cross recess.') : t('Z = Pozidriv cross recess (Phillips bits slip out of it).'), 'drive'); }
   }
 
   const g = findStandoffGender(text);
-  if (g) { out.gender = g.gender; out.category = out.category || 'standoff'; add(g.matched, g.gender === 'M-F' ? 'Male-female: outside thread at one end, inside thread at the other.' : g.gender === 'F-F' ? 'Female-female: inside thread at both ends.' : 'Male-male: outside thread at both ends.', 'type'); }
+  if (g) { out.gender = g.gender; out.category = out.category || 'standoff'; add(g.matched, g.gender === 'M-F' ? t('Male-female: outside thread at one end, inside thread at the other.') : g.gender === 'F-F' ? t('Female-female: inside thread at both ends.') : t('Male-male: outside thread at both ends.'), 'type'); }
 
   if (out.thread && out.length != null) {
     const cs = out.head === 'countersunk';
-    const lenText = out.lengthInch ? `${out.lengthInch} in (${out.length} mm)` : `${out.length} mm`;
+    const len = out.lengthInch ? t('{inch} in ({mm} mm)', { inch: out.lengthInch, mm: out.length }) : t('{n} mm', { n: out.length });
     const isStandoff = out.category === 'standoff';
-    add('×' + (out.lengthInch || out.length), `Length ${lenText}, ${isStandoff ? 'measured on the body, not counting the male thread' : cs ? 'measured overall, head included (countersunk)' : 'measured from under the head to the tip'}.`, 'length');
+    add('×' + (out.lengthInch || out.length), isStandoff ? t('Length {len}, measured on the body, not counting the male thread.', { len })
+      : cs ? t('Length {len}, measured overall, head included (countersunk).', { len })
+        : t('Length {len}, measured from under the head to the tip.', { len }), 'length');
   }
 
   for (const mt of MATERIAL_TOKENS) {
@@ -290,12 +299,12 @@ export function decodeDesignation(input) {
       add(m[0], STEEL_CLASS[m[0]], 'material');
     } else if (!out.material || out.material === 'steel-8.8' || out.material === 'steel') {
       out.material = mt.code;
-      const cls = (mt.code === 'A2' || mt.code === 'A4') && m[1] ? ` Strength class ${mt.code}-${m[1]}: tensile strength ${m[1] * 10} MPa.` : '';
+      const cls = (mt.code === 'A2' || mt.code === 'A4') && m[1] ? ' ' + t('Strength class {cls}: tensile strength {mpa} MPa.', { cls: `${mt.code}-${m[1]}`, mpa: m[1] * 10 }) : '';
       add(m[0], MATERIALS[mt.code].label + '. ' + MATERIALS[mt.code].note + cls, 'material');
     }
   }
 
-  if (out.tapping && !out.parts.some((p) => p.kind === 'standard')) add('tapping', 'Self-tapping screw: cuts its own thread. Never use it in a threaded hole meant for a machine screw.', 'type');
+  if (out.tapping && !out.parts.some((p) => p.kind === 'standard')) add('tapping', t('Self-tapping screw: cuts its own thread. Never use it in a threaded hole meant for a machine screw.'), 'type');
   if (!out.category && (out.head || out.drive || (out.thread && out.length != null))) out.category = 'screw';
   if (out.category === 'screw' && out.thread && out.head && out.drive && !out.driveSize) out.driveSize = driveSize(out.head, out.drive, out.thread.d);
 
@@ -330,9 +339,8 @@ export function summarizeDecoded(dec) {
     if (!dec.head && !dec.drive && dec.category) bits.push(dec.category);
   }
   if (dec.thread) bits.push(dec.thread.label + (dec.length != null ? ` × ${dec.lengthInch ? dec.lengthInch + ' in' : dec.length + ' mm'}` : ''));
-  const lc = (t) => (t ? t[0].toLowerCase() + t.slice(1) : t);
-  if (dec.material && MATERIALS[dec.material]) bits.push(lc(MATERIALS[dec.material].label));
-  else if (dec.material === 'steel') bits.push('steel');
-  if (dec.steelClass && dec.material !== 'steel-8.8') bits.push('class ' + dec.steelClass);
+  if (dec.material && MATERIALS[dec.material]) bits.push(lower(MATERIALS[dec.material].label));
+  else if (dec.material === 'steel') bits.push(lower(t('Steel')));
+  if (dec.steelClass && dec.material !== 'steel-8.8') bits.push(t('class {cls}', { cls: dec.steelClass }));
   return bits.join(' · ');
 }

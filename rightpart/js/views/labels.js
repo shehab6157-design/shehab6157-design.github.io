@@ -1,4 +1,7 @@
 import { html, raw, icon } from '../ui.js';
+import { th } from '../ui.js';
+import { t } from '../core/i18n.js';
+import { partText } from '../core/content.js';
 import { drawPart, partExtentMm } from '../draw.js';
 import { barcodeSVG } from '../core/code128.js';
 import { findLookalikes, shortDifference } from '../core/lookalike.js';
@@ -19,23 +22,23 @@ export default async function labels({ app, query }) {
     return html`<div class="binlabel">
       <div class="draw">
         <div>${raw(drawPart(p, { view: 'auto', mode: fits ? 'print' : 'fit', pad: 1 }))}</div>
-        <div class="note">${fits ? 'ACTUAL SIZE: lay the part here' : isFastener(p) ? 'Scaled to fit' : ''}</div>
+        <div class="note">${fits ? t('ACTUAL SIZE: lay the part here') : isFastener(p) ? t('Scaled to fit') : ''}</div>
       </div>
       <div style="display:grid;align-content:start;gap:.6mm;min-width:0">
         <div class="code">${p.id}</div>
-        <div class="nm">${p.name}</div>
+        <div class="nm">${partText(p, app.lib).name}</div>
         <div style="height:12mm;margin-top:1mm">${raw(barcodeSVG(p.id, { height: 40, width: '100%', heightAttr: '12mm' }))}</div>
-        ${codes.length ? html`<div class="al">Also: ${codes.join(' · ')}</div>` : ''}
-        ${look ? html`<div class="warn">NOT ${look.part.id} ${sizeLabel(look.part) ? `(${sizeLabel(look.part)})` : ''}: ${shortDifference(p, look.part)}</div>` : ''}
+        ${codes.length ? html`<div class="al">${t('Also:')} <span class="code">${codes.join(' · ')}</span></div>` : ''}
+        ${look ? html`<div class="warn">${th('NOT {part}: {diff}', { part: sizeLabel(look.part) ? `${look.part.id} (${sizeLabel(look.part)})` : look.part.id, diff: shortDifference(p, look.part) })}</div>` : ''}
       </div>
     </div>`;
   };
   return {
-    title: 'Bin labels',
+    title: t('Bin labels'),
     html: html`<div class="page">
-      <div class="page-head no-print"><div><div class="crumbs"><a href="#/parts">Parts</a><span>/</span><span>Labels</span></div><h1>Bin labels</h1><p class="lede">${parts.length} label${parts.length === 1 ? '' : 's'}, 100 × 50 mm. Print at 100% scale ("actual size", not "fit to page") so the outlines are true to size. Check one with a ruler: the barcode block is exactly 12 mm tall.</p></div>
-        <div class="row"><button class="btn primary" type="button" id="printBtn">${icon('print')}Print</button></div></div>
-      ${parts.length ? html`<div class="label-sheet">${parts.map(label)}</div>` : html`<div class="empty">No parts selected. Open a part and press "Bin label", or use "Bin labels" on the parts list.</div>`}
+      <div class="page-head no-print"><div><div class="crumbs"><a href="#/parts">${t('Parts')}</a><span>/</span><span>${t('Labels')}</span></div><h1>${t('Bin labels')}</h1><p class="lede">${t('{n, plural, one {# label} other {# labels}}, 100 × 50 mm. Print at 100% scale ("actual size", not "fit to page") so the outlines are true to size. Check one with a ruler: the barcode block is exactly 12 mm tall.', { n: parts.length })} ${t('Labels print in the language chosen in RightPart; codes and sizes are the same in every language.')}</p></div>
+        <div class="row"><button class="btn primary" type="button" id="printBtn">${icon('print')}${t('Print')}</button></div></div>
+      ${parts.length ? html`<div class="label-sheet">${parts.map(label)}</div>` : html`<div class="empty">${t('No parts selected. Open a part and press "Bin label", or use "Bin labels" on the parts list.')}</div>`}
     </div>`,
     mount(root) { root.querySelector('#printBtn')?.addEventListener('click', () => window.print()); },
   };

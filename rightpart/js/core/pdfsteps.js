@@ -8,6 +8,7 @@
 
 import { resolveCode, normCode } from './model.js';
 import { isFastener } from './dims.js';
+import { t } from './i18n.js';
 
 export const QTY_NOTE = 'Quantity not stated in the PDF';
 
@@ -221,7 +222,7 @@ export function draftSteps(pages, index, { file = 'PDF' } = {}) {
         // Numbering starts again: an earlier table of contents (headings without bodies), or a second section.
         const thin = raw.every((s) => s.body.length <= 1);
         if (thin) { preamble.push(...raw.flatMap((s) => [{ text: s.heading, page: s.page }, ...s.body])); raw = []; }
-        else warnings.push(`Step numbers start again on page ${l.page}; the steps were kept in the order they appear.`);
+        else warnings.push(t('Step numbers start again on page {page}; the steps were kept in the order they appear.', { page: l.page }));
       }
       cur = { no: h.no, title: h.title, heading: l.text, page: l.page, body: [] };
       raw.push(cur);
@@ -230,7 +231,7 @@ export function draftSteps(pages, index, { file = 'PDF' } = {}) {
     else preamble.push(l);
   }
   if (!mode || !raw.length) {
-    warnings.push('No step numbers were found ("Step 1", "1.0" or a numbered list), so each page became one step. Split them in the editor.');
+    warnings.push(t('No step numbers were found ("Step 1", "1.0" or a numbered list), so each page became one step. Split them in the editor.'));
     raw = clean.filter((p) => p.lines.length).map((p, k) => ({ no: k + 1, title: '', heading: '', page: p.page, body: p.lines.map((text) => ({ text, page: p.page })) }));
     preamble.length = 0;
   }
@@ -331,7 +332,7 @@ export function draftSteps(pages, index, { file = 'PDF' } = {}) {
 
   for (const st of steps) for (const k of ['tools', 'instructions', 'checks']) st[k] = [...new Set(st[k])];
   const stats = { pages: pages.length, steps: steps.length, refsLinked, qtyMissing, unknown: unknownCodes.size, textLines: all.length };
-  if (qtyMissing) warnings.push(`${qtyMissing} part${qtyMissing === 1 ? '' : 's'} had no quantity next to the code, so 1 was used. Check them in the editor.`);
+  if (qtyMissing) warnings.push(t('{n, plural, one {# part had no quantity next to the code, so 1 was used. Check it in the editor.} other {# parts had no quantity next to the code, so 1 was used. Check them in the editor.}}', { n: qtyMissing }));
   return {
     meta,
     steps,

@@ -2,8 +2,11 @@
 import { loadLibrary, setSetting, currentWorkspace, setCurrentWorkspace, workspaces } from './store.js';
 import { buildIndex, search, resolveCode } from './core/model.js';
 import { runAudit } from './core/audit.js';
-import { html, icon, LOGO, esc, $, toast } from './ui.js';
+import { html, th, icon, LOGO, esc, $, toast } from './ui.js';
 import { thumb, partHref } from './components.js';
+import { t, getLanguage, dirOf } from './core/i18n.js';
+import { looksLikeQuestion } from './core/assistant.js';
+import { initialLanguage, applyLanguage, saveLanguage, setCompanyLanguages, languageDialog, languageInfo } from './lang.js';
 
 const DEMO_URL = 'data/demo-library.json';
 
@@ -12,10 +15,11 @@ export const app = { lib: null, index: null, audit: null, source: 'demo', libNam
 
 export function setLibrary(lib, source = app.source, name) {
   app.lib = lib;
+  setCompanyLanguages(lib); // before the check runs, so its findings use this company's wording
   app.index = buildIndex(lib);
   app.audit = runAudit(app.index);
   app.source = source;
-  app.libName = name || lib.meta?.name || 'Library';
+  app.libName = name || lib.meta?.name || t('Library');
   app.workspace = currentWorkspace();
   renderNav();
   renderWorkspaceButton();
@@ -34,7 +38,7 @@ export async function reloadLibrary() {
 export async function switchWorkspace(id, to = '#/') {
   setCurrentWorkspace(id);
   await reloadLibrary();
-  toast(`Now working in ${app.workspace.name}.`, 'ok');
+  toast(t('Now working in {company}.', { company: app.workspace.name }), 'ok');
   navigate(to);
 }
 
@@ -98,7 +102,7 @@ async function route() {
   try { cleanup?.(); } catch { /* ignore */ }
   cleanup = null;
   if (!m) {
-    main.innerHTML = String(html`<div class="page narrow"><div class="empty"><h2>Page not found</h2><p style="margin-top:8px"><a href="#/">Back to home</a></p></div></div>`);
+    main.innerHTML = String(html`<div class="page narrow"><div class="empty"><h2>${t('Page not found')}</h2><p style="margin-top:8px"><a href="#/">${t('Back to home')}</a></p></div></div>`);
     return;
   }
   currentNav = m.route.nav;
@@ -118,58 +122,59 @@ async function route() {
     firstRender = false;
   } catch (err) {
     console.error(err);
-    main.innerHTML = String(html`<div class="page narrow"><div class="callout bad">${icon('stop')}<div><p class="t">This page could not be shown</p><p>${err.message}</p><div class="acts"><a class="btn" href="#/">Home</a></div></div></div></div>`);
+    main.innerHTML = String(html`<div class="page narrow"><div class="callout bad">${icon('stop')}<div><p class="t">${t('This page could not be shown')}</p><p>${err.message}</p><div class="acts"><a class="btn" href="#/">${t('Home')}</a></div></div></div></div>`);
   }
 }
 
 // ---------- Navigation ----------
+// Labels are functions so they follow the language.
 const NAV = [
-  { id: 'home', href: '#/', label: 'Home', icon: 'home' },
-  { id: 'parts', href: '#/parts', label: 'Parts', icon: 'parts' },
-  { id: 'identify', href: '#/identify', label: 'Identify', icon: 'identify' },
-  { id: 'guides', href: '#/devices', label: 'Build', icon: 'guide' },
-  { id: 'audit', href: '#/audit', label: 'Check', icon: 'shield' },
+  { id: 'home', href: '#/', label: () => t('Home'), icon: 'home' },
+  { id: 'parts', href: '#/parts', label: () => t('Parts'), icon: 'parts' },
+  { id: 'identify', href: '#/identify', label: () => t('Identify'), icon: 'identify' },
+  { id: 'guides', href: '#/devices', label: () => t('nav::Build'), icon: 'guide' },
+  { id: 'audit', href: '#/audit', label: () => t('nav::Check'), icon: 'shield' },
 ];
 const NAV_MORE = [
-  { id: 'ask', href: '#/ask', label: 'Ask a question', icon: 'chat' },
-  { id: 'learn', href: '#/learn', label: 'Learn fasteners', icon: 'learn' },
-  { id: 'setup', href: '#/setup', label: 'Set up this company', icon: 'checklist' },
-  { id: 'companies', href: '#/companies', label: 'Companies and sign-in', icon: 'building' },
-  { id: 'data', href: '#/data', label: 'Data and records', icon: 'data' },
-  { id: 'challenges', href: '#/challenges', label: 'Problems to expect', icon: 'alert' },
-  { id: 'about', href: '#/about', label: 'About the idea', icon: 'info' },
+  { id: 'ask', href: '#/ask', label: () => t('Ask a question'), icon: 'chat' },
+  { id: 'learn', href: '#/learn', label: () => t('Learn fasteners'), icon: 'learn' },
+  { id: 'setup', href: '#/setup', label: () => t('Set up this company'), icon: 'checklist' },
+  { id: 'companies', href: '#/companies', label: () => t('Companies and sign-in'), icon: 'building' },
+  { id: 'data', href: '#/data', label: () => t('Data and records'), icon: 'data' },
+  { id: 'challenges', href: '#/challenges', label: () => t('Problems to expect'), icon: 'alert' },
+  { id: 'about', href: '#/about', label: () => t('About the idea'), icon: 'info' },
 ];
 
 function renderNav() {
   const crit = app.audit?.counts.critical || 0;
-  const item = (n, small) => html`<a href="${n.href}" ${n.id === currentNav ? html`aria-current="page"` : ''}>${icon(n.icon)}<span>${small && n.id === 'guides' ? 'Build' : n.label}</span>${n.id === 'audit' && crit ? html`<span class="count" aria-label="${crit} critical">${crit}</span>` : ''}</a>`;
+  const item = (n) => html`<a href="${n.href}" ${n.id === currentNav ? html`aria-current="page"` : ''}>${icon(n.icon)}<span>${n.label()}</span>${n.id === 'audit' && crit ? html`<span class="count" aria-label="${t('{n} critical', { n: crit })}">${crit}</span>` : ''}</a>`;
   const ws = currentWorkspace();
   const side = $('#sidenav');
   if (side) {
     side.innerHTML = String(html`${NAV.map((n) => item(n))}
-      <div class="group">More</div>
+      <div class="group">${t('More')}</div>
       ${NAV_MORE.map((n) => item(n))}
-      <div class="foot">${ws.kind === 'demo' ? 'Demo: a fictional device. Add your own company with the company button at the top.' : ws.kind === 'cloud' ? html`Signed-in company: ${ws.name}. A copy is kept on this device for offline work.` : html`${ws.name}: stored only on this device.`}</div>`);
+      <div class="foot">${ws.kind === 'demo' ? t('Demo: a fictional device. Add your own company with the company button at the top.') : ws.kind === 'cloud' ? th('Signed-in company: {company}. A copy is kept on this device for offline work.', { company: ws.name }) : th('{company}: stored only on this device.', { company: ws.name })}</div>`);
   }
   const bottom = $('#bottomnav');
-  if (bottom) bottom.innerHTML = String(html`${NAV.map((n) => item(n, true))}`);
+  if (bottom) bottom.innerHTML = String(html`${NAV.map((n) => item(n))}`);
 }
 
 const NARROW = window.matchMedia('(max-width: 640px)');
 function searchPlaceholder() {
   const input = $('#q');
   if (!input) return;
-  input.placeholder = NARROW.matches ? 'Code, size or question'
-    : currentWorkspace().kind === 'demo' ? 'Any code, size, name or question: C-55013, M3x8, torque for step 7?' : 'Any code, size, name or a question';
+  input.placeholder = NARROW.matches ? t('Code, size or question')
+    : currentWorkspace().kind === 'demo' ? t('Any code, size, name or question: C-55013, M3x8, torque for step 7?') : t('Any code, size, name or a question');
 }
 
 function renderWorkspaceButton() {
   const b = $('#wsBtn');
   if (!b) return;
   const ws = currentWorkspace();
-  const initials = ws.kind === 'demo' ? 'Demo' : ws.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
-  b.innerHTML = String(html`${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}<span class="ws-name">${ws.kind === 'demo' ? 'Demo' : ws.name}</span><span class="ws-init">${initials}</span>${icon('chevronDown', 'chev')}`);
-  b.setAttribute('aria-label', `Company: ${ws.name}. Switch company`);
+  const initials = ws.kind === 'demo' ? t('Demo') : ws.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
+  b.innerHTML = String(html`${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}<span class="ws-name">${ws.kind === 'demo' ? t('Demo') : ws.name}</span><span class="ws-init">${initials}</span>${icon('chevronDown', 'chev')}`);
+  b.setAttribute('aria-label', t('Company: {company}. Switch company', { company: ws.kind === 'demo' ? t('Demo: Nova-1 (fictional)') : ws.name }));
   searchPlaceholder();
 }
 
@@ -191,14 +196,14 @@ function renderSuggest(q) {
   const res = search(app.index, q, { limit: 6 });
   lastResults = res.results;
   const amb = res.exact?.status === 'ambiguous';
-  const looksLikeQuestion = /\?|^(how|what|which|why|where|when|can|do|is|does|show|tell|כמה|מה|איזה|למה|איפה|كم|ما|ماذا|أي|لماذا|أين)\b/i.test(q.trim());
-  box.innerHTML = String(html`${looksLikeQuestion ? html`<a role="option" id="sg-ask" href="#/ask?q=${encodeURIComponent(q)}" aria-selected="false"><span class="thumb" style="display:grid;place-items:center">${icon('chat')}</span><span><span class="t">Ask: “${q}”</span><br><span class="s">Answer from this company's parts, steps and BOMs</span></span><span class="k"></span></a>` : ''}
+  const isQ = looksLikeQuestion(q);
+  box.innerHTML = String(html`${isQ ? html`<a role="option" id="sg-ask" href="#/ask?q=${encodeURIComponent(q)}" aria-selected="false"><span class="thumb" style="display:grid;place-items:center">${icon('chat')}</span><span><span class="t">${th('Ask: “{q}”', { q })}</span><br><span class="s">${t("Answer from this company's parts, steps and BOMs")}</span></span><span class="k"></span></a>` : ''}
     ${res.results.length ? res.results.map((r, i) => html`<a role="option" id="sg-${i}" href="${partHref(r.part.id)}" aria-selected="${i === activeIdx}">
       <span class="thumb">${thumb(r.part)}</span>
       <span><span class="t">${r.part.name}</span><br><span class="s"><span class="code">${r.part.id}</span> · ${r.reasons[0]?.text || ''}</span></span>
-      <span class="k">${r.reasons[0]?.kind === 'code' ? (amb ? html`<span class="chip bad">2+ parts</span>` : html`<span class="chip ok">exact</span>`) : ''}</span>
-    </a>`) : looksLikeQuestion ? '' : html`<div class="foot">No part matches “${q}”. Press Enter to ask it as a question.</div>`}
-    <div class="foot">Enter: ${res.exact?.status === 'unique' ? 'open this part' : looksLikeQuestion || !res.results.length ? 'ask it as a question' : 'see all results'} · Esc: close</div>`);
+      <span class="k">${r.reasons[0]?.kind === 'code' ? (amb ? html`<span class="chip bad">${t('2+ parts')}</span>` : html`<span class="chip ok">${t('exact')}</span>`) : ''}</span>
+    </a>`) : isQ ? '' : html`<div class="foot">${th('No part matches “{q}”. Press Enter to ask it as a question.', { q })}</div>`}
+    <div class="foot">${res.exact?.status === 'unique' ? t('Enter: open this part · Esc: close') : isQ || !res.results.length ? t('Enter: ask it as a question · Esc: close') : t('Enter: see all results · Esc: close')}</div>`);
   box.classList.remove('hidden');
   $('#q').setAttribute('aria-expanded', 'true');
 }
@@ -210,7 +215,7 @@ export function submitQuery(q) {
   closeSuggest();
   if (r.status === 'unique') { navigate(`${partHref(r.part.id)}?code=${encodeURIComponent(q)}`); return; }
   const res = search(app.index, q, { limit: 1 });
-  const question = /\?|\s/.test(q) && (!res.results.length || /\?|^(how|what|which|why|where|when|can|do|is|does|show|tell|כמה|מה|איזה|למה|איפה|كم|ما|ماذا|أي|لماذا|أين)\b/i.test(q));
+  const question = (/[?？؟\s]/.test(q) || looksLikeQuestion(q)) && (!res.results.length || looksLikeQuestion(q));
   if (question) navigate(`#/ask?q=${encodeURIComponent(q)}`);
   else navigate(`#/search?q=${encodeURIComponent(q)}`);
 }
@@ -220,8 +225,8 @@ function wireSearch() {
   const input = $('#q');
   searchPlaceholder();
   NARROW.addEventListener?.('change', searchPlaceholder);
-  let t = 0;
-  input.addEventListener('input', () => { clearTimeout(t); activeIdx = -1; t = setTimeout(() => renderSuggest(input.value), 70); });
+  let timer = 0;
+  input.addEventListener('input', () => { clearTimeout(timer); activeIdx = -1; timer = setTimeout(() => renderSuggest(input.value), 70); });
   input.addEventListener('focus', () => { if (input.value.trim()) renderSuggest(input.value); });
   input.addEventListener('keydown', (e) => {
     const opts = [...document.querySelectorAll('#suggest [role="option"]')];
@@ -249,7 +254,7 @@ function wireSearch() {
   $('#photoBtn').innerHTML = String(icon('camera'));
   $('#scanBtn').addEventListener('click', async () => {
     const { scanDialog } = await import('./scan.js');
-    const code = await scanDialog({ title: 'Scan any code', hint: 'Point the camera at a bin label, a bag or a drawing. A USB or Bluetooth scanner works too: just scan into the search box.' });
+    const code = await scanDialog({ title: t('Scan any code'), hint: t('Point the camera at a bin label, a bag or a drawing. A USB or Bluetooth scanner works too: just scan into the search box.') });
     if (code) { input.value = code; submitQuery(code); }
   });
   $('#photoBtn').addEventListener('click', () => navigate('#/identify'));
@@ -268,7 +273,7 @@ function wireWorkspaces() {
 function wireAsk() {
   const fab = $('#askFab');
   if (!fab) return;
-  fab.innerHTML = String(html`${icon('chat')}<span>Ask</span>`);
+  fab.innerHTML = String(html`${icon('chat')}<span>${t('Ask')}</span>`);
   fab.addEventListener('click', async () => {
     const { openAskPanel } = await import('./askpanel.js');
     openAskPanel({ app, navigate });
@@ -283,7 +288,7 @@ function paintTheme() {
   const btn = $('#themeBtn');
   if (btn) {
     btn.innerHTML = String(icon(dark ? 'sun' : 'moon'));
-    btn.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+    btn.setAttribute('aria-label', dark ? t('Switch to light theme') : t('Switch to dark theme'));
   }
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#131A22' : '#1D5BD8');
 }
@@ -307,12 +312,14 @@ function openMenu() {
   const dark = isDark();
   const d = document.createElement('dialog');
   d.className = 'dlg sheet menu-sheet';
-  d.setAttribute('aria-label', 'Menu');
-  d.innerHTML = String(html`<div class="dh"><h2>${icon('menu')} Menu</h2><button class="icon-btn" type="button" data-close aria-label="Close">${icon('x')}</button></div>
+  const lang = languageInfo();
+  d.setAttribute('aria-label', t('Menu'));
+  d.innerHTML = String(html`<div class="dh"><h2>${icon('menu')} ${t('Menu')}</h2><button class="icon-btn" type="button" data-close aria-label="${t('Close')}">${icon('x')}</button></div>
     <div class="db">
-      <button class="ws-item menu-ws" type="button" data-ws><span class="av">${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}</span><span><span class="t">${ws.name}</span><br><span class="s">Company: switch or add one</span></span>${icon('chevronRight')}</button>
-      <nav class="menu-list" aria-label="More pages">${NAV_MORE.map((n) => html`<a href="${n.href}" ${n.id === currentNav ? html`aria-current="page"` : ''}>${icon(n.icon)}<span>${n.label}</span></a>`)}</nav>
-      <button class="btn" type="button" data-theme>${icon(dark ? 'sun' : 'moon')}${dark ? 'Light theme' : 'Dark theme'}</button>
+      <button class="ws-item menu-ws" type="button" data-ws><span class="av">${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}</span><span><span class="t">${ws.kind === 'demo' ? t('Demo: Nova-1 (fictional)') : ws.name}</span><br><span class="s">${t('Company: switch or add one')}</span></span>${icon('chevronRight', 'flip')}</button>
+      <button class="ws-item menu-ws" type="button" data-lang><span class="av">${icon('globe')}</span><span><span class="t" lang="${lang.code}">${lang.native}</span><br><span class="s">${t('Language')}</span></span>${icon('chevronRight', 'flip')}</button>
+      <nav class="menu-list" aria-label="${t('More pages')}">${NAV_MORE.map((n) => html`<a href="${n.href}" ${n.id === currentNav ? html`aria-current="page"` : ''}>${icon(n.icon)}<span>${n.label()}</span></a>`)}</nav>
+      <button class="btn" type="button" data-theme>${icon(dark ? 'sun' : 'moon')}${dark ? t('Light theme') : t('Dark theme')}</button>
     </div>`);
   document.body.append(d);
   d.addEventListener('close', () => d.remove());
@@ -324,6 +331,7 @@ function openMenu() {
       workspaceDialog({ app, navigate });
       return;
     }
+    if (e.target.closest('[data-lang]')) { d.close(); pickLanguage(); return; }
     if (e.target.closest('[data-theme]')) { toggleTheme(); d.close(); }
   });
   d.showModal();
@@ -336,21 +344,76 @@ function wireMenu() {
   btn.addEventListener('click', openMenu);
 }
 
+// ---------- Language ----------
+/** Text in index.html (labels, placeholders) that is not re-rendered by the pages. */
+function paintShell() {
+  const set = (sel, attr, text) => { const el = $(sel); if (el) el.setAttribute(attr, text); };
+  const lang = languageInfo();
+  $('#skipLink') && ($('#skipLink').textContent = t('Skip to content'));
+  set('.appbrand', 'aria-label', t('RightPart home'));
+  set('#q', 'aria-label', t('Search any code, size or name, or ask a question'));
+  set('#suggest', 'aria-label', t('Suggestions'));
+  set('#scanBtn', 'title', t('Scan a barcode')); set('#scanBtn', 'aria-label', t('Scan a barcode'));
+  set('#photoBtn', 'title', t('Identify by photo or size')); set('#photoBtn', 'aria-label', t('Identify a part by photo or size'));
+  set('#aboutBtn', 'aria-label', t('About RightPart'));
+  set('#menuBtn', 'aria-label', t('Menu'));
+  set('#askFab', 'aria-label', t('Ask a question about parts and steps'));
+  set('#sidenav', 'aria-label', t('Main')); set('#bottomnav', 'aria-label', t('Main'));
+  const lb = $('#langBtn');
+  if (lb) {
+    lb.innerHTML = String(html`${icon('globe')}<span class="lang-code">${lang.code.toUpperCase()}</span>`);
+    lb.setAttribute('aria-label', `${t('Language')}: ${lang.native}`);
+    lb.title = `${t('Language')}: ${lang.native}`;
+  }
+  searchPlaceholder();
+  wireAskLabel();
+  paintTheme();
+}
+
+/** Switch the whole app to another language: pages, findings, answers and labels. */
+export async function changeLanguage(code) {
+  if (!code) return;
+  saveLanguage(code);
+  await applyLanguage(code);
+  setCompanyLanguages(app.lib);
+  if (app.lib) setLibrary(app.lib, app.source, app.libName); // the check speaks the new language too
+  paintShell();
+  await route();
+}
+
+async function pickLanguage() {
+  const code = await languageDialog();
+  if (code && code !== getLanguage()) await changeLanguage(code);
+}
+
+function wireLanguage() {
+  $('#langBtn')?.addEventListener('click', pickLanguage);
+}
+
+function wireAskLabel() {
+  const fab = $('#askFab');
+  if (fab) fab.innerHTML = String(html`${icon('chat')}<span>${t('Ask')}</span>`);
+}
+
 // ---------- Boot ----------
 async function boot() {
   document.querySelector('.appbrand .logo').innerHTML = String(LOGO);
   $('#aboutBtn').innerHTML = String(icon('info'));
+  // The language is chosen before anything is drawn, so nobody sees the page flip.
+  await applyLanguage(initialLanguage());
+  wireLanguage();
   wireTheme();
   wireSearch();
   wireWorkspaces();
   wireMenu();
   wireAsk();
+  paintShell();
   // Hash routing owns the URL fragment, so the skip link moves focus itself.
   $('#skipLink')?.addEventListener('click', (e) => { e.preventDefault(); $('#main').focus(); });
   try {
     await reloadLibrary();
   } catch (err) {
-    $('#main').innerHTML = String(html`<div class="page narrow"><div class="callout bad">${icon('stop')}<div><p class="t">The library could not be loaded</p><p>${err.message}. If you opened the file directly, serve the folder with a web server instead.</p></div></div></div>`);
+    $('#main').innerHTML = String(html`<div class="page narrow"><div class="callout bad">${icon('stop')}<div><p class="t">${t('The library could not be loaded')}</p><p>${err.message}. ${t('If you opened the file directly, serve the folder with a web server instead.')}</p></div></div></div>`);
     return;
   }
   window.addEventListener('hashchange', route);
@@ -367,10 +430,10 @@ function registerSW() {
   navigator.serviceWorker.register('sw.js').then((reg) => {
     reg.addEventListener('updatefound', () => {
       const w = reg.installing;
-      w?.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) toast('A new version is ready: reload to use it.'); });
+      w?.addEventListener('statechange', () => { if (w.state === 'installed' && navigator.serviceWorker.controller) toast(t('A new version is ready: reload to use it.')); });
     });
   }).catch(() => { /* offline support is optional */ });
 }
 
 boot();
-void esc; void workspaces;
+void esc; void workspaces; void dirOf;

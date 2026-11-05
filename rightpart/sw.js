@@ -1,7 +1,9 @@
 // Offline support. The app shell is cached on install; the photo-identification model,
 // TensorFlow.js (about 7 MB) and the PDF reader (about 1.5 MB) are cached the first time they are used.
 // Bump VERSION whenever a file in SHELL changes.
-const VERSION = 'rp-2026-11-05-1';
+const VERSION = 'rp-2026-11-06-1';
+// Kept in step with LANGUAGES in js/lang.js (a test checks it).
+const LOCALES = ['en', 'he', 'ar', 'ru', 'uk', 'am', 'es', 'pt', 'fr', 'de', 'it', 'pl', 'ro', 'tr', 'zh', 'vi', 'th', 'hi', 'fil', 'id'];
 const SHELL = [
   './',
   'index.html',
@@ -22,6 +24,7 @@ const SHELL = [
   'js/importflows.js',
   'js/askui.js',
   'js/askpanel.js',
+  'js/lang.js',
   'js/problems.js',
   'js/pdfimport.js',
   'js/core/dims.js',
@@ -34,6 +37,9 @@ const SHELL = [
   'js/core/importer.js',
   'js/core/assistant.js',
   'js/core/pdfsteps.js',
+  'js/core/i18n.js',
+  'js/core/content.js',
+  'js/core/translations.js',
   'js/views/home.js',
   'js/views/parts.js',
   'js/views/search.js',
@@ -55,6 +61,8 @@ const SHELL = [
   'js/views/ask.js',
   'js/views/challenges.js',
   'data/demo-library.json',
+  // Every built-in language, so a shared tablet can switch language on the floor without a network.
+  ...LOCALES.map((c) => `locales/${c}.json`),
   'vendor/three/three.bundle.js',
   'vendor/zxing/zxing.min.js',
   'vendor/supabase/supabase.js',

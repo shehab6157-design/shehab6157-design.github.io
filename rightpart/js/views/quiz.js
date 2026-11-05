@@ -1,4 +1,6 @@
 import { html, raw, icon, beep } from '../ui.js';
+import { t, lower } from '../core/i18n.js';
+import { stepText, partText } from '../core/content.js';
 import { drawPart, drawChoice } from '../draw.js';
 import { stepParts, torqueText, CODE_TYPES } from '../core/model.js';
 import { findLookalikes, shortDifference } from '../core/lookalike.js';
@@ -21,48 +23,49 @@ function buildQuestions(app, dev) {
       const looks = findLookalikes(app.lib.parts, sp.part).filter((l) => !l.duplicate && l.part.status !== 'obsolete').slice(0, 3);
       if (looks.length < 2) continue;
       qs.push({
-        kind: 'which', prompt: `Step ${i + 1}, “${s.title}”: which screw goes here?`,
+        kind: 'which', prompt: t('Step {n}, “{title}”: which screw goes here?', { n: i + 1, title: stepText(s, app.lib).title }),
         options: shuffle([sp.part, ...looks.map((l) => l.part)]).map((p) => ({ id: p.id, part: p, label: sizeLabel(p) })),
         answer: sp.part.id,
-        explain: `${sp.part.id} (${sizeLabel(sp.part)}). ${sp.part.details?.why || ''} ${looks[0] ? `The look-alike ${looks[0].part.id} is ${shortDifference(sp.part, looks[0].part)}.` : ''}`,
+        explain: [`${sp.part.id} (${sizeLabel(sp.part)}).`, partText(sp.part, app.lib).why, looks[0] ? t('The look-alike {id} is {diff}.', { id: looks[0].part.id, diff: shortDifference(sp.part, looks[0].part) }) : ''].filter(Boolean).join(' '),
       });
     }
   }
   // b) torque
   const torqued = steps.flatMap((s, i) => stepParts(app.index, s).filter((sp) => sp.part && sp.torque?.value).map((sp) => ({ s, i, sp })));
-  for (const t of shuffle(torqued).slice(0, 2)) {
-    const v = t.sp.torque.value;
+  for (const x of shuffle(torqued).slice(0, 2)) {
+    const v = x.sp.torque.value;
     const opts = [...new Set([v, Math.round(v * 2 * 10) / 10, Math.round(v * 0.5 * 100) / 100, Math.round((v + 0.8) * 10) / 10])].slice(0, 4);
-    qs.push({ kind: 'torque', prompt: `What torque for ${t.sp.part.name.split(',')[0]} in step ${t.i + 1}?`, options: shuffle(opts).map((o) => ({ id: String(o), label: `${o} N·m` })), answer: String(v), explain: `${torqueText(t.sp.torque)}. ${t.sp.part.details?.ifWrong || 'Too loose shakes out; too tight strips the thread or cracks the part.'}` });
+    const pt = partText(x.sp.part, app.lib);
+    qs.push({ kind: 'torque', prompt: t('What torque for {part} in step {n}?', { part: sizeLabel(x.sp.part) ? `${x.sp.part.id} (${sizeLabel(x.sp.part)})` : pt.name.split(',')[0], n: x.i + 1 }), options: shuffle(opts).map((o) => ({ id: String(o), label: `${o} N·m` })), answer: String(v), explain: `${torqueText(x.sp.torque)}. ${pt.ifWrong || t('Too loose shakes out; too tight strips the thread or cracks the part.')}` });
   }
   // c) codes
   const withCust = app.lib.parts.filter((p) => (p.aliases || []).some((a) => a.type === 'customer' || a.type === 'supplier') && isFastener(p));
   for (const p of shuffle(withCust).slice(0, 2)) {
     const a = pick((p.aliases || []).filter((x) => x.type === 'customer' || x.type === 'supplier'));
     const others = shuffle(fasteners.filter((q) => q.id !== p.id && q.category === p.category)).slice(0, 3);
-    qs.push({ kind: 'code', prompt: `A ${(CODE_TYPES[a.type] || a.type).toLowerCase()} reads ${a.code}. Which internal part is it?`, options: shuffle([p, ...others]).map((q) => ({ id: q.id, label: q.id, sub: sizeLabel(q) || q.name })), answer: p.id, explain: `${a.code} is ${p.id}, ${p.name}. Every code in RightPart leads to one part: search any of them.` });
+    qs.push({ kind: 'code', prompt: t('The {type} reads {code}. Which internal part is it?', { type: lower(CODE_TYPES[a.type] || a.type), code: a.code }), options: shuffle([p, ...others]).map((q) => ({ id: q.id, label: q.id, sub: sizeLabel(q) || partText(q, app.lib).name })), answer: p.id, explain: t('{code} is {id}, {name}. Every code in RightPart leads to one part: search any of them.', { code: a.code, id: p.id, name: partText(p, app.lib).name }) });
   }
   // d) decode
   const des = shuffle(fasteners.filter((p) => p.designation && decodeDesignation(p.designation)?.standard)).slice(0, 4);
   if (des.length >= 4) {
     const p = des[0];
-    qs.push({ kind: 'decode', prompt: `What is “${p.designation}”?`, options: shuffle(des).map((q) => ({ id: q.id, label: summarizeDecoded(decodeDesignation(q.designation)) })), answer: p.id, explain: decodeDesignation(p.designation).parts.map((x) => `${x.token}: ${x.meaning}`).join(' ') });
+    qs.push({ kind: 'decode', prompt: t('What is “{code}”?', { code: p.designation }), options: shuffle(des).map((q) => ({ id: q.id, label: summarizeDecoded(decodeDesignation(q.designation)) })), answer: p.id, explain: decodeDesignation(p.designation).parts.map((x) => `${x.token}: ${x.meaning}`).join(' ') });
   }
   // e) drive
   const drives = ['phillips', 'pozidriv', 'torx', 'hex'];
   const d = pick(drives);
-  qs.push({ kind: 'drive', prompt: 'Which drive is this?', figure: drawChoice('drive', d), options: shuffle(drives).map((x) => ({ id: x, label: DRIVES[x].label })), answer: d, explain: DRIVES[d].note });
+  qs.push({ kind: 'drive', prompt: t('Which drive is this?'), figure: drawChoice('drive', d), options: shuffle(drives).map((x) => ({ id: x, label: DRIVES[x].label })), answer: d, explain: DRIVES[d].note });
   return shuffle(qs).slice(0, 8);
 }
 
 export default async function quiz({ app, params }) {
   const dev = app.index.devices.get(params.device);
-  if (!dev) return { title: 'Quiz', html: html`<div class="page narrow"><div class="empty">No device ${params.device}.</div></div>` };
+  if (!dev) return { title: t('Quiz'), html: html`<div class="page narrow"><div class="empty">${t('No device {id}.', { id: params.device })}</div></div>` };
   const best = settings()[`quiz.${dev.id}`];
   return {
-    title: `Quiz: ${dev.name}`,
+    title: t('Quiz: {device}', { device: dev.name }),
     html: html`<div class="page narrow">
-      <div class="page-head"><div><div class="crumbs"><a href="#/learn">Learn</a><span>/</span><span>Quiz</span></div><h1>Quiz: ${dev.name}</h1><p class="lede">Eight quick questions from the real device: which screw, which torque, which code. ${best != null ? `Your best so far: ${best}%.` : ''}</p></div></div>
+      <div class="page-head"><div><div class="crumbs"><a href="#/learn">${t('mode::Learn')}</a><span>/</span><span>${t('Quiz')}</span></div><h1>${t('Quiz: {device}', { device: dev.name })}</h1><p class="lede">${t('Eight quick questions from the real device: which screw, which torque, which code.')} ${best != null ? t('Your best so far: {pct}%.', { pct: best }) : ''}</p></div></div>
       <div id="quiz" class="stack"></div>
     </div>`,
     mount(root) {
@@ -74,18 +77,18 @@ export default async function quiz({ app, params }) {
         if (i >= qs.length) {
           const pct = Math.round((score / qs.length) * 100);
           if (best == null || pct > best) setSetting(`quiz.${dev.id}`, pct);
-          box.innerHTML = String(html`<div class="callout ${pct >= 80 ? 'ok' : pct >= 50 ? 'warn' : 'bad'}">${icon(pct >= 80 ? 'checkCircle' : 'info')}<div><p class="t">${score} of ${qs.length} right (${pct}%)</p><p>${pct >= 80 ? 'Well done. You know these parts.' : 'Have another look at the learn page and the parts below, then try again.'}</p></div></div>
-            ${wrong.length ? html`<h2>To review</h2>${wrong.map((q) => html`<div class="card pad"><b>${q.prompt}</b><p class="small" style="margin-top:6px">${q.explain}</p></div>`)}` : ''}
-            <div class="row"><button class="btn primary" type="button" id="again">${icon('replay')}Try again</button><a class="btn" href="#/device/${encodeURIComponent(dev.id)}">Back to the device</a></div>`);
+          box.innerHTML = String(html`<div class="callout ${pct >= 80 ? 'ok' : pct >= 50 ? 'warn' : 'bad'}">${icon(pct >= 80 ? 'checkCircle' : 'info')}<div><p class="t">${t('{score} of {total} right ({pct}%)', { score, total: qs.length, pct })}</p><p>${pct >= 80 ? t('Well done. You know these parts.') : t('Have another look at the learn page and the parts below, then try again.')}</p></div></div>
+            ${wrong.length ? html`<h2>${t('To review')}</h2>${wrong.map((q) => html`<div class="card pad"><b>${q.prompt}</b><p class="small" style="margin-top:6px">${q.explain}</p></div>`)}` : ''}
+            <div class="row"><button class="btn primary" type="button" id="again">${icon('replay')}${t('Try again')}</button><a class="btn" href="#/device/${encodeURIComponent(dev.id)}">${t('Back to the device')}</a></div>`);
           box.querySelector('#again').addEventListener('click', () => { qs = buildQuestions(app, dev); i = 0; score = 0; wrong.length = 0; render(); });
           return;
         }
         const q = qs[i];
         box.innerHTML = String(html`<div class="progress"><i style="width:${(i / qs.length) * 100}%"></i></div>
-          <p class="small muted">Question ${i + 1} of ${qs.length}</p>
+          <p class="small muted">${t('Question {n} of {total}', { n: i + 1, total: qs.length })}</p>
           <h2>${q.prompt}</h2>
           ${q.figure ? html`<div class="drawing-box" style="min-height:140px;max-width:240px">${raw(q.figure)}</div>` : ''}
-          <div class="quiz-opts">${q.options.map((o) => html`<button class="quiz-opt" type="button" data-id="${o.id}">${o.part ? raw(drawPart(o.part, { view: 'side' })) : ''}<span>${o.label}</span>${o.sub ? html`<span class="small muted">${o.sub}</span>` : ''}</button>`)}</div>
+          <div class="quiz-opts">${q.options.map((o) => html`<button class="quiz-opt" type="button" data-id="${o.id}">${o.part ? raw(drawPart(o.part, { view: 'side' })) : ''}<span dir="auto">${o.label}</span>${o.sub ? html`<span class="small muted">${o.sub}</span>` : ''}</button>`)}</div>
           <div id="fb" aria-live="polite"></div>`);
         box.querySelectorAll('.quiz-opt').forEach((b) => b.addEventListener('click', () => {
           const right = b.dataset.id === q.answer;
@@ -93,7 +96,7 @@ export default async function quiz({ app, params }) {
           beep(right ? 'ok' : 'bad');
           box.querySelectorAll('.quiz-opt').forEach((x) => { x.disabled = true; if (x.dataset.id === q.answer) x.classList.add('right'); });
           if (!right) b.classList.add('wrong');
-          box.querySelector('#fb').innerHTML = String(html`<div class="callout ${right ? 'ok' : 'bad'}">${icon(right ? 'checkCircle' : 'xCircle')}<div><p class="t">${right ? 'Right' : 'Not quite'}</p><p>${q.explain}</p><div class="acts"><button class="btn primary" type="button" id="next">${i === qs.length - 1 ? 'See the result' : 'Next question'}</button></div></div></div>`);
+          box.querySelector('#fb').innerHTML = String(html`<div class="callout ${right ? 'ok' : 'bad'}">${icon(right ? 'checkCircle' : 'xCircle')}<div><p class="t">${right ? t('quiz::Right') : t('Not quite')}</p><p>${q.explain}</p><div class="acts"><button class="btn primary" type="button" id="next">${i === qs.length - 1 ? t('See the result') : t('Next question')}</button></div></div></div>`);
           box.querySelector('#next').addEventListener('click', () => { i++; render(); });
           box.querySelector('#next').focus();
         }));

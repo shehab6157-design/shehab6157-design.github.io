@@ -3,6 +3,7 @@
 // 1 mm on a calibrated screen; in "print" mode it is 1 mm on paper.
 
 import { headDims, nutDims, washerDims, MATERIALS, isFastener } from './core/dims.js';
+import { t } from './core/i18n.js';
 
 let uid = 0;
 const f = (n) => Math.round(n * 1000) / 1000;
@@ -273,7 +274,7 @@ function genericIcon(part) {
   } else {
     body = `<path d="M8 58 h84 v-6 h-70 v-40 h-14 z" class="gen-sheet"/><circle cx="15" cy="22" r="2.6" class="gen-hole"/><circle cx="60" cy="55" r="2" class="gen-hole"/>`;
   }
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="pdraw generic" role="img" aria-label="${escAttr(part.name)} (illustration, not to scale)">${body}</svg>`;
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="pdraw generic" role="img" aria-label="${escAttr(t('{name} (illustration, not to scale)', { name: part.name }))}">${body}</svg>`;
 }
 
 // Drawing styles. The app loads the same rules from css/app.css; STYLE is embedded only in standalone SVGs.
@@ -416,7 +417,7 @@ export function drawPart(part, opts = {}) {
   x0 -= pad; x1 += pad; y0 -= pad; y1 += pad;
   const W = x1 - x0, H = y1 - y0;
   const size = mode === 'actual' ? `width="${f(W * pxPerMm)}" height="${f(H * pxPerMm)}"` : mode === 'print' ? `width="${f(W)}mm" height="${f(H)}mm"` : '';
-  const label = ariaLabel || `${part.name}${mode === 'fit' ? '' : ', actual size'}`;
+  const label = ariaLabel || (mode === 'fit' ? part.name : t('{name}, actual size', { name: part.name }));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${f(x0)} ${f(y0)} ${f(W)} ${f(H)}" ${size} class="pdraw" role="img" aria-label="${escAttr(label)}"><defs>${defs}</defs>${standalone ? STYLE : ''}${body}</svg>`;
 }
 

@@ -4,6 +4,7 @@
 // need none of this: they type the code into the focused box and press Enter.
 
 import { html, icon, openDialog, esc } from './ui.js';
+import { t } from './core/i18n.js';
 
 let zxing = null;
 function loadZXing() {
@@ -13,7 +14,7 @@ function loadZXing() {
     const s = document.createElement('script');
     s.src = new URL('../vendor/zxing/zxing.min.js', import.meta.url).href;
     s.onload = () => resolve(window.ZXing);
-    s.onerror = () => { zxing = null; reject(new Error('The barcode reader could not be loaded')); };
+    s.onerror = () => { zxing = null; reject(new Error(t('The barcode reader could not be loaded'))); };
     document.head.append(s);
   });
   return zxing;
@@ -73,10 +74,10 @@ export async function decodeFile(file) {
 }
 
 function cameraError(err) {
-  if (!window.isSecureContext) return 'The camera only works over HTTPS.';
-  if (err?.name === 'NotAllowedError') return 'Camera permission was refused. Allow it in the browser settings, or type the code below.';
-  if (err?.name === 'NotFoundError' || err?.name === 'OverconstrainedError') return 'No camera found on this device. Type the code below or use a handheld scanner.';
-  return 'The camera could not start. Type the code below.';
+  if (!window.isSecureContext) return t('The camera only works over HTTPS.');
+  if (err?.name === 'NotAllowedError') return t('Camera permission was refused. Allow it in the browser settings, or type the code below.');
+  if (err?.name === 'NotFoundError' || err?.name === 'OverconstrainedError') return t('No camera found on this device. Type the code below or use a handheld scanner.');
+  return t('The camera could not start. Type the code below.');
 }
 
 export async function openCamera(video, { facing = 'environment' } = {}) {
@@ -90,23 +91,23 @@ export async function openCamera(video, { facing = 'environment' } = {}) {
 }
 
 export function stopStream(stream) {
-  stream?.getTracks().forEach((t) => t.stop());
+  stream?.getTracks().forEach((tr) => tr.stop());
 }
 
 /**
  * Open a scanner. Resolves with the code (from the camera, a photo, or typed) or null.
  */
-export function scanDialog({ title = 'Scan a code', hint = '' } = {}) {
+export function scanDialog({ title = t('Scan a code'), hint = '' } = {}) {
   let stream = null;
   let stop = false;
   let found = null;
   return openDialog({
     title,
-    body: String(html`<div class="cam"><video muted playsinline></video><div class="frame line"></div><div class="msg" id="scMsg">Starting the camera…</div></div>
+    body: String(html`<div class="cam"><video muted playsinline></video><div class="frame line"></div><div class="msg" id="scMsg">${t('Starting the camera…')}</div></div>
       ${hint ? html`<p class="small muted">${hint}</p>` : ''}
-      <form class="verify-row" id="scForm" autocomplete="off"><input id="scInput" type="text" autocapitalize="characters" spellcheck="false" placeholder="Or type the code" aria-label="Code"><button class="btn primary" type="submit">Use</button></form>
-      <div class="row"><label class="btn sm" for="scFile">${icon('upload')}Read from a photo</label><input id="scFile" type="file" accept="image/*" class="sr-only"><button class="btn sm hidden" type="button" id="scTorch">${icon('zap')}Light</button></div>`),
-    actions: [{ label: 'Cancel', value: null }],
+      <form class="verify-row" id="scForm" autocomplete="off"><input id="scInput" type="text" autocapitalize="characters" spellcheck="false" dir="ltr" placeholder="${t('Or type the code')}" aria-label="${t('Code')}"><button class="btn primary" type="submit">${t('Use')}</button></form>
+      <div class="row"><label class="btn sm" for="scFile">${icon('upload')}${t('Read from a photo')}</label><input id="scFile" type="file" accept="image/*" class="sr-only"><button class="btn sm hidden" type="button" id="scTorch">${icon('zap')}${t('Light')}</button></div>`),
+    actions: [{ label: t('Cancel'), value: null }],
     onMount(d, close) {
       const video = d.querySelector('video');
       const msg = d.querySelector('#scMsg');
@@ -116,16 +117,16 @@ export function scanDialog({ title = 'Scan a code', hint = '' } = {}) {
       d.querySelector('#scFile').addEventListener('change', async (e) => {
         const f = e.target.files?.[0];
         if (!f) return;
-        msg.textContent = 'Reading the photo…';
+        msg.textContent = t('Reading the photo…');
         const code = await decodeFile(f).catch(() => null);
-        if (code) finish(code); else msg.textContent = 'No barcode found in that photo. Try closer, flat and in focus.';
+        if (code) finish(code); else msg.textContent = t('No barcode found in that photo. Try closer, flat and in focus.');
       });
       (async () => {
         try {
           const dec = await makeDecoder();
           stream = await openCamera(video);
           if (stop) { stopStream(stream); return; }
-          msg.textContent = 'Hold the barcode inside the frame';
+          msg.textContent = t('Hold the barcode inside the frame');
           const track = stream.getVideoTracks()[0];
           const caps = track.getCapabilities?.() || {};
           if (caps.torch) {

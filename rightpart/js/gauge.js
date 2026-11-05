@@ -4,6 +4,8 @@
 // M3 × 8 from M3 × 10, which is the mistake that matters.
 
 import { html, icon, openDialog, toast } from './ui.js';
+import { t, lower } from './core/i18n.js';
+import { HEADS, DRIVES } from './core/dims.js';
 import { settings, setSetting } from './store.js';
 import { outlineMm } from './draw.js';
 import { isFastener, sizeLabel, headDims } from './core/dims.js';
@@ -16,13 +18,13 @@ export function pxPerMm() { return settings().pxPerMm || null; }
 export function calibrateDialog() {
   let value = settings().pxPerMm || DEFAULT_PX_PER_MM;
   return openDialog({
-    title: 'Calibrate the screen',
+    title: t('Calibrate the screen'),
     wide: true,
-    body: String(html`<p>Hold a bank card (or any ID card of the same size) flat against the screen, and move the slider until the blue card is exactly as wide as yours. Do this once per device.</p>
+    body: String(html`<p>${t('Hold a bank card (or any ID card of the same size) flat against the screen, and move the slider until the blue card is exactly as wide as yours. Do this once per device.')}</p>
       <div style="overflow:hidden;padding:8px 0"><div id="calCard" style="border:2px solid var(--brand);background:color-mix(in srgb,var(--brand) 12%,transparent);border-radius:10px;display:grid;place-items:center;color:var(--brand-strong);font-weight:700;max-width:none">85.6 mm</div></div>
-      <div class="row nowrap"><button class="btn sm" type="button" data-step="-0.01" aria-label="Smaller">${icon('chevronLeft')}</button><input id="calRange" type="range" min="2" max="14" step="0.005" aria-label="Card width"><button class="btn sm" type="button" data-step="0.01" aria-label="Larger">${icon('chevronRight')}</button></div>
-      <p class="tiny muted">Tip: the card's long edge goes left to right. Your phone or tablet keeps this setting; a zoomed browser page changes it, so keep the zoom at 100%.</p>`),
-    actions: [{ label: 'Cancel', value: null }, { label: 'Save calibration', value: 'save', primary: true }],
+      <div class="row nowrap"><button class="btn sm" type="button" data-step="-0.01" aria-label="${t('Smaller')}">${icon('chevronLeft')}</button><input id="calRange" type="range" min="2" max="14" step="0.005" aria-label="${t('Card width')}"><button class="btn sm" type="button" data-step="0.01" aria-label="Larger">${icon('chevronRight')}</button></div>
+      <p class="tiny muted">${t("Tip: the card's long edge goes left to right. Your phone or tablet keeps this setting; a zoomed browser page changes it, so keep the zoom at 100%.")}</p>`),
+    actions: [{ label: t('Cancel'), value: null }, { label: t('Save calibration'), value: 'save', primary: true }],
     onMount(d) {
       const card = d.querySelector('#calCard');
       const range = d.querySelector('#calRange');
@@ -34,12 +36,12 @@ export function calibrateDialog() {
   }).then((v) => {
     if (v !== 'save') return null;
     setSetting('pxPerMm', Math.round(value * 1000) / 1000);
-    toast('Screen calibrated.', 'ok');
+    toast(t('Screen calibrated.'), 'ok');
     return value;
   });
 }
 
-const STD_D = [[1.6, 'M1.6'], [2, 'M2'], [2.5, 'M2.5'], [2.84, '#4 (inch)'], [3, 'M3'], [3.5, 'M3.5'], [3.51, '#6 (inch)'], [4, 'M4'], [4.17, '#8 (inch)'], [5, 'M5'], [6, 'M6']];
+const STD_D = [[1.6, 'M1.6'], [2, 'M2'], [2.5, 'M2.5'], [2.84, '#4 (inch)'], [3, 'M3'], [3.5, 'M3.5'], [3.51, '#6 (inch)'], [4, 'M4'], [4.17, '#8 (inch)'], [5, 'M5'], [6, 'M6']].map(([d, l]) => [d, l.replace('(inch)', '(' + t('inch') + ')')]);
 
 export function nearestThread(d) {
   let best = STD_D[0];
@@ -65,7 +67,7 @@ export function mountGauge(el, { onChange } = {}) {
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg = document.createElementNS(svgNS, 'svg');
   svg.setAttribute('role', 'img');
-  svg.setAttribute('aria-label', 'Measuring stage with a millimetre ruler');
+  svg.setAttribute('aria-label', t('Measuring stage with a millimetre ruler'));
   svg.setAttribute('class', 'gstage');
   el.append(svg);
 
@@ -173,16 +175,16 @@ export function rankByMeasure(parts, { length, diameter, head, drive, category =
     if (length && L != null) {
       const dl = Math.abs(L - length);
       score -= Math.min(0.6, dl * 0.18);
-      notes.push(dl <= 0.5 ? `length matches (${L} mm)` : `${L} mm long (${(L - length > 0 ? '+' : '') + (L - length).toFixed(1)})`);
+      notes.push(dl <= 0.5 ? { ok: true, text: t('length matches ({n} mm)', { n: L }) } : { text: t('{n} mm long ({diff})', { n: L, diff: (L - length > 0 ? '+' : '') + (L - length).toFixed(1) }) });
     }
     if (diameter && d != null) {
       const dd = Math.abs(d - diameter);
       score -= Math.min(0.5, dd * 0.45);
-      notes.push(dd <= 0.25 ? `diameter matches (${s.thread || 'M' + d})` : `${s.thread || 'M' + d}`);
+      notes.push(dd <= 0.25 ? { ok: true, text: t('diameter matches ({thread})', { thread: s.thread || 'M' + d }) } : { text: `${s.thread || 'M' + d}` });
     }
-    if (head) { if (s.head === head) notes.push('same head'); else { score -= 0.3; notes.push(`head: ${s.head}`); } }
-    if (drive) { if (s.drive === drive) notes.push('same drive'); else { score -= 0.2; notes.push(`drive: ${s.drive}`); } }
-    if (p.status === 'obsolete') { score -= 0.1; notes.push('retired'); }
+    if (head) { if (s.head === head) notes.push({ ok: true, text: t('same head') }); else { score -= 0.3; notes.push({ text: t('head: {head}', { head: lower(HEADS[s.head]?.label || s.head || '?') }) }); } }
+    if (drive) { if (s.drive === drive) notes.push({ ok: true, text: t('same drive') }); else { score -= 0.2; notes.push({ text: t('drive: {drive}', { drive: DRIVES[s.drive]?.label || s.drive || '?' }) }); } }
+    if (p.status === 'obsolete') { score -= 0.1; notes.push({ text: t('retired') }); }
     out.push({ part: p, score: Math.max(0, Math.round(score * 100) / 100), notes });
   }
   return out.sort((a, b) => b.score - a.score);

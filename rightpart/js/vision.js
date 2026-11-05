@@ -7,6 +7,7 @@
 // right family (head, drive, finish); the true-scale gauge confirms the size.
 
 import { put, all, del } from './store.js';
+import { t } from './core/i18n.js';
 
 let tfPromise = null;
 let modelPromise = null;
@@ -16,7 +17,7 @@ function loadScript(src) {
     const s = document.createElement('script');
     s.src = src;
     s.onload = resolve;
-    s.onerror = () => reject(new Error('Could not load ' + src));
+    s.onerror = () => reject(new Error(t('Could not load {file}', { file: src })));
     document.head.append(s);
   });
 }
@@ -38,7 +39,7 @@ async function loadTF() {
 export function loadModel(onStatus) {
   if (!modelPromise) {
     modelPromise = (async () => {
-      onStatus?.('Loading the on-device model…');
+      onStatus?.(t('Loading the on-device model…'));
       const tf = await loadTF();
       const full = await tf.loadLayersModel(new URL('../vendor/mobilenet/model.json', import.meta.url).href);
       const feat = tf.model({ inputs: full.inputs, outputs: full.getLayer('global_average_pooling2d_1').output });
@@ -146,7 +147,7 @@ export async function exportSamples() {
 }
 
 export async function importSamples(data) {
-  if (data?.schema !== 'rightpart-samples/1' || !Array.isArray(data.samples)) throw new Error('Not a RightPart photo-samples file');
+  if (data?.schema !== 'rightpart-samples/1' || !Array.isArray(data.samples)) throw new Error(t('Not a RightPart photo-samples file'));
   let n = 0;
   for (const s of data.samples) {
     if (!s.partId || !Array.isArray(s.vec) || s.vec.length !== 512) continue;

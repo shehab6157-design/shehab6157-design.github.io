@@ -1,4 +1,7 @@
 import { html, raw, icon, toast } from '../ui.js';
+import { th } from '../ui.js';
+import { t } from '../core/i18n.js';
+import { partText } from '../core/content.js';
 import { drawPart, drawChoice } from '../draw.js';
 import { HEADS, DRIVES, sizeLabel } from '../core/dims.js';
 import { partHref, thumb, subtitle } from '../components.js';
@@ -8,54 +11,55 @@ import { settings } from '../store.js';
 export default async function identify({ app, query, navigate }) {
   const tab = ['photo', 'measure', 'code'].includes(query.get('tab')) ? query.get('tab') : 'measure';
   const calibrated = !!settings().pxPerMm;
-  const tabLink = (t, label, ic) => html`<a href="#/identify?tab=${t}" ${t === tab ? html`aria-current="page"` : ''}>${icon(ic)}${label}</a>`;
+  const tabLink = (id, label, ic) => html`<a href="#/identify?tab=${id}" ${id === tab ? html`aria-current="page"` : ''}>${icon(ic)}${label}</a>`;
+  const HEAD_SHORT = { pan: () => t('head-short::Pan'), button: () => t('head-short::Button'), socket: () => t('head-short::Socket cap'), countersunk: () => t('head-short::Countersunk'), cheese: () => t('head-short::Cheese'), hex: () => t('head-short::Hex') };
   return {
-    title: 'Identify a part',
+    title: t('Identify a part'),
     html: html`<div class="page">
       <div class="page-head"><div>
-        <h1>Identify a part</h1>
-        <p class="lede">Found a loose screw on the bench, or not sure what is in a bin? Measure it on the screen, photograph it, or scan any code on it.</p>
+        <h1>${t('Identify a part')}</h1>
+        <p class="lede">${t('Found a loose screw on the bench, or not sure what is in a bin? Measure it on the screen, photograph it, or scan any code on it.')}</p>
       </div>
-      <nav class="seg" aria-label="Method">${tabLink('measure', 'Measure', 'ruler')}${tabLink('photo', 'Photo', 'camera')}${tabLink('code', 'Code', 'scan')}</nav></div>
+      <nav class="seg" aria-label="${t('Method')}">${tabLink('measure', t('Measure'), 'ruler')}${tabLink('photo', t('Photo'), 'camera')}${tabLink('code', t('Code'), 'scan')}</nav></div>
 
       ${tab === 'measure' ? html`
-        ${!calibrated ? html`<div class="callout warn">${icon('ruler')}<div><p class="t">Calibrate the screen first</p><p>Screens differ in size. Hold a bank card against the screen once, and every drawing in RightPart is shown at its real size on this device.</p><div class="acts"><button class="btn sm primary" type="button" id="calib">Calibrate with a card</button></div></div></div>` : ''}
+        ${!calibrated ? html`<div class="callout warn">${icon('ruler')}<div><p class="t">${t('Calibrate the screen first')}</p><p>${t('Screens differ in size. Hold a bank card against the screen once, and every drawing in RightPart is shown at its real size on this device.')}</p><div class="acts"><button class="btn sm primary" type="button" id="calib">${t('Calibrate with a card')}</button></div></div></div>` : ''}
         <section class="card">
-          <div class="card-head"><div><h2>Lay the part on the screen</h2><p class="small muted">Drag <b>H</b> to the underside of the head (the top, for a countersunk screw) and <b>T</b> to the tip. Drag the green lines to the edges of the thread.</p></div>${calibrated ? html`<button class="btn sm" type="button" id="calib">${icon('ruler')}Recalibrate</button>` : ''}</div>
-          <div class="gauge-stage" id="stage"></div>
+          <div class="card-head"><div><h2>${t('Lay the part on the screen')}</h2><p class="small muted">${th('Drag {h} to the underside of the head (the top, for a countersunk screw) and {t} to the tip. Drag the green lines to the edges of the thread.', { h: html`<b>H</b>`, t: html`<b>T</b>` })}</p></div>${calibrated ? html`<button class="btn sm" type="button" id="calib">${icon('ruler')}${t('Recalibrate')}</button>` : ''}</div>
+          <div class="gauge-stage" id="stage" dir="ltr"></div>
           <div class="card-body stack">
             <div class="gauge-readout" id="readout"></div>
-            <div class="stack tight"><span class="small muted" style="font-weight:650">Head (optional)</span><div class="choice-grid" id="heads">${Object.entries(HEADS).map(([k, v]) => html`<button class="choice" type="button" data-head="${k}" aria-pressed="false">${raw(drawChoice('head', k))}${v.label.replace(' head', '').replace(' (flat)', '')}</button>`)}</div></div>
-            <div class="stack tight"><span class="small muted" style="font-weight:650">Drive (optional)</span><div class="choice-grid" id="drives">${Object.entries(DRIVES).filter(([k]) => k !== 'external').map(([k, v]) => html`<button class="choice" type="button" data-drive="${k}" aria-pressed="false">${raw(drawChoice('drive', k))}${v.label}</button>`)}</div></div>
+            <div class="stack tight"><span class="small muted" style="font-weight:650">${t('Head (optional)')}</span><div class="choice-grid" id="heads">${Object.keys(HEADS).map((k) => html`<button class="choice" type="button" data-head="${k}" aria-pressed="false">${raw(drawChoice('head', k))}${HEAD_SHORT[k]?.() || HEADS[k].label}</button>`)}</div></div>
+            <div class="stack tight"><span class="small muted" style="font-weight:650">${t('Drive (optional)')}</span><div class="choice-grid" id="drives">${Object.entries(DRIVES).filter(([k]) => k !== 'external').map(([k, v]) => html`<button class="choice" type="button" data-drive="${k}" aria-pressed="false">${raw(drawChoice('drive', k))}${v.label}</button>`)}</div></div>
           </div>
         </section>
-        <section class="stack"><h2>Closest parts in the library</h2><div class="results" id="cands"></div></section>
+        <section class="stack"><h2>${t('Closest parts in the library')}</h2><div class="results" id="cands"></div></section>
       ` : ''}
 
       ${tab === 'photo' ? html`
         <section class="split">
           <div class="stack">
-            <div class="cam" id="cam"><video muted playsinline></video><div class="frame"></div><div class="msg" id="camMsg">Camera off</div></div>
+            <div class="cam" id="cam"><video muted playsinline></video><div class="frame"></div><div class="msg" id="camMsg">${t('Camera off')}</div></div>
             <div class="row">
-              <button class="btn primary" type="button" id="camStart">${icon('camera')}Start camera</button>
-              <button class="btn" type="button" id="snap" disabled>${icon('target')}Identify</button>
-              <label class="btn" for="photoFile">${icon('upload')}Use a photo</label><input id="photoFile" type="file" accept="image/*" capture="environment" class="sr-only">
+              <button class="btn primary" type="button" id="camStart">${icon('camera')}${t('Start camera')}</button>
+              <button class="btn" type="button" id="snap" disabled>${icon('target')}${t('verb::Identify')}</button>
+              <label class="btn" for="photoFile">${icon('upload')}${t('Use a photo')}</label><input id="photoFile" type="file" accept="image/*" capture="environment" class="sr-only">
             </div>
-            <p class="small muted">Place the part alone on a plain background (a white sheet works), fill the frame, and use the same setup you used when teaching.</p>
+            <p class="small muted">${t('Place the part alone on a plain background (a white sheet works), fill the frame, and use the same setup you used when teaching.')}</p>
           </div>
           <div class="stack">
             <div id="photoStatus"></div>
             <div class="stack" id="photoResults"></div>
-            <a class="btn" href="#/teach">${icon('sparkle')}Teach parts</a>
+            <a class="btn" href="#/teach">${icon('sparkle')}${t('Teach parts')}</a>
           </div>
         </section>
       ` : ''}
 
       ${tab === 'code' ? html`
         <section class="card pad stack">
-          <h2>Any code on the part, bag or bin</h2>
-          <p class="muted">Internal, customer, supplier, manufacturer or an old code: all of them lead to the same part. A handheld scanner types straight into this box.</p>
-          <form class="verify-row" id="codeForm" autocomplete="off"><input id="codeIn" type="text" autocapitalize="characters" spellcheck="false" placeholder="Scan or type a code" aria-label="Code"><button class="btn" type="button" id="codeScan">${icon('scan')}Camera</button><button class="btn primary" type="submit">Find</button></form>
+          <h2>${t('Any code on the part, bag or bin')}</h2>
+          <p class="muted">${t('Internal, customer, supplier, manufacturer or an old code: all of them lead to the same part. A handheld scanner types straight into this box.')}</p>
+          <form class="verify-row" id="codeForm" autocomplete="off"><input id="codeIn" type="text" autocapitalize="characters" spellcheck="false" dir="ltr" placeholder="${t('Scan or type a code')}" aria-label="${t('Code')}"><button class="btn" type="button" id="codeScan">${icon('scan')}${t('Camera')}</button><button class="btn primary" type="submit">${t('Find')}</button></form>
         </section>
       ` : ''}
     </div>`,
@@ -75,13 +79,13 @@ export default async function identify({ app, query, navigate }) {
         let mod = null;
         const update = (m) => {
           if (!mod) return;
-          const t = mod.nearestThread(m.diameter);
-          readout.innerHTML = String(html`<div class="fact"><div class="k">Length</div><div class="v">${m.length.toFixed(1)} mm</div><div class="n">± 0.3 mm on a calibrated screen</div></div><div class="fact"><div class="k">Thread diameter</div><div class="v">${m.diameter.toFixed(1)} mm</div><div class="n">closest: ${t[1]}</div></div>`);
+          const near = mod.nearestThread(m.diameter);
+          readout.innerHTML = String(html`<div class="fact"><div class="k">${t('Length')}</div><div class="v" dir="ltr">${m.length.toFixed(1)} mm</div><div class="n">${t('± 0.3 mm on a calibrated screen')}</div></div><div class="fact"><div class="k">${t('Thread diameter')}</div><div class="v" dir="ltr">${m.diameter.toFixed(1)} mm</div><div class="n">${t('closest: {thread}', { thread: near[1] })}</div></div>`);
           const ranked = mod.rankByMeasure(app.lib.parts, { length: m.length, diameter: m.diameter, head: sel.head, drive: sel.drive }).slice(0, 6);
           cands.innerHTML = String(html`${ranked.map((r) => html`<div class="result" style="grid-template-columns:96px minmax(0,1fr) auto">
             <a class="thumb" href="${partHref(r.part.id)}">${thumb(r.part)}</a>
-            <div><a href="${partHref(r.part.id)}" class="t" style="color:inherit;text-decoration:none">${r.part.name}</a><div class="muted small"><span class="code">${r.part.id}</span> · ${sizeLabel(r.part)}</div><div class="why">${r.notes.map((n) => html`<span class="chip ${/matches|same/.test(n) ? 'ok' : ''}">${n}</span>`)}</div></div>
-            <button class="btn sm" type="button" data-ov="${r.part.id}" aria-pressed="${overlayId === r.part.id}">${icon('layers')}${overlayId === r.part.id ? 'Hide' : 'Overlay'}</button>
+            <div><a href="${partHref(r.part.id)}" class="t" style="color:inherit;text-decoration:none">${partText(r.part, app.lib).name}</a><div class="muted small"><span class="code">${r.part.id}</span> · <span class="code">${sizeLabel(r.part)}</span></div><div class="why">${r.notes.map((n) => html`<span class="chip ${n.ok ? 'ok' : ''}">${n.text}</span>`)}</div></div>
+            <button class="btn sm" type="button" data-ov="${r.part.id}" aria-pressed="${overlayId === r.part.id}">${icon('layers')}${overlayId === r.part.id ? t('Hide') : t('Overlay')}</button>
           </div>`)}`);
         };
         import('../gauge.js').then((g) => {
@@ -96,7 +100,7 @@ export default async function identify({ app, query, navigate }) {
           if (!b || !gauge) return;
           overlayId = overlayId === b.dataset.ov ? null : b.dataset.ov;
           gauge.setOverlay(overlayId ? app.index.parts.get(overlayId) : null);
-          if (overlayId) toast('The dashed outline is the real size: lay the part on it.');
+          if (overlayId) toast(t('The dashed outline is the real size: lay the part on it.'));
         });
         root.querySelectorAll('[data-head]').forEach((b) => b.addEventListener('click', () => {
           sel.head = sel.head === b.dataset.head ? null : b.dataset.head;
@@ -123,48 +127,48 @@ export default async function identify({ app, query, navigate }) {
           vision = vision || await import('../vision.js');
           const counts = await vision.samplesByPart();
           if (!counts.size) {
-            setStatus(html`<div class="callout info">${icon('sparkle')}<div><p class="t">Teach it your parts first</p><p>The identifier learns from your own photos, on this device: 5 to 10 photos of each part, on the same background you will use here. Start with the parts people mix up.</p><div class="acts"><a class="btn sm primary" href="#/teach">Teach parts</a></div></div></div>`);
+            setStatus(html`<div class="callout info">${icon('sparkle')}<div><p class="t">${t('Teach it your parts first')}</p><p>${t('The identifier learns from your own photos, on this device: 5 to 10 photos of each part, on the same background you will use here. Start with the parts people mix up.')}</p><div class="acts"><a class="btn sm primary" href="#/teach">${t('Teach parts')}</a></div></div></div>`);
             return null;
           }
-          setStatus(html`<div class="row"><span class="spinner"></span><span class="small muted">Loading the on-device model (about 6 MB, only the first time)…</span></div>`);
+          setStatus(html`<div class="row"><span class="spinner"></span><span class="small muted">${t('Loading the on-device model (about 6 MB, only the first time)…')}</span></div>`);
           await vision.loadModel();
-          setStatus(html`<p class="small muted">${counts.size} part${counts.size > 1 ? 's' : ''} taught on this device.</p>`);
+          setStatus(html`<p class="small muted">${t('{n, plural, one {# part taught on this device.} other {# parts taught on this device.}}', { n: counts.size })}</p>`);
           return counts;
         };
         const show = async (source, preview) => {
-          const counts = await ensure().catch((e) => { setStatus(html`<div class="callout bad">${icon('stop')}<div><p class="t">The model could not load</p><p>${e.message}</p></div></div>`); return null; });
+          const counts = await ensure().catch((e) => { setStatus(html`<div class="callout bad">${icon('stop')}<div><p class="t">${t('The model could not load')}</p><p>${e.message}</p></div></div>`); return null; });
           if (!counts) return;
           const res = await vision.identify(source);
-          const lab = { strong: ['ok', 'Strong match'], possible: ['warn', 'Possible match: confirm the size'], unsure: ['bad', 'Not sure: teach more photos or measure it'] }[res.verdict] || ['', ''];
+          const lab = { strong: ['ok', t('Strong match')], possible: ['warn', t('Possible match: confirm the size')], unsure: ['bad', t('Not sure: teach more photos or measure it')] }[res.verdict] || ['', ''];
           results.innerHTML = String(html`
-            <div class="row">${preview ? html`<img src="${preview}" alt="Your photo" style="width:96px;height:96px;object-fit:cover;border-radius:12px">` : ''}<span class="chip ${lab[0]}">${lab[1]}</span></div>
+            <div class="row">${preview ? html`<img src="${preview}" alt="${t('Your photo')}" style="width:96px;height:96px;object-fit:cover;border-radius:12px">` : ''}<span class="chip ${lab[0]}">${lab[1]}</span></div>
             ${res.matches.map((m, i) => {
               const p = app.index.parts.get(m.partId);
               if (!p) return '';
               return html`<div class="match" style="${i === 0 ? 'border-color:var(--brand)' : ''}">
                 ${m.thumb ? html`<img src="${m.thumb}" alt="">` : html`<span class="thumb">${thumb(p)}</span>`}
-                <div><a href="${partHref(p.id)}" style="font-weight:650">${p.name}</a><div class="small muted"><span class="code">${p.id}</span> · ${subtitle(p)}</div></div>
+                <div><a href="${partHref(p.id)}" style="font-weight:650">${partText(p, app.lib).name}</a><div class="small muted"><span class="code">${p.id}</span> · ${subtitle(p)}</div></div>
                 <div class="stack tight" style="justify-items:end"><span class="small"><b>${Math.round(m.score * 100)}%</b></span><div class="meter"><i style="width:${Math.max(4, Math.min(100, (m.score - 0.5) * 200))}%"></i></div>
-                ${p.spec?.length ? html`<a class="btn sm" href="#/identify?tab=measure&part=${encodeURIComponent(p.id)}">${icon('ruler')}Check size</a>` : ''}</div>
+                ${p.spec?.length ? html`<a class="btn sm" href="#/identify?tab=measure&part=${encodeURIComponent(p.id)}">${icon('ruler')}${t('Check size')}</a>` : ''}</div>
               </div>`;
             })}
-            <p class="tiny muted">A photo shows the type (head, drive, finish) but not the exact length. Always confirm the size with "Check size" before fitting.</p>`);
+            <p class="tiny muted">${t('A photo shows the type (head, drive, finish) but not the exact length. Always confirm the size with "Check size" before fitting.')}</p>`);
         };
         ensure();
         root.querySelector('#camStart').addEventListener('click', async () => {
           const { openCamera } = await import('../scan.js');
           try {
             stream = await openCamera(video);
-            msg.textContent = 'Part in the frame, then Identify';
+            msg.textContent = t('Part in the frame, then Identify');
             root.querySelector('#snap').disabled = false;
-          } catch (e) { msg.textContent = e?.name === 'NotAllowedError' ? 'Camera permission refused. You can still use a photo.' : 'No camera available. Use a photo instead.'; }
+          } catch (e) { msg.textContent = e?.name === 'NotAllowedError' ? t('Camera permission refused. You can still use a photo.') : t('No camera available. Use a photo instead.'); }
         });
         root.querySelector('#snap').addEventListener('click', async () => {
           if (!stream) return;
           const c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight; c.getContext('2d').drawImage(video, 0, 0);
-          msg.textContent = 'Comparing…';
+          msg.textContent = t('Comparing…');
           await show(c, c.toDataURL('image/jpeg', 0.7));
-          msg.textContent = 'Part in the frame, then Identify';
+          msg.textContent = t('Part in the frame, then Identify');
         });
         root.querySelector('#photoFile').addEventListener('change', async (e) => {
           const f = e.target.files?.[0];
@@ -173,7 +177,7 @@ export default async function identify({ app, query, navigate }) {
           const img = new Image(); img.src = url; await img.decode();
           await show(img, url);
         });
-        cleanups.push(() => stream?.getTracks().forEach((t) => t.stop()));
+        cleanups.push(() => stream?.getTracks().forEach((tr) => tr.stop()));
       }
 
       if (tab === 'code') {
@@ -182,7 +186,7 @@ export default async function identify({ app, query, navigate }) {
         root.querySelector('#codeForm').addEventListener('submit', (e) => { e.preventDefault(); submitQuery(inp.value); });
         root.querySelector('#codeScan').addEventListener('click', async () => {
           const { scanDialog } = await import('../scan.js');
-          const code = await scanDialog({ title: 'Scan a code' });
+          const code = await scanDialog({ title: t('Scan a code') });
           if (code) { inp.value = code; submitQuery(code); }
         });
       }
