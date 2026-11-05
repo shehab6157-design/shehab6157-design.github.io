@@ -16,6 +16,8 @@ export const CHECKS = {
   'bom-not-in-steps': { label: 'In the BOM, never fitted in a step', why: 'Either the part is forgotten during assembly or the instructions use something else in its place.' },
   'bom-qty': { label: 'Quantity differs from the BOM', why: 'Leftover or missing parts at the end of a build point to a mistake somewhere.' },
   'rev-mismatch': { label: 'Instructions and BOM are on different revisions', why: 'Changes made to the BOM (ECOs) may never have reached the people who build the device.' },
+  'draft-steps': { label: 'Steps read from a PDF, not reviewed yet', why: 'Steps read automatically from a document can miss a part, a quantity or a warning. An engineer compares them with the released document before anyone builds from them.' },
+  'no-bom': { label: 'Device without a BOM', why: 'Without a parts list to compare with, nobody can tell whether the steps fit the right parts in the right numbers.' },
   'legacy-code': { label: 'Document still uses an old code', why: 'Old codes keep working only as long as somebody remembers them.' },
   'spec-conflict': { label: 'A code says one size, the spec says another', why: 'A code that spells out a size (like M3-12) but points to a different size misleads anyone who reads it.' },
   'duplicate-part': { label: 'Two records for the same part', why: 'Two codes for one physical part split the stock and confuse people. It is how mix-ups start.' },
@@ -150,7 +152,16 @@ export function runAudit(index) {
       }
     }
 
-    for (const id of ids) {
+    if (!bomLines.length && steps.length) {
+      add({ check: 'no-bom', severity: 'warning', deviceId: dev.id, title: `${dev.name} has no BOM`, detail: `${steps.length} step${steps.length === 1 ? '' : 's'} fit${steps.length === 1 ? 's' : ''} ${stepQty.size} different part${stepQty.size === 1 ? '' : 's'}, but there is no parts list to check them against.`, suggestion: 'Import the BOM from the ERP (More, Set up this company). The check then compares every step with it.' });
+    }
+    const drafts = steps.map((st, i) => ({ st, i })).filter(({ st }) => st.draft);
+    if (drafts.length) {
+      const files = [...new Set(drafts.map(({ st }) => st.source?.file).filter(Boolean))];
+      add({ check: 'draft-steps', severity: 'warning', deviceId: dev.id, steps: drafts.map(({ st, i }) => ({ deviceId: dev.id, stepId: st.id, stepNo: i + 1 })), title: `${drafts.length} step${drafts.length === 1 ? '' : 's'} of ${dev.name} ${drafts.length === 1 ? 'was' : 'were'} read from a PDF and not reviewed yet`, detail: `Step${drafts.length === 1 ? '' : 's'} ${drafts.map(({ i }) => i + 1).join(', ')}${files.length ? `, read from ${files.join(', ')}` : ''}. Reading a document automatically can miss a part, a quantity or a warning.`, suggestion: 'Open the step editor, compare each step with the PDF and tick Reviewed.' });
+    }
+
+    for (const id of bomLines.length ? ids : []) {
       if (explained.has(id)) continue;
       const s = stepQty.get(id), b = bomQty.get(id), p = P(id);
       if (s && !b) add({ check: 'steps-not-in-bom', severity: 'critical', deviceId: dev.id, parts: [id], steps: s.refs.map((r) => ({ deviceId: dev.id, stepId: r.stepId, stepNo: r.stepNo })), title: `${p.name} is fitted but not in the BOM`, detail: `${label(p)} is fitted in ${s.refs.map((r) => 'step ' + r.stepNo).join(', ')} but BOM rev ${dev.bom?.rev} does not list it.`, suggestion: 'Check whether the BOM or the instructions are wrong.' });

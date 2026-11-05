@@ -757,6 +757,9 @@ dialog.dlg.sheet[open] { display: grid; }
 .viewer.board-mode { aspect-ratio: auto; min-height: 280px; height: auto; touch-action: auto; }
 .step-photo { width: 100%; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); }
 
+.draft-note { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: 10px; background: var(--warn-soft); color: var(--text); font-size: 14px; }
+.draft-note svg { width: 18px; height: 18px; color: var(--warn); margin-top: 1px; }
+
 /* ---------- Problems ---------- */
 .risk { display: grid; gap: 8px; padding: 16px 18px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
 .risk .k { font-size: 12.5px; font-weight: 650; color: var(--text-3); }
@@ -768,8 +771,10 @@ dialog.dlg.sheet[open] { display: grid; }
 .risk .todo b { color: var(--warn); }
 .toc { display: flex; flex-wrap: wrap; gap: 6px; }
 
+[hidden] { display: none !important; }
+
 /* Icons: a default size for any icon without a more specific rule. */
-.ico { width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; }
+.ico { display: inline-block; width: 1.2em; height: 1.2em; flex: none; vertical-align: -.22em; }
 
 /* Ask panel and step editor details */
 dialog.dlg .dh h2 { display: flex; align-items: center; gap: 8px; }

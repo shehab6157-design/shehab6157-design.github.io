@@ -5,6 +5,8 @@ import { sizeLabel } from '../core/dims.js';
 import { stepsToCSV } from '../core/importer.js';
 import { currentWorkspace } from '../store.js';
 import { commitLibrary, importSteps, templates } from '../importflows.js';
+import { importPdfSteps } from '../pdfimport.js';
+import { QTY_NOTE } from '../core/pdfsteps.js';
 import { stepHref } from '../components.js';
 
 // Step editor: anyone who knows the product can write or fix the steps here. The integrity check
@@ -33,8 +35,14 @@ export default async function editor({ app, params, navigate }) {
           <div class="field"><label for="devRev">Instructions revision</label><input id="devRev" type="text" placeholder="e.g. A" maxlength="10"></div>
           <div><button class="btn primary" type="submit" ${readOnly ? 'disabled' : ''}>Create and add steps</button></div>
         </form>
+        <div class="card pad stack tight">
+          <h2 style="font-size:17px">Already have the instructions as a PDF?</h2>
+          <p class="small muted">RightPart reads the steps, the parts each step names (by any of their codes), quantities, torques, tools, warnings and checks, and lists every code it does not know. The PDF is read on this device and is not uploaded. The steps are saved as drafts for an engineer to review.</p>
+          <div><button class="btn" type="button" id="pdfNew" ${readOnly ? 'disabled' : ''}>${icon('upload')}Read steps from a PDF</button></div>
+        </div>
       </div>`,
       mount(root) {
+        root.querySelector('#pdfNew')?.addEventListener('click', async () => { const id = await importPdfSteps(app); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
         root.querySelector('#newDev').addEventListener('submit', async (e) => {
           e.preventDefault();
           const id = root.querySelector('#devId').value.trim();
@@ -66,7 +74,7 @@ export default async function editor({ app, params, navigate }) {
   };
 
   const stepCard = (s, i, index, audit) => {
-    const issues = (audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info');
+    const issues = (audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info' && f.check !== 'draft-steps');
     return html`<article class="editor-step ${issues.some((f) => f.severity === 'critical') ? 'flag' : ''}" data-i="${i}">
       <div class="head">
         <span class="row nowrap" style="flex:1;min-width:0"><span class="num">${i + 1}</span><input data-f="title" type="text" value="${s.title}" aria-label="Title of step ${i + 1}" style="flex:1;min-width:0;min-height:42px;padding:8px 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--surface);font-weight:650;font-size:16px" ${readOnly ? 'disabled' : ''}></span>
@@ -76,6 +84,7 @@ export default async function editor({ app, params, navigate }) {
           <button class="btn sm ghost danger" type="button" data-del-step aria-label="Delete step ${i + 1}" ${readOnly ? 'disabled' : ''}>${icon('trash')}</button>
         </span>
       </div>
+      ${s.draft ? html`<div class="draft-note"><span class="row nowrap" style="gap:8px;align-items:flex-start;min-width:0">${icon('alert')}<span>Draft read from <b>${s.source?.file || 'a PDF'}</b>${s.source?.page ? `, page ${s.source.page}` : ''}. Compare it with the PDF and correct it, then tick Reviewed.</span></span><label class="row nowrap" style="gap:8px;font-weight:650"><input type="checkbox" data-f="reviewed" ${readOnly ? 'disabled' : ''}> Reviewed</label></div>` : s.source?.file ? html`<p class="tiny muted">${icon('check')} From ${s.source.file}${s.source.page ? `, page ${s.source.page}` : ''}${s.source.reviewedAt ? `, reviewed ${s.source.reviewedAt}` : ''}</p>` : ''}
       <div data-issues>${issues.map((f) => html`<div class="warnline" style="color:${f.severity === 'critical' ? 'var(--bad)' : 'var(--warn)'}">${icon(f.severity === 'critical' ? 'stop' : 'alert')}<span>${f.title}</span></div>`)}</div>
       <div class="field"><label>Summary</label><input data-f="summary" type="text" value="${s.summary || ''}" ${readOnly ? 'disabled' : ''}></div>
       <div class="stack tight">
@@ -113,12 +122,13 @@ export default async function editor({ app, params, navigate }) {
       <div class="crumbs"><a href="#/devices">Build</a><span>/</span><a href="#/device/${encodeURIComponent(dev.id)}">${dev.name}</a><span>/</span><span>Edit steps</span></div>
       <div class="page-head"><div>
         <h1>Edit steps</h1>
-        <p class="lede">Write each step the way you would explain it to someone new. Parts can be entered by any of their codes. The integrity check runs as you type and flags parts that are unknown, retired, look-alikes, or that disagree with the BOM.</p>
+        <p class="lede">Write each step the way you would explain it to someone new, or read the steps from the PDF you already have. Parts can be entered by any of their codes. The integrity check runs as you type and flags parts that are unknown, retired, look-alikes, or that disagree with the BOM.</p>
       </div><span class="chip" id="saveState" aria-live="polite">${readOnly ? 'Read only' : 'Saved'}</span></div>
       ${readOnly ? html`<div class="callout info">${icon('lock')}<div><p class="t">Only engineers can change the steps</p><p>Your role in ${ws.name} is ${role}. Report a doubt on the step instead, and an engineer will see it.</p></div></div>` : ''}
       <div class="row">
         <div class="field" style="min-width:140px"><label for="instRev">Instructions revision</label><input id="instRev" type="text" value="${dev.instructions.rev || ''}" maxlength="10" ${readOnly ? 'disabled' : ''}></div>
         <span style="flex:1"></span>
+        <button class="btn" type="button" id="pdfSteps" ${readOnly ? 'disabled' : ''}>${icon('upload')}Read steps from a PDF</button>
         <button class="btn" type="button" id="impSteps" ${readOnly ? 'disabled' : ''}>${icon('upload')}Import steps CSV</button>
         <button class="btn" type="button" id="expSteps">${icon('download')}Export steps CSV</button>
         <button class="btn ghost" type="button" id="tplSteps">${icon('download')}Template</button>
@@ -152,7 +162,7 @@ export default async function editor({ app, params, navigate }) {
             box.querySelectorAll('.editor-step').forEach((card) => {
               const s = dev.instructions.steps[+card.dataset.i];
               if (!s) return;
-              const issues = (audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info');
+              const issues = (audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info' && f.check !== 'draft-steps');
               card.classList.toggle('flag', issues.some((f) => f.severity === 'critical'));
               card.querySelector('[data-issues]').innerHTML = String(html`${issues.map((f) => html`<div class="warnline" style="color:${f.severity === 'critical' ? 'var(--bad)' : 'var(--warn)'}">${icon(f.severity === 'critical' ? 'stop' : 'alert')}<span>${f.title}</span></div>`)}`);
               card.querySelectorAll('.ref-row').forEach((row) => { const p = s.parts[+row.dataset.r]; if (p) row.querySelector('[data-hint]').innerHTML = String(hint(index, p.code)); });
@@ -172,6 +182,13 @@ export default async function editor({ app, params, navigate }) {
           if (f === 'title' || f === 'summary' || f === 'why') s[f] = t.value;
           else if (f === 'warnings') s.warnings = fromWarn(t.value);
           else if (f === 'critical' || f === 'esd') { if (t.checked) s[f] = true; else delete s[f]; }
+          else if (f === 'reviewed') {
+            if (!t.checked) return;
+            delete s.draft;
+            s.source = { ...(s.source || {}), reviewedAt: new Date().toISOString().slice(0, 10) };
+            for (const p of s.parts || []) if (p.note === QTY_NOTE) delete p.note;
+            rerender();
+          }
           else s[f] = fromLines(t.value);
           changed(f !== 'title' || true);
         } else if (t.dataset.pf) {
@@ -208,6 +225,7 @@ export default async function editor({ app, params, navigate }) {
       });
       root.querySelector('#instRev')?.addEventListener('input', (e) => { dev.instructions.rev = e.target.value.trim(); changed(); });
       root.querySelector('#impSteps')?.addEventListener('click', async () => { if (await importSteps(app)) navigate(`#/editor/${encodeURIComponent(dev.id)}`); });
+      root.querySelector('#pdfSteps')?.addEventListener('click', async () => { const id = await importPdfSteps(app, { deviceId: dev.id }); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
       root.querySelector('#expSteps').addEventListener('click', () => download(`${dev.id}-steps.csv`, '﻿' + stepsToCSV(dev), 'text/csv;charset=utf-8'));
       root.querySelector('#tplSteps').addEventListener('click', templates.steps);
       return () => { if (timer) { clearTimeout(timer); save(); } };

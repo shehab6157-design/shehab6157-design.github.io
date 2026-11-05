@@ -1,7 +1,7 @@
-// Offline support. The app shell is cached on install; the photo-identification model and
-// TensorFlow.js (about 7 MB) are cached the first time they are used.
+// Offline support. The app shell is cached on install; the photo-identification model,
+// TensorFlow.js (about 7 MB) and the PDF reader (about 1.5 MB) are cached the first time they are used.
 // Bump VERSION whenever a file in SHELL changes.
-const VERSION = 'rp-2026-11-04-2';
+const VERSION = 'rp-2026-11-05-1';
 const SHELL = [
   './',
   'index.html',
@@ -23,6 +23,7 @@ const SHELL = [
   'js/askui.js',
   'js/askpanel.js',
   'js/problems.js',
+  'js/pdfimport.js',
   'js/core/dims.js',
   'js/core/decode.js',
   'js/core/model.js',
@@ -32,6 +33,7 @@ const SHELL = [
   'js/core/csv.js',
   'js/core/importer.js',
   'js/core/assistant.js',
+  'js/core/pdfsteps.js',
   'js/views/home.js',
   'js/views/parts.js',
   'js/views/search.js',
@@ -92,7 +94,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Large optional files: cache on first use.
-  if (url.pathname.includes('/vendor/tfjs/') || url.pathname.includes('/vendor/mobilenet/')) {
+  if (url.pathname.includes('/vendor/tfjs/') || url.pathname.includes('/vendor/mobilenet/') || url.pathname.includes('/vendor/pdfjs/')) {
     event.respondWith(caches.open('rp-runtime').then(async (c) => {
       const hit = await c.match(req);
       if (hit) return hit;

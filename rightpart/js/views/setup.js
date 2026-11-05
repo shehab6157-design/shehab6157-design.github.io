@@ -1,6 +1,7 @@
 import { html, icon } from '../ui.js';
 import { currentWorkspace, listRecords } from '../store.js';
 import { importParts, importBOM, importSteps, importLibraryJSON, templates } from '../importflows.js';
+import { importPdfSteps, SAMPLE_PDF } from '../pdfimport.js';
 import { isFastener } from '../core/dims.js';
 
 // Getting a new company running: what to load, in which order, and what is still missing.
@@ -12,6 +13,7 @@ export default async function setup({ app, navigate }) {
   const devices = lib.devices || [];
   const withBom = devices.filter((d) => d.bom?.lines?.length).length;
   const withSteps = devices.filter((d) => d.instructions?.steps?.length).length;
+  const drafts = devices.reduce((n, d) => n + (d.instructions?.steps || []).filter((s) => s.draft).length, 0);
   const fasteners = lib.parts.filter(isFastener);
   const sized = fasteners.filter((p) => p.spec?.d && (p.category !== 'screw' || p.spec.length)).length;
   const explained = lib.parts.filter((p) => p.details?.function).length;
@@ -20,7 +22,7 @@ export default async function setup({ app, navigate }) {
     { done: parts > 0, title: 'Parts and every code they go by', text: parts ? `${parts} parts under ${codes} codes.` : 'Start with a spreadsheet of your parts: internal number, description, and every customer, supplier or old code you know.', acts: html`<button class="btn sm primary" type="button" data-imp="parts">${icon('upload')}Import parts CSV</button><button class="btn sm ghost" type="button" data-tpl="parts">${icon('download')}Template</button>` },
     { done: fasteners.length > 0 && sized === fasteners.length, title: 'Sizes for screws, nuts, washers and standoffs', text: fasteners.length ? `${sized} of ${fasteners.length} fasteners have a size. Sizes are read from descriptions like "ISO 7380 M3x8 A2"; they power the true-scale drawings and the look-alike warnings.` : 'No fasteners yet.', acts: fasteners.length && sized < fasteners.length ? html`<a class="btn sm" href="#/parts?cat=screw">See the parts</a>` : '' },
     { done: withBom > 0, title: 'Devices and their BOMs', text: devices.length ? `${devices.length} device${devices.length === 1 ? '' : 's'}, ${withBom} with a BOM.` : 'One BOM per product your line builds. Any code works in the BOM: RightPart resolves it.', acts: html`<button class="btn sm primary" type="button" data-imp="bom">${icon('upload')}Import BOM CSV</button><button class="btn sm ghost" type="button" data-tpl="bom">${icon('download')}Template</button>` },
-    { done: withSteps > 0, title: 'Assembly steps', text: withSteps ? `${withSteps} device${withSteps === 1 ? '' : 's'} with steps.` : 'Import the steps from a spreadsheet (one row per step), or write them in the step editor. Existing PDF instructions can be typed in step by step.', acts: html`<button class="btn sm primary" type="button" data-imp="steps">${icon('upload')}Import steps CSV</button><button class="btn sm ghost" type="button" data-tpl="steps">${icon('download')}Template</button>${devices.length ? devices.slice(0, 3).map((d) => html`<a class="btn sm" href="#/editor/${encodeURIComponent(d.id)}">${icon('edit')}Edit ${d.id}</a>`) : ''}<a class="btn sm" href="#/editor/new">${icon('plus')}New device</a>` },
+    { done: withSteps > 0 && !drafts, title: 'Assembly steps', text: withSteps ? `${withSteps} device${withSteps === 1 ? '' : 's'} with steps.${drafts ? ` ${drafts} step${drafts === 1 ? ' is a draft' : 's are drafts'} read from a PDF, waiting for an engineer's review.` : ''}` : 'Read them from the PDF work instructions you already have, import them from a spreadsheet (one row per step), or write them in the step editor.', acts: html`<button class="btn sm primary" type="button" data-pdf>${icon('upload')}Read a PDF work instruction</button>${ws.kind === 'demo' ? html`<button class="btn sm" type="button" data-pdf-sample>${icon('book')}Try the sample PDF</button>` : ''}<button class="btn sm" type="button" data-imp="steps">${icon('upload')}Import steps CSV</button><button class="btn sm ghost" type="button" data-tpl="steps">${icon('download')}Template</button>${devices.length ? devices.slice(0, 3).map((d) => html`<a class="btn sm" href="#/editor/${encodeURIComponent(d.id)}">${icon('edit')}Edit ${d.id}</a>`) : ''}<a class="btn sm" href="#/editor/new">${icon('plus')}New device</a>` },
     { done: app.audit.counts.critical === 0 && parts > 0, title: 'Integrity check', text: parts ? `${app.audit.counts.critical} critical, ${app.audit.counts.warning} warnings. Fix the critical ones before anyone builds from these steps.` : 'Runs automatically once there is data.', acts: parts ? html`<a class="btn sm" href="#/audit">${icon('shield')}Open the check</a>` : '' },
     { done: explained > 0 && explained >= Math.min(parts, 10), title: 'Explanations for learners', text: `${explained} of ${parts} parts say what they do and why. Add a "function" and "why" column to the parts spreadsheet; new people learn much faster.`, acts: '' },
     { done: parts > 0 && fasteners.length > 0, title: 'True-scale bin labels', text: 'Print a label for each fastener bin: every code it goes by, a barcode, and the part outline at actual size.', acts: fasteners.length ? html`<a class="btn sm" href="#/labels?ids=${encodeURIComponent(fasteners.slice(0, 40).map((p) => p.id).join(','))}">${icon('print')}Print labels</a>` : '' },
@@ -46,6 +48,8 @@ export default async function setup({ app, navigate }) {
       const flows = { parts: importParts, bom: importBOM, steps: importSteps, json: importLibraryJSON };
       root.querySelectorAll('[data-imp]').forEach((b) => b.addEventListener('click', async () => { if (await flows[b.dataset.imp](app)) navigate('#/setup'); }));
       root.querySelectorAll('[data-tpl]').forEach((b) => b.addEventListener('click', () => templates[b.dataset.tpl]()));
+      root.querySelector('[data-pdf]')?.addEventListener('click', async () => { const id = await importPdfSteps(app); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
+      root.querySelector('[data-pdf-sample]')?.addEventListener('click', async () => { const id = await importPdfSteps(app, { url: SAMPLE_PDF }); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
     },
   };
 }

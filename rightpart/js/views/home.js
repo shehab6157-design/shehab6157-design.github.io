@@ -47,7 +47,7 @@ function welcome(app) {
         <h2>Three ways to start</h2>
         <ol class="how">
           <li><b>From spreadsheets</b><span>Export the parts list, the BOMs and, if you have them, the steps from your ERP or Excel as CSV. Templates are on the setup page.</span></li>
-          <li><b>From PDF instructions</b><span>Create the device, then type each step in the step editor. It checks every part against the BOM as you type.</span></li>
+          <li><b>From PDF instructions</b><span>Read the work instructions you already have: steps, parts, quantities, torques and warnings are drafted for an engineer to check, and every code the parts list does not know is listed.</span></li>
           <li><b>From your team</b><span>If an engineer already set the company up, sign in to the company server and download the library, or import the library file they sent you.</span></li>
         </ol>
       </section>

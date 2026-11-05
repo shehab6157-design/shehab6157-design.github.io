@@ -23,6 +23,7 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 | **Bin labels** | 100 × 50 mm, Code 128 barcode, every code the part goes by, a "NOT M3 × 10" warning, and the part's outline at actual size. |
 | **Training** | Fastener basics (heads, drives, threads, length, materials) and a quiz generated from the real device. |
 | **Every company, its own data** | Each company is a separate space with its own library: loaded from CSV or JSON, or written in the step editor. Switch between them from the header. |
+| **Reads your PDFs** | The work instructions a company already has: steps, the parts each step names (by any of their codes), quantities, torques, tools, warnings and checks are read on the device, and every code the parts list does not know is listed. Steps stay drafts, marked in the guide, until an engineer compares them with the PDF and ticks Reviewed. |
 | **Ask a question** | "Which screw goes in step 7?", "torque for 100-0233?", "what is C-55013?", "difference between M3x8 and M3x10". Answers come from the company's own data, with the source of each one, offline and without AI. It never guesses a torque or a part number, and it warns when the data disagrees. English, Hebrew and Arabic questions work. |
 | **Sign in (optional)** | A company server shares one library between people and tablets, with roles (owner, admin, engineer, supervisor, operator, viewer), numbered library versions, uploaded build records and optional AI answers from the company's records. See [backend/README.md](backend/README.md). |
 | **Problems to expect** | The problems products like this, and the companies using them, have run into, with sources: in the app and in [docs/PROBLEMS.md](docs/PROBLEMS.md). |
@@ -37,11 +38,12 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 5. **Identify → Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
 6. **Part page → Bin label**, then print at 100 %.
 7. **Ask** (the button at the bottom right of every page): open step 7, press Ask, and ask "which screw here?".
+8. **Set up this company → Try the sample PDF**: a fictional two-page work instruction becomes five draft steps; the check flags its old code, its unknown code and the missing BOM.
 
 ## Your own company
 
 1. Press the company name in the header → **Add a company**. Each company gets its own storage; the demo stays as it was.
-2. Follow **Set up this company**: import parts, then BOMs, then steps (or write the steps in the editor), then print bin labels and run the integrity check.
+2. Follow **Set up this company**: import parts, then BOMs, then steps (read from your PDF work instructions, imported from a spreadsheet, or written in the editor), then print bin labels and run the integrity check.
 3. To share one library between people and tablets, connect a company server and sign in (see [backend/README.md](backend/README.md)). Without one, the data stays on the device it was loaded on: export it from **Data and records** to move it.
 
 Everything you import stays in this browser (IndexedDB) unless you publish it to your company server.
@@ -64,6 +66,16 @@ Everything you import stays in this browser (IndexedDB) unless you publish it to
 - Importing steps for a device replaces that device's steps and keeps its BOM, so a device is updated by importing its steps again. Devices that do not exist yet are created.
 
 The step editor checks each step against the BOM as you type: unknown codes, parts not in the BOM, retired parts, look-alikes and missing torques.
+
+**Steps from a PDF**: any PDF with text in it (exported from Word or a document system; scans need text recognition first). RightPart understands:
+
+- step headings like `Step 3: Fit the bezel`, `3.0 Fit the bezel`, or a numbered list (`1.`, `2.` …), in English, Hebrew, Arabic or Russian (`שלב 3`, `خطوة 3`, `шаг 3`); a table of contents is skipped;
+- part codes by any code the parts library knows, also across spaces (`ISO 7380-1 M3x8 A2`), with quantities written as `4 x CODE`, `CODE x4`, `CODE (4)`, `4 screws CODE`, `CODE qty 4`, or in a parts table;
+- torques in N·m or in·lb, placed on the part named on the same line;
+- `Tools:`, `Parts:`, `Check:`, `Warning:`, `Caution:` and `Note:` lines (and their Hebrew and Arabic words), ESD notes, and the document number, revision and product name;
+- headers and footers repeated on every page are ignored.
+
+Each step remembers its PDF and page. It stays a draft until an engineer ticks **Reviewed** in the step editor; the guide, the Ask answers and the integrity check show the warning until then. Part numbers made only of digits are matched when the library knows them, but are not listed as unknown codes. The sample in `data/sample-work-instruction.pdf` is built from `tools/sample-work-instruction.html` (print it to PDF from Chrome).
 
 **Library JSON** (everything, including steps and 3D scenes): see `data/demo-library.json`. In short:
 
@@ -97,9 +109,11 @@ js/store.js           one IndexedDB database per company, and the list of compan
 js/cloud.js           optional company server: sign-in, roles, library versions, record upload, AI answers
 js/askui.js, askpanel.js   the Ask chat (page and panel)
 js/importflows.js     CSV and JSON imports shared by the setup, data and editor pages
+js/pdfimport.js       reads a PDF on the device (pdf.js, loaded only when used) and previews the draft
 js/problems.js        the "Problems to expect" list (docs/PROBLEMS.md is generated from it)
 js/core/              pure logic, runs in the browser and in Node tests
   assistant.js        answers questions from the data, offline, with sources (no AI)
+  pdfsteps.js         drafts steps from the text of a PDF work instruction
   decode.js           reads designations: ISO/DIN standards, metric and inch threads, drives, materials
   model.js            the index: every code -> one part, search, where-used
   lookalike.js        similarity of fasteners and the difference in words
@@ -115,7 +129,7 @@ js/views/             one file per page
 data/demo-library.json   the fictional Nova-1 library
 backend/              optional company server (Supabase): schema with row-level security, tests, AI function
 docs/PROBLEMS.md      problems to expect, with sources
-vendor/               three.js (tree-shaken bundle), TensorFlow.js, MobileNet weights, ZXing, supabase-js
+vendor/               three.js (tree-shaken bundle), TensorFlow.js, MobileNet weights, ZXing, supabase-js, pdf.js
 sw.js                 offline cache
 tests/                node --test
 ```
@@ -150,8 +164,8 @@ node tools/problems-md.mjs
 
 ## Next steps
 
-Pilot on one sub-assembly with real data on an approved private copy · read codes, BOMs and changes from the ERP/PLM so the check runs on every change · load the real 3D model from CAD (glTF) · instructions in Hebrew, Arabic, Russian and English with right-to-left layout · electronic signatures, then validation · single sign-on with the company's accounts · AI drafts of steps from existing PDFs, approved by an engineer · a shared photo identifier trained on the line's own parts · a supervisor dashboard (wrong scans per step, doubts, questions asked, training scores).
+Pilot on one sub-assembly with real data on an approved private copy · read codes, BOMs and changes from the ERP/PLM so the check runs on every change · load the real 3D model from CAD (glTF) · instructions in Hebrew, Arabic, Russian and English with right-to-left layout · electronic signatures, then validation · single sign-on with the company's accounts · text recognition for scanned PDFs, and AI help for documents without clear step numbers, approved by an engineer · a shared photo identifier trained on the line's own parts · a supervisor dashboard (wrong scans per step, doubts, questions asked, training scores).
 
 ## Credits
 
-[three.js](https://threejs.org) (MIT) · [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0) · [ZXing](https://github.com/zxing-js/library) (Apache 2.0) · [supabase-js](https://github.com/supabase/supabase-js) (MIT). The Nova-1, its parts, codes and suppliers are fictional.
+[three.js](https://threejs.org) (MIT) · [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0) · [ZXing](https://github.com/zxing-js/library) (Apache 2.0) · [supabase-js](https://github.com/supabase/supabase-js) (MIT) · [pdf.js](https://mozilla.github.io/pdf.js/) (Apache 2.0). The Nova-1, its parts, codes and suppliers are fictional.

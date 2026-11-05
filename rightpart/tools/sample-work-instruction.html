@@ -1,0 +1,89 @@
+<!doctype html>
+<!-- Source of data/sample-work-instruction.pdf: a FICTIONAL work instruction for the demo's
+     PDF reader. To rebuild the PDF, open this file in Chrome and print it to PDF (A4, default
+     margins, "Headers and footers" off): the page header and footer come from the @page rules. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WI-NV1-FAN-001 Fan tray sub-assembly (fictional)</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 20mm;
+    @top-center { content: "FICTIONAL DEMO DOCUMENT · NOT A REAL WORK INSTRUCTION"; font: 600 8pt Arial, sans-serif; color: #a33; }
+    @bottom-center { content: "WI-NV1-FAN-001 Rev A · Page " counter(page) " of " counter(pages); font: 8pt Arial, sans-serif; color: #555; }
+  }
+  body { font: 10.5pt/1.45 Arial, Helvetica, sans-serif; color: #111; margin: 0; }
+  h1 { font-size: 17pt; margin: 0 0 8pt; }
+  h2 { font-size: 12.5pt; margin: 16pt 0 5pt; padding-bottom: 3pt; border-bottom: 1.5pt solid #1d5bd8; }
+  table { border-collapse: collapse; width: 100%; margin: 4pt 0 8pt; }
+  th, td { border: 0.75pt solid #999; padding: 3pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #eef2fa; }
+  .meta td { border: 0; padding: 1pt 12pt 1pt 0; }
+  p { margin: 3pt 0; }
+  ol { margin: 3pt 0 3pt 18pt; padding: 0; }
+  .note { border-left: 3pt solid #c77700; padding: 3pt 8pt; background: #fff6e8; margin: 6pt 0; }
+  .warn { border-left: 3pt solid #c0262d; padding: 3pt 8pt; background: #fdecec; margin: 6pt 0; }
+</style>
+</head>
+<body>
+  <h1>Work Instruction: Fan tray sub-assembly</h1>
+  <table class="meta">
+    <tr><td>Product: Nova-1 fan tray</td></tr>
+    <tr><td>Document: WI-NV1-FAN-001</td><td>Revision: A</td><td>Date: 2026-10-12</td></tr>
+  </table>
+
+  <h2>General notes</h2>
+  <p class="note">CAUTION: ESD sensitive. Wear a grounded wrist strap for all steps.</p>
+  <p>Use only parts from labelled bins. If the code on a bin does not match this document, stop and ask.</p>
+
+  <h2>Parts list</h2>
+  <table>
+    <tr><th>Item</th><th>Part number</th><th>Description</th><th>Qty</th></tr>
+    <tr><td>1</td><td>C-61003</td><td>Fan 60 x 60 x 15 mm, 24 V</td><td>1</td></tr>
+    <tr><td>2</td><td>AF-7045-M3-25-A2</td><td>Pan head screw M3 x 25, Phillips</td><td>4</td></tr>
+    <tr><td>3</td><td>100-0311</td><td>Lock nut M3, nylon insert</td><td>4</td></tr>
+    <tr><td>4</td><td>100-0313</td><td>Plain washer M3, nylon</td><td>4</td></tr>
+    <tr><td>5</td><td>100-0999</td><td>Fan finger guard 60 mm</td><td>1</td></tr>
+    <tr><td>6</td><td>C-62002</td><td>Protective earth wire, M4 ring terminal</td><td>1</td></tr>
+    <tr><td>7</td><td>SCR-TX-36</td><td>Pan head screw M3 x 6, Torx</td><td>1</td></tr>
+    <tr><td>8</td><td>C-62003</td><td>Cable tie 100 x 2.5 mm</td><td>2</td></tr>
+  </table>
+
+  <h2>Step 1: Prepare the fan</h2>
+  <p>Tools: ESD mat, side cutter</p>
+  <ol>
+    <li>Take the fan (C-61003) from its bag.</li>
+    <li>Find the airflow arrow on the side of the fan housing.</li>
+  </ol>
+  <p>Check: The airflow arrow points into the chassis.</p>
+
+  <h2>Step 2: Fit the finger guard</h2>
+  <p>Place the finger guard 100-0999 x1 on the outlet side of the fan.</p>
+  <p class="note">NOTE: The open side of the guard faces away from the fan.</p>
+
+  <h2>Step 3: Fasten the fan to the bracket</h2>
+  <p>Tools: PH1 screwdriver; torque driver</p>
+  <ol>
+    <li>Fit 4 x AF-7045-M3-25-A2 through the guard, the fan and the bracket.</li>
+    <li>Fit a nylon washer 100-0313 x4 under each nut.</li>
+    <li>Fit 4 x 100-0311 lock nuts and tighten to 0.5 N·m.</li>
+  </ol>
+  <p class="warn">WARNING: Do not overtighten: the fan housing cracks above 0.6 N·m.</p>
+  <p>Check: The fan turns freely by hand.</p>
+
+  <div>
+    <h2>Step 4: Earth the bracket</h2>
+    <p>Tools: T10 driver, torque driver</p>
+    <p>Fit the earth wire C-62002 x1 with 1 x SCR-TX-36 and tighten to 0.8 N·m.</p>
+    <p>Verify the ring terminal does not turn.</p>
+
+    <h2>Step 5: Dress the cable</h2>
+    <ol>
+      <li>Route the fan cable along the bracket edge.</li>
+      <li>Secure it with 2 x C-62003 and cut the tails flush.</li>
+    </ol>
+    <p>Check: No cable touches the fan blades.</p>
+  </div>
+</body>
+</html>

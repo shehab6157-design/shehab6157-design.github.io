@@ -434,6 +434,12 @@ export function answer(index, audit, question, pageCtx = {}) {
     const steps = dev.instructions?.steps || [];
     a = { intent: 'pickStep', text: [`Which step of the ${dev.name}? It has ${steps.length} steps:`], followUps: steps.slice(0, 12).map((s, i) => `${is('how') ? 'How do I do' : 'Which parts for'} step ${i + 1}? (${s.title})`) };
   } else a = fallback(ctx);
+  // A step read from a PDF and not reviewed yet: say so with every answer about it.
+  const st = step?.step;
+  const stepIntents = ['which', 'how', 'torque', 'tool', 'howMany', 'why', 'next', 'problems', 'safety'];
+  if (st?.draft && stepIntents.includes(a.intent)) {
+    a.lines = [{ level: 'warn', text: `Step ${step.no} is a draft read from ${st.source?.file || 'a PDF'}${st.source?.page ? `, page ${st.source.page}` : ''} and not reviewed yet. Check it against the released document.` }, ...(a.lines || [])];
+  }
   return {
     lines: [], list: [], checks: [], tools: [], items: [], findings: [], sources: [], followUps: [], confidence: 'high', canAskAI: false,
     ...a,
@@ -455,7 +461,7 @@ export function retrieveRecords(index, audit, question, pageCtx = {}, limit = 40
   };
   const addStep = (d, st, no) => {
     if (!st || out.has(`step:${d.id}/${st.id}`) || out.size >= limit) return;
-    out.set(`step:${d.id}/${st.id}`, { id: `step:${d.id}/${st.id}`, type: 'step', device: d.name, number: no, title: st.title, summary: st.summary, parts: (st.parts || []).map((r) => `${r.qty} x ${r.code}${r.torque ? ` @ ${r.torque.value} N·m` : ''}`), tools: st.tools, instructions: st.instructions, checks: st.checks, warnings: st.warnings, why: st.why, critical: !!st.critical, esd: !!st.esd });
+    out.set(`step:${d.id}/${st.id}`, { id: `step:${d.id}/${st.id}`, type: 'step', device: d.name, number: no, title: st.title, summary: st.summary, parts: (st.parts || []).map((r) => `${r.qty} x ${r.code}${r.torque ? ` @ ${r.torque.value} N·m` : ''}`), tools: st.tools, instructions: st.instructions, checks: st.checks, warnings: st.warnings, why: st.why, critical: !!st.critical, esd: !!st.esd, ...(st.draft ? { draft: `read automatically from ${st.source?.file || 'a PDF'}, not reviewed by an engineer` } : {}) });
     for (const sp of stepParts(index, st)) addPart(sp.part);
   };
   a.context.partIds.forEach((id) => addPart(index.parts.get(id)));

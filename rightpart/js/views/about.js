@@ -26,7 +26,7 @@ export default async function about() {
           <li><b>Learn and explain</b><span>Each part says what it does, why it was chosen and what happens if the wrong one is fitted. A short quiz is built from the real device.</span></li>
           <li><b>Identify loose parts</b><span>Measure a screw by laying it on the screen, photograph it (the identifier learns your parts on the device), or scan any code on it.</span></li>
           <li><b>Answer questions</b><span>"Which screw goes in this step?", "what is C-55013?", "M3×8 or M3×10?" The Ask assistant answers from the company's own data, with the source of each answer, offline and without AI. It never guesses a torque or a part number, and it warns when the data disagrees.</span></li>
-          <li><b>Every company, its own data</b><span>Any production company adds its own space and loads its parts, BOMs and steps from spreadsheets or the step editor. With a company server, people sign in, roles decide who may change what, and every tablet gets the same published library.</span></li>
+          <li><b>Every company, its own data</b><span>Any production company adds its own space and loads its parts, BOMs and steps from spreadsheets, from the PDF work instructions it already has, or with the step editor. With a company server, people sign in, roles decide who may change what, and every tablet gets the same published library.</span></li>
           <li><b>Private and offline</b><span>A web app that installs on a tablet and works without a network. Without a company server the data never leaves the device; with one, it goes only to the company's own server.</span></li>
         </ol>
       </section>
@@ -52,7 +52,7 @@ export default async function about() {
             ['3D from CAD', 'Load the real assembly model (glTF exported from the CAD system) instead of the generated one.'],
             ['Every language on the line', 'Instructions in Hebrew, Arabic, Russian, English and more, with right-to-left layouts.'],
             ['Signed records', 'Sign-in, roles and an activity log are there; next come electronic signatures for build records, then validation for production use.'],
-            ['Steps from existing PDFs', 'AI drafts the steps from the PDF instructions a company already has; an engineer checks and approves every step before anyone builds from it.'],
+            ['Scanned documents', 'PDFs that are photos or scans need text recognition before their steps can be read; then AI help for documents without clear step numbers, always approved by an engineer.'],
             ['Shared photo identifier', 'Train once on the line\'s own parts and share it between stations.'],
           ].map(([t, d]) => html`<li class="card pad"><b>${t}</b><p class="small muted" style="margin-top:2px">${d}</p></li>`)}
         </ul>
@@ -60,7 +60,7 @@ export default async function about() {
 
       <section class="stack tight">
         <h2>Built with</h2>
-        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes · supabase-js (MIT) for the optional company server · Claude, only for the optional AI answers on a company's own server. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
+        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes · pdf.js (Apache 2.0) for reading PDF work instructions · supabase-js (MIT) for the optional company server · Claude, only for the optional AI answers on a company's own server. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
       </section>
     </div>`,
   };

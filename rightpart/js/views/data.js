@@ -2,6 +2,7 @@ import { html, icon, toast, download, confirmDialog, fmtDate } from '../ui.js';
 import { resetLibrary, listRecords, clear, storageEstimate, currentWorkspace } from '../store.js';
 import { reloadLibrary } from '../app.js';
 import { importParts, importBOM, importSteps, importLibraryJSON, templates } from '../importflows.js';
+import { importPdfSteps } from '../pdfimport.js';
 import { toCSV } from '../core/csv.js';
 
 export default async function dataView({ app, navigate }) {
@@ -34,6 +35,7 @@ export default async function dataView({ app, navigate }) {
             <div class="stack tight"><h3>Parts and codes</h3><p class="small muted">One row per part, with every code it goes by. If a row only has a description like <span class="code">ISO 7380 M3x8 A2</span>, the size, head, drive and material are read from it.</p><div class="row"><button class="btn primary" type="button" data-imp="parts">${icon('upload')}Import parts CSV</button><button class="btn sm ghost" type="button" data-tpl="parts">${icon('download')}Template</button></div></div>
             <div class="stack tight"><h3>Bill of materials</h3><p class="small muted">Device, revision, item, code (any code), quantity and position. Replaces that device's BOM.</p><div class="row"><button class="btn primary" type="button" data-imp="bom">${icon('upload')}Import BOM CSV</button><button class="btn sm ghost" type="button" data-tpl="bom">${icon('download')}Template</button></div></div>
             <div class="stack tight"><h3>Assembly steps</h3><p class="small muted">One row per step: title, parts like <span class="code">100-0233 x6 @0.6</span>, tools, instructions, checks and warnings separated by <span class="code">|</span>.</p><div class="row"><button class="btn primary" type="button" data-imp="steps">${icon('upload')}Import steps CSV</button><button class="btn sm ghost" type="button" data-tpl="steps">${icon('download')}Template</button></div></div>
+            <div class="stack tight"><h3>Steps from a PDF</h3><p class="small muted">The work instructions you already have. The steps, the parts each one names (any code), quantities, torques, tools, warnings and checks are read on this device and saved as drafts for an engineer to review.</p><div class="row"><button class="btn primary" type="button" data-pdf>${icon('upload')}Read a PDF</button></div></div>
             <div class="stack tight"><h3>Full library</h3><p class="small muted">Parts, devices, BOMs, steps, changes and 3D scenes in the format of the demo file (see the README).</p><div class="row"><button class="btn" type="button" data-imp="json">${icon('upload')}Import library JSON</button></div></div>
           </div>
         </div>
@@ -63,6 +65,7 @@ export default async function dataView({ app, navigate }) {
     mount(root) {
       const flows = { parts: importParts, bom: importBOM, steps: importSteps, json: importLibraryJSON };
       root.querySelectorAll('[data-imp]').forEach((b) => b.addEventListener('click', async () => { if (await flows[b.dataset.imp](app)) navigate('#/audit'); }));
+      root.querySelector('[data-pdf]')?.addEventListener('click', async () => { const id = await importPdfSteps(app); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
       root.querySelectorAll('[data-tpl]').forEach((b) => b.addEventListener('click', () => templates[b.dataset.tpl]()));
       root.querySelector('#expLib').addEventListener('click', () => download(`rightpart-${ws.name.replace(/[^\w-]+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(app.lib, null, 1)));
       root.querySelector('#resetDemo')?.addEventListener('click', async () => {

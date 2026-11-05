@@ -54,8 +54,8 @@ Instructions in one language exclude people who read another one better.
 A digital system is only as good as its steps, and nobody has time to rewrite hundreds of PDF pages.
 
 - **Seen elsewhere:** Guides list "no content owner" as a common failure: digital content decays without someone maintaining it. Others note that turning engineering data into usable instructions is where the digital thread breaks. ([Manual.to](https://manual.to/the-paper-to-digital-sop-playbook/), [Why connected worker strategies are leaving workers behind](https://www.pulse.bot/manufacturing/news/why-connected-worker-strategies-are-leaving-workers-behind-bc0eb2a2-372c-43d7-8e05-ba5ae8f5cb95))
-- **Handled today:** Steps import from a spreadsheet, and the step editor checks each step against the BOM as you type.
-- **Still open:** Name an owner for each device. Later: AI drafts steps from existing PDFs, always reviewed and approved by an engineer.
+- **Handled today:** Steps are read from the PDF work instructions a company already has (every part code linked, unknown codes listed), or imported from a spreadsheet. They stay drafts until an engineer reviews them, and the step editor checks each step against the BOM as you type.
+- **Still open:** Name an owner for each device. Scanned PDFs need text recognition first; later, AI help for documents without clear step numbers, always reviewed by an engineer.
 
 ### Instructions drift away from the BOM
 

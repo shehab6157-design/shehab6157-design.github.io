@@ -111,7 +111,8 @@ export default async function guide({ app, params, query, navigate }) {
             <p style="margin-top:6px"><b>What to do:</b> ${f.suggestion}</p>
             <div class="acts"><a class="btn sm" href="#/audit">${icon('shield')}${CHECKS[f.check]?.label || 'Integrity check'}</a><button class="btn sm" type="button" data-report="${f.title}">${icon('flag')}Report it</button></div>
           </div></div>`)}
-          ${findings.some((f) => f.severity === 'warning') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">Also checked for this step</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning').map((f) => html`<li>${f.title}</li>`)}</ul></div></div>` : ''}
+          ${step.draft ? html`<div class="callout warn" role="note">${icon('alert')}<div><p class="t">Draft: not reviewed yet</p><p>This step was read automatically from ${step.source?.file || 'a PDF'}${step.source?.page ? `, page ${step.source.page}` : ''}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.</p></div></div>` : ''}
+          ${findings.some((f) => f.severity === 'warning' && f.check !== 'draft-steps') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">Also checked for this step</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning' && f.check !== 'draft-steps').map((f) => html`<li>${f.title}</li>`)}</ul></div></div>` : ''}
 
           ${(step.warnings || []).map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${w.text}</span></div>`)}
 
