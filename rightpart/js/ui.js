@@ -121,6 +121,7 @@ const P = {
   arrowUp: '<path d="M12 19V5M6 11l6-6 6 6"/>',
   grip: '<path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  antibody: '<path d="M12 21v-7.5M12 13.5 6.8 8.3M12 13.5l5.2-5.2"/><path d="M3.8 10.2 8.2 5.8M20.2 10.2l-4.4-4.4"/>',
   image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/>',
 };
 
@@ -219,6 +220,10 @@ export function beep(kind = 'ok') {
 }
 
 export const reducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+export function fmtDay(ts) {
+  try { return new Date(ts).toLocaleDateString(getLanguage(), { dateStyle: 'medium', numberingSystem: 'latn' }); } catch { return String(ts); }
+}
 
 export function fmtDate(ts) {
   try { return new Date(ts).toLocaleString(getLanguage(), { dateStyle: 'medium', timeStyle: 'short', numberingSystem: 'latn' }); } catch { return String(ts); }

@@ -478,6 +478,13 @@ details.more .body { padding: 0 16px 16px 58px; color: var(--text-2); }
 .steppart .alias { font-size: 13px; color: var(--text-3); margin-top: 4px; }
 .steppart .warnline { margin-top: 6px; display: flex; gap: 6px; align-items: flex-start; font-size: 13.5px; color: var(--warn); font-weight: 600; }
 .steppart .warnline svg { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.steppart .warnline.learned { color: var(--bad); }
+.steppart .thumb { position: relative; }
+.thumb-mark { position: absolute; inset-block-start: -6px; inset-inline-end: -6px; line-height: 0; filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / .25)); }
+.markline { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); }
+.markline svg { flex: none; }
+svg.mark { display: inline-block; vertical-align: middle; }
+.tbl td.num { text-align: end; font-variant-numeric: tabular-nums; }
 .steppart > * { min-width: 0; }
 .steppart .verify { grid-column: 1 / -1; display: grid; gap: 8px; }
 .vdraw { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; max-width: 360px; }
@@ -617,6 +624,14 @@ dialog.dlg .df { padding: 12px 18px 16px; display: flex; gap: 8px; justify-conte
 .binlabel .nm { font-size: 8pt; font-weight: 600; line-height: 1.2; margin-top: .5mm; }
 .binlabel .al { font-size: 6.5pt; color: #333; margin-top: 1mm; line-height: 1.25; font-family: var(--mono); }
 .binlabel .warn { font-size: 6.5pt; font-weight: 700; margin-top: 1mm; }
+.binlabel .al .code { font-size: inherit; font-weight: 700; }
+.binlabel { position: relative; }
+.binlabel .bl-mark { position: absolute; inset-block-start: 2.5mm; inset-inline-end: 2.5mm; display: grid; justify-items: center; gap: .4mm; font-size: 6pt; font-weight: 700; color: #000; text-align: center; max-width: 16mm; line-height: 1.1; }
+.binlabel .bl-mark svg { width: 11mm; height: 11mm; }
+.binlabel.has-mark .code, .binlabel.has-mark .nm { padding-inline-end: 15mm; }
+.mark-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; padding: 0 18px 14px; }
+.mark-cell { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; color: inherit; text-decoration: none; background: var(--surface); }
+.mark-cell:hover { border-color: var(--brand); }
 @media print {
   @page { margin: 10mm; }
   body { background: #fff; }

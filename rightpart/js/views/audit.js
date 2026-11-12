@@ -1,12 +1,17 @@
-import { html, icon, download, fmtDate } from '../ui.js';
+import { html, th, icon, download, fmtDate, fmtDay } from '../ui.js';
 import { t, getLanguage } from '../core/i18n.js';
 const langName = (code) => { try { return new Intl.DisplayNames([getLanguage()], { type: 'language' }).of(code); } catch { return code; } };
 import { findingCard, partHref } from '../components.js';
 import { CHECKS } from '../core/audit.js';
 import { toCSV } from '../core/csv.js';
 import { listRecords } from '../store.js';
+import { getMemory, forgetMemory } from '../memory.js';
+import { countOf, lastAt, unsharedCount, shareMemory } from '../core/immune.js';
+import { shortDifference } from '../core/lookalike.js';
+import { sizeLabel } from '../core/dims.js';
+import { stepHref } from '../components.js';
 
-export default async function auditView({ app, query }) {
+export default async function auditView({ app, query, navigate }) {
   const { findings, counts } = app.audit;
   const sev = query.get('sev') || 'all';
   const list = findings.filter((f) => sev === 'all' || f.severity === sev);
@@ -14,6 +19,15 @@ export default async function auditView({ app, query }) {
   const builds = await listRecords('build');
   const stopped = builds.flatMap((b) => (b.events || []).filter((e) => e.result === 'wrong').map((e) => ({ ...e, serial: b.serial, deviceId: b.deviceId })));
   const link = (s) => `#/audit${s === 'all' ? '' : '?sev=' + s}`;
+  const memory = await getMemory(app);
+  const unshared = unsharedCount(app.lib.memory, memory.local);
+  const sized = (p) => html`<span class="code">${p.id}</span>${sizeLabel(p) ? html` <span class="tiny muted code">${sizeLabel(p)}</span>` : ''}`;
+  const learnedRow = (e) => {
+    const dev = app.index.devices.get(e.deviceId);
+    const no = dev.instructions.steps.findIndex((s) => s.id === e.stepId) + 1;
+    const need = app.index.parts.get(e.expected), took = app.index.parts.get(e.taken);
+    return html`<tr><td><a href="${stepHref(dev.id, e.stepId)}">${dev.name} · ${t('step {n}', { n: no })}</a></td><td>${sized(need)}</td><td>${sized(took)}<div class="tiny muted">${shortDifference(need, took)}</div></td><td class="num"><b>${countOf(e)}</b></td><td class="small nowrap">${fmtDay(lastAt(e))}</td></tr>`;
+  };
   return {
     title: t('Integrity check'),
     html: html`<div class="page">
@@ -33,6 +47,13 @@ export default async function auditView({ app, query }) {
       ${sev !== 'all' ? html`<div><a class="chip" href="#/audit">${icon('x')}${t('Show all')}</a></div>` : ''}
 
       ${list.length ? html`<div class="stack">${list.map((f) => findingCard(f, app))}</div>` : html`<div class="callout ok">${icon('checkCircle')}<div><p class="t">${t('Nothing to report')}</p><p>${t('The codes, BOMs and instructions agree.')}</p></div></div>`}
+
+      <section class="card" id="learned">
+        <div class="card-head"><div><h2>${t('Learned mix-ups')}</h2><p class="small muted">${t('Every wrong part stopped at the bench is remembered. The next person at that step is warned before they pick, and the quiz trains new people on it. No names are kept.')}</p></div><span class="chip ${memory.total ? 'warn' : ''}">${memory.total}</span></div>
+        ${memory.all.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Step')}</th><th>${t('Needed')}</th><th>${t('Picked instead')}</th><th>${t('Times')}</th><th>${t('Last')}</th></tr></thead><tbody>${memory.all.map(learnedRow)}</tbody></table></div>
+          <div class="card-body small">${th('To stop a mix-up for good: separate the two bins, give them different {marks}, or ask engineering whether one part can do both jobs.', { marks: html`<a href="#/labels">${t('signal marks')}</a>` })}</div>` : html`<div class="card-body muted">${t('Nothing learned yet. A mix-up is remembered here when build mode stops a wrong part.')}</div>`}
+        ${unshared ? html`<div class="card-body row between" style="border-top:1px solid var(--line)"><span class="small">${t('{n, plural, one {# mix-up on this tablet is not shared yet.} other {# mix-ups on this tablet are not shared yet.}}', { n: unshared })}</span><button class="btn sm" type="button" id="shareMemory">${icon('users')}${t('Share with every tablet')}</button></div>` : ''}
+      </section>
 
       <section class="card">
         <div class="card-head"><h2>${t('Reports from the floor')}</h2><span class="chip">${reports.length}</span></div>
@@ -54,6 +75,12 @@ export default async function auditView({ app, query }) {
         download(`rightpart-integrity-${new Date().toISOString().slice(0, 10)}.csv`, '﻿' + toCSV(rows), 'text/csv;charset=utf-8');
       });
       root.querySelector('#print').addEventListener('click', () => window.print());
+      root.querySelector('#shareMemory')?.addEventListener('click', async () => {
+        const { commitLibrary } = await import('../importflows.js');
+        forgetMemory();
+        await commitLibrary(app, { ...app.lib, memory: shareMemory(app.lib.memory, memory.local) }, t('Mix-ups added to the library. Every tablet that gets this version is warned at those steps.'));
+        navigate('#/audit');
+      });
     },
   };
 }

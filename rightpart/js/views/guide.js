@@ -1,4 +1,4 @@
-import { html, th, raw, icon, toast, beep, openDialog, fmtDate } from '../ui.js';
+import { html, th, raw, icon, toast, beep, openDialog, fmtDate, fmtDay } from '../ui.js';
 import { t, lower, listJoin } from '../core/i18n.js';
 import { esc, rich } from '../ui.js';
 import { stepText, partText } from '../core/content.js';
@@ -12,6 +12,9 @@ import { partHref, stepHref, thumb, codePill, sevIcon } from '../components.js';
 import { reportDialog } from './part.js';
 import { startBuild } from './device.js';
 import { CHECKS } from '../core/audit.js';
+import { getMemory, forgetMemory, getSignals } from '../memory.js';
+import { markSVG, markName } from '../core/signals.js';
+import { mixupsAt, countOf, lastAt } from '../core/immune.js';
 
 // The 3D viewer survives step changes inside the same device, so moving between steps is instant.
 const keep = { deviceId: null, el: null, viewer: null, timer: 0 };
@@ -36,6 +39,8 @@ export default async function guide({ app, params, query, navigate }) {
   const disputedPart = subst ? subst.parts[1] : null; // the part the instructions fit
   const bomPart = subst ? subst.parts[0] : null; // the part the BOM asks for
   const sps = stepParts(app.index, step);
+  const memory = await getMemory(app); // mix-ups caught at this step before (learned at the bench)
+  const signals = await getSignals(app); // colour + shape marks that tell look-alike bins apart
   const usedInDevice = new Set([...app.index.usage.entries()].filter(([, u]) => u.some((x) => x.deviceId === dev.id)).map(([id]) => id));
   const doneSteps = new Set((record?.steps || []).map((s) => s.stepId));
   const lastEvents = new Map();
@@ -44,7 +49,9 @@ export default async function guide({ app, params, query, navigate }) {
   const partBlock = (sp, i) => {
     const p = sp.part;
     if (!p) return html`<div class="steppart bad"><div class="thumb"></div><div><div class="t">${th('Unknown code {code}', { code: html`<span class="code">${sp.ref.code}</span>` })}</div><div class="s">${sp.resolution.status === 'ambiguous' ? t('This code points to several parts.') : t('This code is not in the library.')}</div></div><span class="qty">${sp.qty}</span></div>`;
-    const looks = findLookalikes(app.lib.parts, p).filter((l) => l.score >= 0.75 && (usedInDevice.has(l.part.id) || l.score >= 0.85)).slice(0, 2);
+    const learned = mixupsAt(memory, dev.id, step.id, p.id).slice(0, 2);
+    const learnedIds = new Set(learned.map((e) => e.taken));
+    const looks = findLookalikes(app.lib.parts, p).filter((l) => !learnedIds.has(l.part.id) && l.score >= 0.75 && (usedInDevice.has(l.part.id) || l.score >= 0.85)).slice(0, 2);
     const flagged = disputedPart && p.id === disputedPart;
     const needsScan = build && isFastener(p);
     const ev = lastEvents.get(i);
@@ -52,14 +59,17 @@ export default async function guide({ app, params, query, navigate }) {
     const others = otherCodes(p).slice(0, 4);
     const pt = partText(p, app.lib);
     const code = (c) => html`<span class="code">${c}</span>`;
+    const mark = signals.marks.get(p.id);
+    const mName = mark ? markName(mark, t) : '';
     return html`<div class="steppart ${flagged ? 'flag' : ''} ${ev?.result === 'ok' ? 'ok' : ''}" data-ref="${i}">
-      <a class="thumb" href="${partHref(p.id)}" aria-label="${t('Open {name}', { name: pt.name })}">${thumb(p)}</a>
+      <a class="thumb" href="${partHref(p.id)}" aria-label="${t('Open {name}', { name: pt.name })}">${thumb(p)}${mark ? raw(`<span class="thumb-mark">${markSVG(mark, { size: 26, title: t('Bin mark: {mark}', { mark: mName }) })}</span>`) : ''}</a>
       <div>
         <div class="t"><a href="${partHref(p.id)}" style="color:inherit;text-decoration:none">${pt.name}</a></div>
         <div class="s"><span class="code">${p.id}</span>${sizeLabel(p) ? html` · <span class="code">${sizeLabel(p)}</span>` : ''}${torqueText(sp.torque) ? html` · <b class="code">${torqueText(sp.torque)}</b>` : ''}${sp.ref.note ? ` · ${sp.ref.note}` : ''}</div>
         ${legacy ? html`<div class="warnline">${icon('history')}<span>${th('The instructions use the old code {code}.', { code: code(sp.ref.code) })}</span></div>` : ''}
         ${others.length ? html`<div class="alias">${t('Bin or bag may read:')} ${others.map((a, k) => html`${k ? ', ' : ''}<span class="code">${a.code}</span>`)}</div>` : ''}
         ${flagged ? html`<div class="warnline" style="color:var(--bad)">${icon('stop')}<span>${th('BOM rev {rev} asks for {part} ({size}) here.', { rev: dev.bom?.rev, part: html`<a href="${partHref(bomPart)}" class="code">${bomPart}</a>`, size: sizeLabel(app.index.parts.get(bomPart)) })}</span></div>` : ''}
+        ${learned.map((e) => { const tp = app.index.parts.get(e.taken); return html`<div class="warnline learned">${icon('antibody')}<span>${th('Mix-up caught here before: {part} ({size}) was picked instead {n, plural, one {once} other {# times}}, last on {date}.', { part: html`<a href="${partHref(tp.id)}" class="code">${tp.id}</a>`, size: sizeLabel(tp) || partText(tp, app.lib).name, n: countOf(e), date: fmtDay(lastAt(e)) })} ${t('Difference: {diff}.', { diff: shortDifference(p, tp) })}</span></div>`; })}
         ${looks.map((l) => html`<div class="warnline">${icon('alert')}<span>${usedInDevice.has(l.part.id)
           ? th("Don't confuse with {part} ({size}): {diff}, also in this device.", { part: html`<a href="${partHref(l.part.id)}" class="code">${l.part.id}</a>`, size: sizeLabel(l.part) || l.part.name, diff: shortDifference(p, l.part) })
           : th("Don't confuse with {part} ({size}): {diff}.", { part: html`<a href="${partHref(l.part.id)}" class="code">${l.part.id}</a>`, size: sizeLabel(l.part) || l.part.name, diff: shortDifference(p, l.part) })}</span></div>`)}
@@ -72,6 +82,7 @@ export default async function guide({ app, params, query, navigate }) {
           ${p.tool ? html`<p style="margin-top:6px"><b>${t('Tool.')}</b> ${p.tool}</p>` : ''}
         </div></details>` : ''}
       ${needsScan ? html`<div class="verify">
+          ${mark ? html`<div class="markline">${raw(markSVG(mark, { size: 22 }))}<span>${th('Take it from the bin with the {mark}.', { mark: html`<b>${mName}</b>` })}</span></div>` : ''}
           <form class="verify-row" data-verify="${i}" autocomplete="off">
             <input type="text" inputmode="text" autocapitalize="characters" spellcheck="false" dir="ltr" placeholder="${t('Scan or type the bin code')}" aria-label="${t('Code on the bin for {name}', { name: pt.name })}" value="${ev?.code || ''}">
             <button class="btn" type="button" data-cam="${i}" aria-label="${t('Scan with the camera')}">${icon('scan')}</button>
@@ -224,6 +235,7 @@ export default async function guide({ app, params, query, navigate }) {
         card.classList.toggle('bad', ev.result === 'wrong');
         beep(ev.result === 'ok' ? 'ok' : 'bad');
         await logEvent(ev);
+        if (ev.result === 'wrong') forgetMemory(); // the next person at this step is warned
         refresh();
         if (passed(ev.result)) {
           const nextInput = [...root.querySelectorAll('[data-verify] input')].find((inp) => !passed(state.get(+inp.closest('[data-verify]').dataset.verify)));

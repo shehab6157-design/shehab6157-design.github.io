@@ -1,7 +1,7 @@
 // Offline support. The app shell is cached on install; the photo-identification model,
 // TensorFlow.js (about 7 MB) and the PDF reader (about 1.5 MB) are cached the first time they are used.
 // Bump VERSION whenever a file in SHELL changes.
-const VERSION = 'rp-2026-11-06-1';
+const VERSION = 'rp-2026-11-12-1';
 // Kept in step with LANGUAGES in js/lang.js (a test checks it).
 const LOCALES = ['en', 'he'];
 const SHELL = [
@@ -40,6 +40,9 @@ const SHELL = [
   'js/core/i18n.js',
   'js/core/content.js',
   'js/core/translations.js',
+  'js/core/immune.js',
+  'js/core/signals.js',
+  'js/memory.js',
   'js/views/home.js',
   'js/views/parts.js',
   'js/views/search.js',

@@ -2571,5 +2571,59 @@
     ]
    }
   }
- ]
+ ],
+ "memory": {
+  "note": "Example mix-ups for the fictional Nova-1, so the demo shows what the app learns at the bench. Not real events.",
+  "updated": "2026-11-04",
+  "mixups": [
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "expected": "100-0231",
+    "taken": "100-0232",
+    "events": [
+     {
+      "key": "demo-b011#1792568520000",
+      "at": 1792568520000
+     },
+     {
+      "key": "demo-b019#1793243700000",
+      "at": 1793243700000
+     },
+     {
+      "key": "demo-b024#1793678700000",
+      "at": 1793678700000
+     }
+    ]
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S6",
+    "expected": "100-0235",
+    "taken": "100-0231",
+    "events": [
+     {
+      "key": "demo-b016#1793107200000",
+      "at": 1793107200000
+     },
+     {
+      "key": "demo-b022#1793587680000",
+      "at": 1793587680000
+     }
+    ]
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S1",
+    "expected": "100-0410",
+    "taken": "100-0411",
+    "events": [
+     {
+      "key": "demo-b018#1793354520000",
+      "at": 1793354520000
+     }
+    ]
+   }
+  ]
+ }
 }

@@ -4,6 +4,9 @@ import { partText } from '../core/content.js';
 import { drawPart } from '../draw.js';
 import { CODE_TYPES, whereUsed, torqueText, normCode } from '../core/model.js';
 import { findLookalikes, shortDifference } from '../core/lookalike.js';
+import { getMemory, getSignals } from '../memory.js';
+import { markSVG, markName } from '../core/signals.js';
+import { countOf, confusedPairs } from '../core/immune.js';
 import { decodeDesignation } from '../core/decode.js';
 import { CATEGORY_LABELS, isFastener, sizeLabel } from '../core/dims.js';
 import { barcodeSVG } from '../core/code128.js';
@@ -20,6 +23,19 @@ export default async function partView({ app, params, query }) {
   const matchedAlias = code ? [{ type: 'internal', code: part.id }, ...(part.aliases || []), part.designation ? { type: 'designation', code: part.designation } : null].filter(Boolean).find((a) => normCode(a.code) === normCode(code)) : null;
   const looks = findLookalikes(app.lib.parts, part);
   const used = whereUsed(app.index, part.id);
+  const memory = await getMemory(app);
+  const mixups = memory.byPart.get(part.id) || [];
+  const mark = (await getSignals(app)).marks.get(part.id);
+  const confused = confusedPairs(mixups);
+  const mixupLine = (e) => {
+    const dev = app.index.devices.get(e.deviceId);
+    const no = dev.instructions.steps.findIndex((s) => s.id === e.stepId) + 1;
+    const where = html`<a href="${stepHref(dev.id, e.stepId)}">${dev.name} · ${t('step {n}', { n: no })}</a>`;
+    const other = (id) => html`<a href="${partHref(id)}" class="code">${id}</a>`;
+    return e.expected === part.id
+      ? th('{where}: {other} was picked instead of this part {n, plural, one {once} other {# times}}.', { where, other: other(e.taken), n: countOf(e) })
+      : th('{where}: this part was picked instead of {other} {n, plural, one {once} other {# times}}.', { where, other: other(e.expected), n: countOf(e) });
+  };
   const findings = app.audit.byPart.get(part.id) || [];
   const reports = (await listRecords('report')).filter((r) => r.partId === part.id);
   const replacement = part.replacedBy ? app.index.parts.get(part.replacedBy) : null;
@@ -69,6 +85,7 @@ export default async function partView({ app, params, query }) {
         </div>
         <div class="stack">
           ${factsGrid(specFacts(part))}
+          ${mark ? html`<a class="markline" href="#/labels">${raw(markSVG(mark, { size: 28 }))}<span>${th('Bin mark: {mark}', { mark: html`<b>${markName(mark, t)}</b>` })}${mark.locked ? '' : html` <span class="tiny muted">(${t('not locked yet')})</span>`}</span></a>` : ''}
           ${torque || part.tool ? html`<div class="facts">${torque ? html`<div class="fact"><div class="k">${t('Torque')}</div><div class="v" dir="ltr">${torque}</div></div>` : ''}${part.tool ? html`<div class="fact"><div class="k">${t('Tool')}</div><div class="v" style="font-size:15px">${part.tool}</div></div>` : ''}</div>` : ''}
           ${pt.state === 'missing' && (d.function || d.why) ? html`<p class="tiny muted lang-note">${icon('globe')} ${t('The explanations below are not translated yet: they are shown as the company wrote them.')}</p>` : ''}
           ${d.function ? html`<div class="why-box"><div class="t">${t('What it does')}</div><p>${d.function}</p></div>` : ''}
@@ -100,6 +117,7 @@ export default async function partView({ app, params, query }) {
 
       ${dec ? decodedBlock(dec, t('How to read {code}', { code: part.designation })) : ''}
 
+      ${mixups.length ? html`<div class="callout bad">${icon('antibody')}<div><p class="t">${t('Mix-ups caught at the bench')}</p><ul class="list-plain small" style="margin-top:4px">${mixups.map((e) => html`<li>${mixupLine(e)}</li>`)}</ul></div></div>` : ''}
       ${looks.length ? html`<section class="stack" aria-labelledby="lk">
         <h2 id="lk">${t("Don't confuse it with")}</h2>
         <div class="compare">${looks.slice(0, 6).map((l) => html`<article class="lookalike">
@@ -110,6 +128,7 @@ export default async function partView({ app, params, query }) {
           </div>
           <div class="diffs">${l.diffs.length ? l.diffs.map((x) => html`<div class="${x.important ? 'imp' : ''}">${rich(x.text)}</div>`) : html`<div class="imp">${t('No difference in the spec: probably the same part under two codes.')}</div>`}</div>
           ${[...usedIn].some((dev) => whereUsed(app.index, l.part.id).some((u) => u.device?.id === dev)) ? html`<span class="chip warn">${icon('alert')}${t('Also used in the same device')}</span>` : ''}
+          ${confused.get([part.id, l.part.id].sort().join('|')) ? html`<span class="chip bad">${icon('antibody')}${t('Confused at the bench {n, plural, one {once} other {# times}}', { n: confused.get([part.id, l.part.id].sort().join('|')) })}</span>` : ''}
         </article>`)}</div>
       </section>` : ''}
 

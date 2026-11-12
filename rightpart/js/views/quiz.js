@@ -7,12 +7,46 @@ import { findLookalikes, shortDifference } from '../core/lookalike.js';
 import { isFastener, sizeLabel, DRIVES } from '../core/dims.js';
 import { decodeDesignation, summarizeDecoded } from '../core/decode.js';
 import { settings, setSetting } from '../store.js';
+import { getMemory } from '../memory.js';
+import { countOf } from '../core/immune.js';
 
 const shuffle = (a) => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
-function buildQuestions(app, dev) {
+/**
+ * Mix-ups really caught at the bench come first, like a vaccine: a new person meets each one in the
+ * quiz before meeting it on the line. Never from a step with open issues.
+ */
+function learnedQuestions(app, dev, memory) {
   const steps = dev.instructions?.steps || [];
+  const out = [];
+  for (const e of memory?.all || []) {
+    if (e.deviceId !== dev.id) continue;
+    const i = steps.findIndex((s) => s.id === e.stepId);
+    const need = app.index.parts.get(e.expected), took = app.index.parts.get(e.taken);
+    if (i < 0 || !need || !took || out.some((q) => q.key === `${e.stepId}|${e.expected}`)) continue;
+    if ((app.audit.byStep.get(`${dev.id}/${e.stepId}`) || []).some((f) => f.severity !== 'info')) continue;
+    const others = findLookalikes(app.lib.parts, need).filter((l) => !l.duplicate && l.part.id !== took.id && l.part.status !== 'obsolete').slice(0, 2).map((l) => l.part);
+    const opts = [need, took, ...others];
+    // Same size on every option (Phillips or Pozidriv, steel or stainless): name them in full, and draw the head from above.
+    const sameSize = new Set(opts.map((p) => sizeLabel(p))).size < opts.length;
+    const label = (p) => (!sameSize && sizeLabel(p)) || partText(p, app.lib).name;
+    const view = need.spec?.drive && took.spec?.drive && need.spec.drive !== took.spec.drive ? 'top' : 'side';
+    out.push({
+      kind: 'learned', key: `${e.stepId}|${e.expected}`,
+      prompt: t('Step {n}, “{title}”: the wrong part has been picked here before. Which one goes here?', { n: i + 1, title: stepText(steps[i], app.lib).title }),
+      options: shuffle(opts).map((p) => ({ id: p.id, part: isFastener(p) ? p : null, view, label: label(p), sub: p.id })),
+      answer: need.id,
+      explain: [`${need.id} (${label(need)}).`, t('{part} was picked here by mistake {n, plural, one {once} other {# times}}.', { part: `${took.id} (${label(took)})`, n: countOf(e) }), t('Difference: {diff}.', { diff: shortDifference(need, took) })].join(' '),
+    });
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+
+function buildQuestions(app, dev, memory) {
+  const steps = dev.instructions?.steps || [];
+  const learned = learnedQuestions(app, dev, memory);
   const qs = [];
   const fasteners = app.lib.parts.filter((p) => isFastener(p) && p.status !== 'obsolete');
   // a) which part goes here (only steps without open issues: never train on a disputed step)
@@ -20,6 +54,7 @@ function buildQuestions(app, dev) {
     if ((app.audit.byStep.get(`${dev.id}/${s.id}`) || []).some((f) => f.severity !== 'info')) continue;
     for (const sp of stepParts(app.index, s)) {
       if (!sp.part || sp.part.category !== 'screw') continue;
+      if (learned.some((q) => q.key === `${s.id}|${sp.part.id}`)) continue;
       const looks = findLookalikes(app.lib.parts, sp.part).filter((l) => !l.duplicate && l.part.status !== 'obsolete').slice(0, 3);
       if (looks.length < 2) continue;
       qs.push({
@@ -55,13 +90,14 @@ function buildQuestions(app, dev) {
   const drives = ['phillips', 'pozidriv', 'torx', 'hex'];
   const d = pick(drives);
   qs.push({ kind: 'drive', prompt: t('Which drive is this?'), figure: drawChoice('drive', d), options: shuffle(drives).map((x) => ({ id: x, label: DRIVES[x].label })), answer: d, explain: DRIVES[d].note });
-  return shuffle(qs).slice(0, 8);
+  return [...learned, ...shuffle(qs)].slice(0, 8);
 }
 
 export default async function quiz({ app, params }) {
   const dev = app.index.devices.get(params.device);
   if (!dev) return { title: t('Quiz'), html: html`<div class="page narrow"><div class="empty">${t('No device {id}.', { id: params.device })}</div></div>` };
   const best = settings()[`quiz.${dev.id}`];
+  const memory = await getMemory(app);
   return {
     title: t('Quiz: {device}', { device: dev.name }),
     html: html`<div class="page narrow">
@@ -70,7 +106,7 @@ export default async function quiz({ app, params }) {
     </div>`,
     mount(root) {
       const box = root.querySelector('#quiz');
-      let qs = buildQuestions(app, dev);
+      let qs = buildQuestions(app, dev, memory);
       let i = 0, score = 0;
       const wrong = [];
       const render = () => {
@@ -80,7 +116,7 @@ export default async function quiz({ app, params }) {
           box.innerHTML = String(html`<div class="callout ${pct >= 80 ? 'ok' : pct >= 50 ? 'warn' : 'bad'}">${icon(pct >= 80 ? 'checkCircle' : 'info')}<div><p class="t">${t('{score} of {total} right ({pct}%)', { score, total: qs.length, pct })}</p><p>${pct >= 80 ? t('Well done. You know these parts.') : t('Have another look at the learn page and the parts below, then try again.')}</p></div></div>
             ${wrong.length ? html`<h2>${t('To review')}</h2>${wrong.map((q) => html`<div class="card pad"><b>${q.prompt}</b><p class="small" style="margin-top:6px">${q.explain}</p></div>`)}` : ''}
             <div class="row"><button class="btn primary" type="button" id="again">${icon('replay')}${t('Try again')}</button><a class="btn" href="#/device/${encodeURIComponent(dev.id)}">${t('Back to the device')}</a></div>`);
-          box.querySelector('#again').addEventListener('click', () => { qs = buildQuestions(app, dev); i = 0; score = 0; wrong.length = 0; render(); });
+          box.querySelector('#again').addEventListener('click', () => { qs = buildQuestions(app, dev, memory); i = 0; score = 0; wrong.length = 0; render(); });
           return;
         }
         const q = qs[i];
@@ -88,7 +124,7 @@ export default async function quiz({ app, params }) {
           <p class="small muted">${t('Question {n} of {total}', { n: i + 1, total: qs.length })}</p>
           <h2>${q.prompt}</h2>
           ${q.figure ? html`<div class="drawing-box" style="min-height:140px;max-width:240px">${raw(q.figure)}</div>` : ''}
-          <div class="quiz-opts">${q.options.map((o) => html`<button class="quiz-opt" type="button" data-id="${o.id}">${o.part ? raw(drawPart(o.part, { view: 'side' })) : ''}<span dir="auto">${o.label}</span>${o.sub ? html`<span class="small muted">${o.sub}</span>` : ''}</button>`)}</div>
+          <div class="quiz-opts">${q.options.map((o) => html`<button class="quiz-opt" type="button" data-id="${o.id}">${o.part ? raw(drawPart(o.part, { view: o.view || 'side' })) : ''}<span dir="auto">${o.label}</span>${o.sub ? html`<span class="small muted">${o.sub}</span>` : ''}</button>`)}</div>
           <div id="fb" aria-live="polite"></div>`);
         box.querySelectorAll('.quiz-opt').forEach((b) => b.addEventListener('click', () => {
           const right = b.dataset.id === q.answer;
