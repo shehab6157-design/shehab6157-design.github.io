@@ -43,6 +43,14 @@ export function th(src, vars) {
 }
 export { t };
 
+// Part codes, sizes and numbers inside composed text ("Don't confuse with 100-0234 (M3 × 10)")
+// are kept on one line and left to right, in every language.
+const CODE_RE = /\b(?:[A-Z0-9]+[-/.])+[A-Z0-9]+\b|\bM\d+(?:\.\d+)?(?:\s?[×xX]\s?\d+(?:\.\d+)?)?\b/g;
+/** Plain text to safe markup, with every code-like token isolated and unbroken. */
+export function rich(text) {
+  return raw(esc(text).replace(CODE_RE, (m) => `<bdi dir="ltr" class="nobr">${m}</bdi>`));
+}
+
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 

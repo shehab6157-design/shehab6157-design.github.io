@@ -1,4 +1,4 @@
-import { html, th, raw, icon, esc, copyText, openDialog, toast, fmtDate } from '../ui.js';
+import { html, th, raw, icon, esc, rich, copyText, openDialog, toast, fmtDate } from '../ui.js';
 import { t, lower } from '../core/i18n.js';
 import { partText } from '../core/content.js';
 import { drawPart } from '../draw.js';
@@ -108,7 +108,7 @@ export default async function partView({ app, params, query }) {
             <div>${raw(drawPart(part, { view: 'side' }))}<span class="code">${sizeLabel(part) || part.id}</span><br><b>${t('this part')}</b></div>
             <div>${raw(drawPart(l.part, { view: 'side' }))}<span class="code">${sizeLabel(l.part) || l.part.id}</span><br><b>${shortDifference(part, l.part)}</b></div>
           </div>
-          <div class="diffs">${l.diffs.length ? l.diffs.map((x) => html`<div class="${x.important ? 'imp' : ''}">${x.text}</div>`) : html`<div class="imp">${t('No difference in the spec: probably the same part under two codes.')}</div>`}</div>
+          <div class="diffs">${l.diffs.length ? l.diffs.map((x) => html`<div class="${x.important ? 'imp' : ''}">${rich(x.text)}</div>`) : html`<div class="imp">${t('No difference in the spec: probably the same part under two codes.')}</div>`}</div>
           ${[...usedIn].some((dev) => whereUsed(app.index, l.part.id).some((u) => u.device?.id === dev)) ? html`<span class="chip warn">${icon('alert')}${t('Also used in the same device')}</span>` : ''}
         </article>`)}</div>
       </section>` : ''}

@@ -1,6 +1,6 @@
 import { html, th, raw, icon, toast, beep, openDialog, fmtDate } from '../ui.js';
 import { t, lower, listJoin } from '../core/i18n.js';
-import { esc } from '../ui.js';
+import { esc, rich } from '../ui.js';
 import { stepText, partText } from '../core/content.js';
 import { languageInfo, englishName } from '../lang.js';
 import { stepParts, resolveCode, otherCodes, torqueText, CODE_TYPES } from '../core/model.js';
@@ -124,16 +124,16 @@ export default async function guide({ app, params, query, navigate }) {
           </div>
 
           ${findings.filter((f) => f.severity === 'critical').map((f) => html`<div class="callout bad" role="alert">${sevIcon(f.severity)}<div>
-            <p class="t">${t('Stop. {problem}', { problem: f.title })}</p>
-            <p>${f.detail}</p>
-            <p style="margin-top:6px"><b>${t('What to do:')}</b> ${f.suggestion}</p>
+            <p class="t">${rich(t('Stop. {problem}', { problem: f.title }))}</p>
+            <p>${rich(f.detail)}</p>
+            <p style="margin-top:6px"><b>${t('What to do:')}</b> ${rich(f.suggestion)}</p>
             <div class="acts"><a class="btn sm" href="#/audit">${icon('shield')}${CHECKS[f.check]?.label || t('Integrity check')}</a><button class="btn sm" type="button" data-report="${f.title}">${icon('flag')}${t('Report it')}</button></div>
           </div></div>`)}
           ${step.draft ? html`<div class="callout warn" role="note">${icon('alert')}<div><p class="t">${t('Draft: not reviewed yet')}</p><p>${step.source?.page ? t('This step was read automatically from {file}, page {page}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.', { file: step.source?.file || t('a PDF'), page: step.source.page }) : t('This step was read automatically from {file}. It can miss a part, a quantity or a warning: follow the released document until an engineer has reviewed it.', { file: step.source?.file || t('a PDF') })}</p></div></div>` : ''}
           ${textNote}
-          ${findings.some((f) => f.severity === 'warning' && f.check !== 'draft-steps') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">${t('Also checked for this step')}</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning' && f.check !== 'draft-steps').map((f) => html`<li>${f.title}</li>`)}</ul></div></div>` : ''}
+          ${findings.some((f) => f.severity === 'warning' && f.check !== 'draft-steps') ? html`<div class="callout warn">${icon('alert')}<div><p class="t">${t('Also checked for this step')}</p><ul class="list-plain small" style="margin-top:4px">${findings.filter((f) => f.severity === 'warning' && f.check !== 'draft-steps').map((f) => html`<li>${rich(f.title)}</li>`)}</ul></div></div>` : ''}
 
-          ${txt.warnings.map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${w.text}</span></div>`)}
+          ${txt.warnings.map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${rich(w.text)}</span></div>`)}
 
           <section class="stack" aria-labelledby="partsH">
             <div class="row between"><h2 id="partsH">${t('Parts for this step')}</h2>${build ? html`<span class="tiny muted">${t('Scan the bin before you fit the part. A USB scanner types into the box.')}</span>` : ''}</div>
@@ -142,11 +142,11 @@ export default async function guide({ app, params, query, navigate }) {
 
           ${step.tools?.length ? html`<section class="stack tight"><h3>${t('Tools')}</h3><div class="tools">${step.tools.map((tool) => html`<span class="chip">${icon('wrench')}${tool}</span>`)}</div></section>` : ''}
 
-          <section class="stack tight"><h3>${t('How')}</h3><ol class="instr">${txt.instructions.map((s) => html`<li>${s}</li>`)}</ol></section>
+          <section class="stack tight"><h3>${t('How')}</h3><ol class="instr">${txt.instructions.map((s) => html`<li>${rich(s)}</li>`)}</ol></section>
 
           ${txt.why ? (build ? html`<details class="more"><summary><span class="ic">${icon('info')}</span>${t('Why this step matters')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${txt.why}</p></div></details>` : html`<div class="why-box"><div class="t">${t('Why this step matters')}</div><p>${txt.why}</p></div>`) : ''}
 
-          ${txt.checks.length ? html`<section class="stack tight"><h3>${build ? t('Check before you continue') : t('What to check')}</h3><div class="checks">${txt.checks.map((c, i) => build ? html`<label class="check"><input type="checkbox" data-check="${i}"><span>${c}</span></label>` : html`<div class="check" style="cursor:default">${icon('checkCircle')}<span>${c}</span></div>`)}</div></section>` : ''}
+          ${txt.checks.length ? html`<section class="stack tight"><h3>${build ? t('Check before you continue') : t('What to check')}</h3><div class="checks">${txt.checks.map((c, i) => build ? html`<label class="check"><input type="checkbox" data-check="${i}"><span>${rich(c)}</span></label>` : html`<div class="check" style="cursor:default">${icon('checkCircle')}<span>${rich(c)}</span></div>`)}</div></section>` : ''}
 
           <div class="row"><button class="btn sm ghost" type="button" id="reportStep">${icon('flag')}${t('Report a doubt about this step')}</button></div>
 

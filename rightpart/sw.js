@@ -3,7 +3,7 @@
 // Bump VERSION whenever a file in SHELL changes.
 const VERSION = 'rp-2026-11-06-1';
 // Kept in step with LANGUAGES in js/lang.js (a test checks it).
-const LOCALES = ['en', 'he', 'ar', 'ru', 'uk', 'am', 'es', 'pt', 'fr', 'de', 'it', 'pl', 'ro', 'tr', 'zh', 'vi', 'th', 'hi', 'fil', 'id'];
+const LOCALES = ['en', 'he'];
 const SHELL = [
   './',
   'index.html',

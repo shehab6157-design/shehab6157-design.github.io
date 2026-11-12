@@ -7,7 +7,7 @@ import { importPdfSteps } from '../pdfimport.js';
 import { toCSV } from '../core/csv.js';
 import { translatedLanguages, contentLanguage } from '../core/content.js';
 import { uiCSV, importUiCSV } from '../core/translations.js';
-import { LANGUAGES, catalog, builtInMessages } from '../lang.js';
+import { LANGUAGES, KNOWN_LANGUAGES, catalog, builtInMessages } from '../lang.js';
 
 const nativeName = (code) => { try { return new Intl.DisplayNames([code], { type: 'language' }).of(code) || code; } catch { return code; } };
 
@@ -21,7 +21,7 @@ export default async function dataView({ app, navigate }) {
   const stepLangs = translatedLanguages(app.lib);
   const companyLangs = Object.entries(app.lib.languages?.names || {});
   const source = contentLanguage(app.lib);
-  const sourceChoices = [...LANGUAGES.map((l) => ({ code: l.code, native: l.native })), ...companyLangs.filter(([c]) => !LANGUAGES.some((l) => l.code === c)).map(([code, native]) => ({ code, native }))];
+  const sourceChoices = [...KNOWN_LANGUAGES.map((l) => ({ code: l.code, native: l.native })), ...companyLangs.filter(([c]) => !KNOWN_LANGUAGES.some((l) => l.code === c)).map(([code, native]) => ({ code, native }))];
   const changed = app.savedAt ? t('last changed {date}', { date: fmtDate(app.savedAt) }) : '';
   return {
     title: t('Data and records'),
@@ -122,7 +122,7 @@ export default async function dataView({ app, navigate }) {
         const ok = await openDialog({
           title: t('Export interface text'),
           body: String(html`<p class="muted">${t('The spreadsheet lists every text RightPart shows, in English, with one column per language. Keep anything in {curly brackets} exactly as it is: it is replaced by a number, a code or a name.')}</p>
-            <div class="lang-checks">${LANGUAGES.filter((l) => l.code !== 'en').map((l) => html`<label class="check"><input type="checkbox" value="${l.code}" ${have.includes(l.code) || l.code === getLanguage() ? 'checked' : ''}><span lang="${l.code}">${l.native}</span><span class="tiny muted">${l.english}</span></label>`)}</div>
+            <div class="lang-checks">${KNOWN_LANGUAGES.filter((l) => l.code !== 'en').map((l) => html`<label class="check"><input type="checkbox" value="${l.code}" ${have.includes(l.code) || l.code === getLanguage() ? 'checked' : ''}><span lang="${l.code}">${l.native}</span><span class="tiny muted">${l.english}</span></label>`)}</div>
             <div class="field" style="margin-top:12px"><label for="newLang">${t('Add a new language (code, for example ti, ne, so, my)')}</label><input id="newLang" type="text" dir="ltr" spellcheck="false" placeholder="ti"></div>`),
           actions: [{ label: t('Cancel'), value: false }, { label: t('Download'), value: true, primary: true }],
           onClose(d) { chosen = [...d.querySelectorAll('.lang-checks input:checked')].map((i) => i.value).concat(d.querySelector('#newLang').value.split(/[\s,;]+/).map((x) => x.trim().toLowerCase()).filter(Boolean)); },

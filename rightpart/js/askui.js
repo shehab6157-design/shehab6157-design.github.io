@@ -1,7 +1,7 @@
 // Chat UI for the Ask assistant, used by the Ask page and the Ask panel on every page.
 import { html, raw, icon, esc, toast } from './ui.js';
 import { t, getLanguage } from './core/i18n.js';
-import { th } from './ui.js';
+import { th, rich } from './ui.js';
 import { stepText, partText } from './core/content.js';
 import { thumb, partHref, sevIcon } from './components.js';
 import { answer, retrieveRecords } from './core/assistant.js';
@@ -27,7 +27,7 @@ function itemCard(it, lib) {
     <span><span class="t">${partText(p, lib).name}</span><br><span class="s"><span class="code">${p.id}</span>${it.torque ? html` · <span class="code">${it.torque}</span>` : ''}${it.note ? ` · ${it.note}` : ''}</span>
       ${it.codes?.length ? html`<br><span class="s">${t('Bin may read:')} <span class="code">${it.codes.join(', ')}</span></span>` : ''}
       ${it.flag ? html`<span class="warnline badline">${icon('stop')}<span>${t('Disputed: see the warning above')}</span></span>` : ''}
-      ${(it.warnings || []).map((w) => html`<span class="warnline">${icon('alert')}<span>${w}</span></span>`)}
+      ${(it.warnings || []).map((w) => html`<span class="warnline">${icon('alert')}<span>${rich(w)}</span></span>`)}
     </span>
     ${it.qty != null ? html`<span class="qty ${it.qty === 'A/R' ? 'ar' : ''}">${it.qty === 'A/R' ? t('qty::A/R') : `×${it.qty}`}</span>` : html`<span></span>`}
   </a>`;
@@ -35,15 +35,15 @@ function itemCard(it, lib) {
 
 export function renderAnswer(a, lib) {
   return html`<div class="a">
-    ${a.text.map((line, i) => html`<p class="${i === 0 ? 'lead-line' : ''}">${line}</p>`)}
-    ${a.lines.map((l) => html`<p class="warnline ${l.level === 'bad' ? 'badline' : ''}">${icon(l.level === 'bad' ? 'stop' : 'alert')}<span>${l.text}</span></p>`)}
-    ${a.list.length ? (a.intent === 'how' ? html`<ol>${a.list.map((x) => html`<li>${x}</li>`)}</ol>` : html`<ul>${a.list.map((x) => html`<li>${x}</li>`)}</ul>`) : ''}
+    ${a.text.map((line, i) => html`<p class="${i === 0 ? 'lead-line' : ''}">${rich(line)}</p>`)}
+    ${a.lines.map((l) => html`<p class="warnline ${l.level === 'bad' ? 'badline' : ''}">${icon(l.level === 'bad' ? 'stop' : 'alert')}<span>${rich(l.text)}</span></p>`)}
+    ${a.list.length ? (a.intent === 'how' ? html`<ol>${a.list.map((x) => html`<li>${rich(x)}</li>`)}</ol>` : html`<ul>${a.list.map((x) => html`<li>${rich(x)}</li>`)}</ul>`) : ''}
     ${a.items.length ? html`<div class="cards" style="margin-top:8px">${a.items.map((it) => itemCard(it, lib))}</div>` : ''}
     ${a.tools.length ? html`<p style="margin-top:8px"><b>${t('Tools:')}</b> ${a.tools.join(', ')}</p>` : ''}
     ${a.checks.length ? html`<p style="margin-top:8px"><b>${t('Check before moving on:')}</b></p><ul>${a.checks.map((c) => html`<li>${c}</li>`)}</ul>` : ''}
     ${a.why ? html`<p style="margin-top:8px"><b>${t('Why:')}</b> ${a.why}</p>` : ''}
-    ${a.findings.length ? html`<ul>${a.findings.map((f) => html`<li><span class="warnline ${f.severity === 'critical' ? 'badline' : ''}">${sevIcon(f.severity)}<span>${f.title}</span></span></li>`)}</ul>` : ''}
-    ${a.tip ? html`<p class="small muted" style="margin-top:8px">${a.tip}</p>` : ''}
+    ${a.findings.length ? html`<ul>${a.findings.map((f) => html`<li><span class="warnline ${f.severity === 'critical' ? 'badline' : ''}">${sevIcon(f.severity)}<span>${rich(f.title)}</span></span></li>`)}</ul>` : ''}
+    ${a.tip ? html`<p class="small muted" style="margin-top:8px">${rich(a.tip)}</p>` : ''}
     ${a.sources.length ? html`<div class="sources" style="margin-top:8px"><span class="tiny muted">${t('From:')}</span>${a.sources.map((s) => html`<a class="chip" href="${s.href}">${s.label}</a>`)}</div>` : ''}
   </div>
   ${a.followUps.length ? html`<div class="suggestions">${a.followUps.map((f) => html`<button class="chip" type="button" data-ask="${f === 'help' ? 'help' : f.replace(/\s*\([^()]*\)$/, '')}">${f === 'help' ? t('What can I ask?') : f}</button>`)}</div>` : ''}

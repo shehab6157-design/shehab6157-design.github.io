@@ -5,10 +5,18 @@ import { setLanguage, dirOf, baseOf, getLanguage, t } from './core/i18n.js';
 import { settings, setSetting } from './store.js';
 import { html, icon, esc } from './ui.js';
 
-/** Built-in languages. `tier`: 'full' = every screen; 'floor' = every screen a worker uses at the bench. */
+/**
+ * Languages RightPart is translated into. `tier`: 'full' = every screen; 'floor' = every screen a
+ * worker uses at the bench. Only languages with a file in locales/ are listed here (a test checks
+ * this and the offline cache list in sw.js); the ones still being translated are in PLANNED.
+ */
 export const LANGUAGES = [
   { code: 'en', native: 'English', english: 'English', tier: 'source' },
   { code: 'he', native: 'עברית', english: 'Hebrew', tier: 'full' },
+];
+
+/** Being translated: shown in the picker as coming, never selectable until their file exists. */
+export const PLANNED = [
   { code: 'ar', native: 'العربية', english: 'Arabic', tier: 'full' },
   { code: 'ru', native: 'Русский', english: 'Russian', tier: 'full' },
   { code: 'uk', native: 'Українська', english: 'Ukrainian', tier: 'floor' },
@@ -28,6 +36,9 @@ export const LANGUAGES = [
   { code: 'fil', native: 'Filipino', english: 'Filipino', tier: 'floor' },
   { code: 'id', native: 'Bahasa Indonesia', english: 'Indonesian', tier: 'floor' },
 ];
+
+/** Every language with a name in the lists above: steps and company wording can be in any of them today. */
+export const KNOWN_LANGUAGES = [...LANGUAGES, ...PLANNED];
 
 const cache = new Map();
 let company = { names: {}, ui: {} }; // languages and wording added by the current company
@@ -130,6 +141,7 @@ export function languageDialog() {
   return new Promise((resolve) => {
     const current = getLanguage();
     const list = availableLanguages();
+    const coming = PLANNED.filter((p) => !list.some((l) => l.code === p.code));
     const d = document.createElement('dialog');
     d.className = 'dlg lang-dlg';
     d.setAttribute('aria-label', t('Language'));
@@ -142,6 +154,7 @@ export function languageDialog() {
       <div class="db">
         <input type="search" class="lang-filter" placeholder="${t('Find a language')}" aria-label="${t('Find a language')}" autocomplete="off" spellcheck="false">
         <div class="lang-list" role="list">${list.map(row)}</div>
+        ${coming.length ? html`<p class="small muted" style="margin-top:10px">${t('Being translated:')} ${coming.map((l, i) => html`${i ? ' · ' : ''}<span lang="${l.code}" dir="${dirOf(l.code)}">${l.native}</span>`)}</p>` : ''}
         <p class="tiny muted" style="margin-top:12px">${t('Translations are drafts until someone who speaks the language checks them. Part codes, numbers, torques and sizes are never translated: they stay exactly as on the drawings and bin labels. A company can add any other language or correct any wording in Data and records.')}</p>
       </div>`);
     document.body.append(d);

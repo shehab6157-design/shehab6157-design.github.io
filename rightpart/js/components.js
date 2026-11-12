@@ -1,5 +1,5 @@
 // Pieces of markup shared by several pages.
-import { html, th, raw, icon, esc } from './ui.js';
+import { html, th, raw, icon, esc, rich } from './ui.js';
 import { t } from './core/i18n.js';
 import { partText } from './core/content.js';
 import { drawPart } from './draw.js';
@@ -59,9 +59,9 @@ export function findingCard(f, app, { compact = false } = {}) {
     <div class="ic">${sevIcon(f.severity)}</div>
     <div>
       <div class="kind">${CHECKS[f.check]?.label || f.check}${dev ? ` · ${dev.name}` : ''}</div>
-      <h3>${f.title}</h3>
-      ${compact ? '' : html`<p class="d">${f.detail}</p>`}
-      ${!compact && f.suggestion ? html`<p class="fix"><b>${t('What to do:')} </b>${f.suggestion}</p>` : ''}
+      <h3>${rich(f.title)}</h3>
+      ${compact ? '' : html`<p class="d">${rich(f.detail)}</p>`}
+      ${!compact && f.suggestion ? html`<p class="fix"><b>${t('What to do:')} </b>${rich(f.suggestion)}</p>` : ''}
       ${!compact && CHECKS[f.check]?.why ? html`<p class="tiny muted" style="margin-top:8px">${t('Why this matters:')} ${CHECKS[f.check].why}</p>` : ''}
       <div class="links">
         ${f.steps.map((s) => html`<a class="chip" href="${stepHref(s.deviceId, s.stepId)}">${icon('guide')}${t('Step {n}', { n: s.stepNo })}</a>`)}

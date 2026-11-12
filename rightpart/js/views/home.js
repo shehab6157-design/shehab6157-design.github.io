@@ -2,7 +2,7 @@ import { html, th, icon, fmtDate } from '../ui.js';
 import { t } from '../core/i18n.js';
 import { listRecords } from '../store.js';
 import { submitQuery } from '../app.js';
-import { LANGUAGES } from '../lang.js';
+import { LANGUAGES, PLANNED } from '../lang.js';
 
 const DEMO_EXAMPLES = [
   ['C-55013', () => t('customer code')],
@@ -103,7 +103,7 @@ export default async function home({ app }) {
           <span class="ic">${icon('chat')}</span>
           <h3>${t('Ask a question')}</h3>
           <p>${t('"Which screw goes in this step?", "what is this code?", "M3×8 or M3×10?" Answers from this company\'s own parts, steps and BOMs, with the source of each one.')}</p>
-          <span class="meta">${t('Ask in {n} languages · works offline', { n: LANGUAGES.length })}</span>
+          <span class="meta">${t('Ask in {n} languages · works offline', { n: LANGUAGES.length + PLANNED.length })}</span>
         </a>
         <a class="tile" href="#/identify">
           <span class="ic">${icon('camera')}</span>

@@ -7,7 +7,7 @@ import { partsFromCSV, mergeParts, bomFromCSV, mergeBOM, stepsFromCSV, mergeStep
 import { t, getLanguage } from './core/i18n.js';
 import { contentCSV, importContentCSV } from './core/translations.js';
 import { translatedLanguages, contentLanguage } from './core/content.js';
-import { LANGUAGES } from './lang.js';
+import { KNOWN_LANGUAGES } from './lang.js';
 
 function preview(title, lines, warnings, extra = '') {
   return openDialog({
@@ -99,7 +99,7 @@ export function languageName(code, inLang = getLanguage()) {
 export async function exportStepText(app) {
   const have = translatedLanguages(app.lib);
   const source = contentLanguage(app.lib);
-  const options = LANGUAGES.filter((l) => l.code !== source);
+  const options = KNOWN_LANGUAGES.filter((l) => l.code !== source);
   let chosen = [];
   const ok = await openDialog({
     title: t('Export step text to translate'),

@@ -816,6 +816,7 @@ dialog.dlg.sheet { max-width: 100vw; grid-template-columns: minmax(0, 1fr); }
 /* ---------- Languages: right-to-left pages, codes that never reorder, the language picker ---------- */
 /* A part code, size or torque is always read left to right, also inside Hebrew or Arabic text. */
 span.code, b.code, a.code, bdi[dir="ltr"], .code-pill { unicode-bidi: isolate; direction: ltr; }
+.nobr { white-space: nowrap; }
 td.code, h3.code, div.code { unicode-bidi: plaintext; }
 [dir="rtl"] .ico.flip, [dir="rtl"] .flip-arrow { transform: scaleX(-1); display: inline-block; }
 [dir="rtl"] .gauge-stage, [dir="rtl"] .viewer canvas, [dir="rtl"] .binlabel svg { direction: ltr; }
