@@ -24,7 +24,7 @@ export function parseCSV(text, delimiter) {
       if (ch === '"') {
         if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false;
       } else field += ch;
-    } else if (ch === '"') inQ = true;
+    } else if (ch === '"' && field === '') inQ = true; // a quote opens a quoted field only at its start: מק"ט stays as it is
     else if (ch === d) { row.push(field); field = ''; }
     else if (ch === '\n' || ch === '\r') {
       if (ch === '\r' && text[i + 1] === '\n') i++;

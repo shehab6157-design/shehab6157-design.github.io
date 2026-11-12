@@ -22,7 +22,7 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 | **Identify a loose part** | Lay it on the screen and measure it (calibrated with a bank card), photograph it (the identifier learns your parts on the device), or scan any code. |
 | **Bin labels** | 100 × 50 mm, Code 128 barcode, every code the part goes by, a "NOT M3 × 10" warning, and the part's outline at actual size. |
 | **Training** | Fastener basics (heads, drives, threads, length, materials) and a quiz generated from the real device. |
-| **Every company, its own data** | Each company is a separate space with its own library: loaded from CSV or JSON, or written in the step editor. Switch between them from the header. |
+| **Every company, its own data** | Each company is a separate space with its own library. **Load company data** takes all its files at once (Excel, CSV, PDF, JSON), recognises what each table is, loads it and checks everything. Switch between companies from the header. |
 | **Reads your PDFs** | The work instructions a company already has: steps, the parts each step names (by any of their codes), quantities, torques, tools, warnings and checks are read on the device, and every code the parts list does not know is listed. Steps stay drafts, marked in the guide, until an engineer compares them with the PDF and ticks Reviewed. |
 | **Ask a question** | "Which screw goes in step 7?", "torque for 100-0233?", "what is C-55013?", "difference between M3x8 and M3x10". Answers come from the company's own data, with the source of each one, offline and without AI. It never guesses a torque or a part number, and it warns when the data disagrees. Questions are understood in 20 languages. |
 | **Every language on the line** | The interface in English and Hebrew (right to left), with 18 more languages being translated. Step text can be translated into any language; a translation that changes a number is held back. |
@@ -46,8 +46,9 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 ## Your own company
 
 1. Press the company name in the header → **Add a company**. Each company gets its own storage; the demo stays as it was.
-2. Follow **Set up this company**: import parts, then BOMs, then steps (read from your PDF work instructions, imported from a spreadsheet, or written in the editor), then print bin labels and run the integrity check.
-3. To share one library between people and tablets, connect a company server and sign in (see [backend/README.md](backend/README.md)). Without one, the data stays on the device it was loaded on: export it from **Data and records** to move it.
+2. **Load company data**: drop every file at once (Excel `.xlsx`, CSV, PDF work instructions, a RightPart `.json`). Each workbook sheet is read on the device and recognised as a parts list, a BOM, a step list or a list of codes, from its column names (SAP, Priority, Oracle and similar exports, in English, Hebrew, Arabic, German and more) and its values. You see what each column was read as and can change it; then everything loads in one go and a report lists what does not add up (unknown codes, codes for two parts, fasteners without a size, devices without a BOM or steps, critical findings). *Try the sample files* loads a fictional company (`data/sample-company.xlsx`).
+3. Or follow **Set up this company** step by step: import parts, then BOMs, then steps (read from your PDF work instructions, imported from a spreadsheet, or written in the editor), then print bin labels and run the integrity check.
+4. To share one library between people and tablets, connect a company server and sign in (see [backend/README.md](backend/README.md)). Without one, the data stays on the device it was loaded on: export it from **Data and records** to move it.
 
 Everything you import stays in this browser (IndexedDB) unless you publish it to your company server.
 

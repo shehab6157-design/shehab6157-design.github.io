@@ -43,6 +43,7 @@ export default async function setup({ app, navigate }) {
         <p class="lede">${ws.kind === 'demo' ? th('You are in the demo. {link}, then follow these steps with your data.', { link: html`<a href="#/companies">${t('Add your own company')}</a>` }) : t("Load your company's data once; every page then works on it: search, drawings, 3D or photo guides, bench checks, the integrity check and the Ask assistant.")}</p>
       </div><span class="chip ${done === items.length ? 'ok' : ''}">${t('{done} of {total} done', { done, total: items.length })}</span></div>
       <div class="progress" aria-hidden="true"><i style="width:${(done / items.length) * 100}%"></i></div>
+      ${ws.kind === 'demo' ? '' : html`<a class="card pad load-cta" href="#/load">${icon('upload')}<span><b>${t('Load all your files at once')}</b><span class="small muted">${t('Drop Excel, CSV and PDF files together: RightPart works out what each one is, loads them and checks everything.')}</span></span>${icon('chevronRight')}</a>`}
       <ol class="setup-list">${items.map((it, i) => html`<li class="setup-item ${it.done ? 'done' : ''}">
         <span class="dot">${it.done ? icon('check') : i + 1}</span>
         <div><h3>${it.title}</h3><p>${it.text}</p>${it.acts ? html`<div class="row">${it.acts}</div>` : ''}</div>

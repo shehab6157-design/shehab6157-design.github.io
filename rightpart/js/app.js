@@ -71,6 +71,7 @@ const ROUTES = [
   { path: 'labels', nav: 'parts', load: () => import('./views/labels.js') },
   { path: 'sync', nav: 'sync', load: () => import('./views/sync.js') },
   { path: 'nature', nav: 'nature', load: () => import('./views/nature.js') },
+  { path: 'load', nav: 'load', load: () => import('./views/load.js') },
 ];
 
 function parseHash() {
@@ -144,6 +145,7 @@ const NAV = [
 const NAV_MORE = [
   { id: 'ask', href: '#/ask', label: () => t('Ask a question'), icon: 'chat' },
   { id: 'learn', href: '#/learn', label: () => t('Learn fasteners'), icon: 'learn' },
+  { id: 'load', href: '#/load', label: () => t('Load company data'), icon: 'upload' },
   { id: 'setup', href: '#/setup', label: () => t('Set up this company'), icon: 'checklist' },
   { id: 'companies', href: '#/companies', label: () => t('Companies and sign-in'), icon: 'building' },
   { id: 'data', href: '#/data', label: () => t('Data and records'), icon: 'data' },

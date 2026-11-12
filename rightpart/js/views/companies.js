@@ -31,7 +31,7 @@ export function workspaceDialog({ navigate }) {
         if (!name) { d.querySelector('#wsName').focus(); return; }
         const w = addWorkspace({ name, kind: 'local' });
         close(null);
-        await switchWorkspace(w.id, '#/setup');
+        await switchWorkspace(w.id, '#/load');
       });
     },
   }).then((v) => { if (v === 'manage') navigate('#/companies'); });
@@ -149,7 +149,7 @@ export default async function companies({ app, navigate }) {
         const name = root.querySelector('#newName').value.trim();
         if (!name) { root.querySelector('#newName').focus(); return; }
         const w = addWorkspace({ name, kind: 'local' });
-        await switchWorkspace(w.id, '#/setup');
+        await switchWorkspace(w.id, '#/load');
       });
       root.querySelector('#srvForm')?.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -203,7 +203,7 @@ export default async function companies({ app, navigate }) {
         try {
           const org = await cloud.createCompany(name);
           const w = cloud.linkWorkspace(org);
-          await switchWorkspace(w.id, '#/setup');
+          await switchWorkspace(w.id, '#/load');
         } catch (err) { toast(err.message, 'bad', 5000); }
       });
       root.querySelector('#pull')?.addEventListener('click', async (e) => {

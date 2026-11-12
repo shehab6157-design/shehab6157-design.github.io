@@ -1,7 +1,7 @@
 // Offline support. The app shell is cached on install; the photo-identification model,
 // TensorFlow.js (about 7 MB) and the PDF reader (about 1.5 MB) are cached the first time they are used.
 // Bump VERSION whenever a file in SHELL changes.
-const VERSION = 'rp-2026-11-12-1';
+const VERSION = 'rp-2026-11-12-2';
 // Kept in step with LANGUAGES in js/lang.js (a test checks it).
 const LOCALES = ['en', 'he'];
 const SHELL = [
@@ -52,6 +52,10 @@ const SHELL = [
   'js/chambers.js',
   'js/core/trails.js',
   'js/views/nature.js',
+  'js/core/xlsx.js',
+  'js/core/detect.js',
+  'js/core/companyload.js',
+  'js/views/load.js',
   'js/memory.js',
   'js/views/home.js',
   'js/views/parts.js',
@@ -74,6 +78,7 @@ const SHELL = [
   'js/views/ask.js',
   'js/views/challenges.js',
   'data/demo-library.json',
+  'data/sample-company.xlsx',
   // Every built-in language, so a shared tablet can switch language on the floor without a network.
   ...LOCALES.map((c) => `locales/${c}.json`),
   'vendor/three/three.bundle.js',

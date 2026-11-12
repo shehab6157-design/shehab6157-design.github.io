@@ -899,3 +899,23 @@ td.code, h3.code, div.code { unicode-bidi: plaintext; }
 .nature-card .card-head h2 svg { width: 22px; height: 22px; color: var(--brand); }
 .nature-card .from { color: var(--text-2); }
 .nature-card .state { font-weight: 650; color: var(--text); background: var(--surface-2); border-radius: 10px; padding: 8px 12px; }
+
+/* ---------- Load company data ---------- */
+.load-item.skipped { opacity: .7; }
+.load-item .card-head { align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.li-name { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.li-kind select { min-width: 150px; }
+.li-cols { display: flex; flex-wrap: wrap; gap: 6px; }
+.li-cols .chip { max-width: 100%; overflow-wrap: anywhere; white-space: normal; }
+.chip.muted-chip { opacity: .6; }
+.li-dev { gap: 8px; }
+.load-checks { display: grid; gap: 8px; }
+.load-checks li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); }
+.load-checks li > svg { width: 20px; height: 20px; flex: none; margin-top: 1px; }
+.load-checks li.ok > svg { color: var(--ok); }
+.load-checks li.bad > svg { color: var(--warn); }
+.load-done li { display: flex; gap: 8px; align-items: flex-start; }
+.load-done li > svg { width: 16px; height: 16px; flex: none; margin-top: 3px; color: var(--ok); }
+.load-cta { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; text-decoration: none; color: inherit; border: 1px solid var(--brand); }
+.load-cta > svg { width: 22px; height: 22px; color: var(--brand); }
+.load-cta > span { display: grid; gap: 2px; }

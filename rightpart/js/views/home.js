@@ -41,7 +41,8 @@ function welcome(app) {
         <h1>${ws.name}</h1>
         <p class="lede">${t("This company has no data yet. Load its parts, BOMs and assembly steps once, and every page works on them: search by any code, true-scale drawings, step-by-step guides, checks at the bench, the integrity check and answers to workers' questions.")}</p>
         <div class="row">
-          <a class="btn primary" href="#/setup">${icon('checklist')}${t('Set up this company')}</a>
+          <a class="btn primary" href="#/load">${icon('upload')}${t('Load company data')}</a>
+          <a class="btn" href="#/setup">${icon('checklist')}${t('Set up this company')}</a>
           ${cloud ? html`<a class="btn" href="#/companies">${icon('cloud')}${t('Download the company library')}</a>` : html`<a class="btn" href="#/companies">${icon('building')}${t('Companies and sign-in')}</a>`}
         </div>
       </section>
