@@ -88,7 +88,30 @@ export function buildCatalog() {
 
 /** {name} placeholders a template uses (plural branches included). */
 export function placeholderSet(s) {
-  return [...new Set((String(s).match(/\{\s*([\w.]+)\s*(?=[,}])/g) || []).map((x) => x.replace(/[{\s]/g, '')))].sort().join('|');
+  // A small ICU reader: {name}, {name, plural|select, one {text} other {text}}; text in branches may hold more placeholders.
+  const src = String(s);
+  const names = new Set();
+  let i = 0;
+  const text = (inBranch) => {
+    while (i < src.length) {
+      const c = src[i];
+      if (c === '}' && inBranch) return;
+      if (c !== '{') { i++; continue; }
+      const m = src.slice(i + 1).match(/^\s*([\w.]+)\s*([,}])/);
+      if (!m) { i++; continue; }
+      names.add(m[1]);
+      i += 1 + m[0].length;
+      if (m[2] === '}') continue;
+      const k = src.slice(i).match(/^\s*(plural|select|selectordinal)\s*,/);
+      if (!k) { let d = 1; while (i < src.length && d) { if (src[i] === '{') d++; else if (src[i] === '}') d--; i++; } continue; }
+      i += k[0].length;
+      for (let b; (b = src.slice(i).match(/^\s*(=?[\w-]+)\s*\{/));) { i += b[0].length; text(true); i++; }
+      while (i < src.length && src[i] !== '}') i++;
+      i++;
+    }
+  };
+  text(false);
+  return [...names].sort().join('|');
 }
 
 /** Problems in one language file against the catalog. */

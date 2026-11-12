@@ -65,7 +65,7 @@ export default async function nature({ app, navigate }) {
         t('Where two similar species live side by side, they evolve to look more different than where they live apart: character displacement.'),
         t('M3×8 next to M3×10 cannot be told apart at a glance, and not everyone on the line reads the same language or sees every colour.'),
         t('Parts that look alike, or that were really mixed up, and that are used in the same device get marks that differ in colour and in shape: on the bin label, on the screen and next to the scan box. The colours are safe for colour-blind eyes, and a shape needs no reading.'),
-        marks.length ? t('{n, plural, one {# part carries a mark} other {# parts carry a mark}}, {k} locked.', { n: marks.length, k: marks.filter((m) => m.locked).length }) + (signals.clashes.length ? ` ${t('{n, plural, one {# pair still shares a colour or a shape.} other {# pairs still share a colour or a shape.}}', { n: signals.clashes.length })}` : '') : t('No look-alikes share a device: no marks needed.'),
+        marks.length ? t('{n, plural, one {# part carries a mark} other {# parts carry a mark}}, {k} locked.', { n: marks.length, k: marks.filter((m) => m.locked).length }) + (signals.clashes.length ? ` ${t('{n, plural, one {# pair still shares a colour or a shape.} other {# pairs still share a colour or a shape.}}', { n: signals.clashes.length })}` : '') : t('No look-alike parts share a device: no marks needed.'),
         html`<a class="btn sm" href="#/labels">${icon('print')}${t('Signal marks and labels')}</a>`)}
 
       ${card('quorum', 'sparkle', t('Quorum light'),
