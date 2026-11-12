@@ -869,3 +869,14 @@ td.code, h3.code, div.code { unicode-bidi: plaintext; }
 .callout.nightwatch > svg { color: #4a4fb0; }
 .second-look .vdraw { margin-top: 8px; }
 .second-look b { white-space: nowrap; }
+
+/* ---------- Light sync ---------- */
+.lightsend { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 760px) { .lightsend { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; } }
+.lightsend canvas.qr { width: 100%; max-width: 560px; aspect-ratio: 1; background: #fff; border-radius: 12px; image-rendering: pixelated; box-shadow: 0 0 0 1px var(--line); justify-self: center; }
+.symbols { display: inline-flex; gap: 2px; font-size: 20px; line-height: 1.2; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; direction: ltr; unicode-bidi: isolate; }
+.symbols.big { font-size: 28px; gap: 4px; }
+.fk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.lightbar { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.lightbar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .2s; }
+.trust-list li { padding: 12px 18px; border-top: 1px solid var(--line); gap: 10px; flex-wrap: wrap; }

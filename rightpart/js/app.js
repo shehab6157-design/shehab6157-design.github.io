@@ -65,6 +65,7 @@ const ROUTES = [
   { path: 'challenges', nav: 'challenges', load: () => import('./views/challenges.js') },
   { path: 'about', nav: 'about', load: () => import('./views/about.js') },
   { path: 'labels', nav: 'parts', load: () => import('./views/labels.js') },
+  { path: 'sync', nav: 'sync', load: () => import('./views/sync.js') },
 ];
 
 function parseHash() {
@@ -141,6 +142,7 @@ const NAV_MORE = [
   { id: 'setup', href: '#/setup', label: () => t('Set up this company'), icon: 'checklist' },
   { id: 'companies', href: '#/companies', label: () => t('Companies and sign-in'), icon: 'building' },
   { id: 'data', href: '#/data', label: () => t('Data and records'), icon: 'data' },
+  { id: 'sync', href: '#/sync', label: () => t('Light sync'), icon: 'light' },
   { id: 'challenges', href: '#/challenges', label: () => t('Problems to expect'), icon: 'alert' },
   { id: 'about', href: '#/about', label: () => t('About the idea'), icon: 'info' },
 ];

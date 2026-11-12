@@ -7,7 +7,7 @@ import { html, icon, openDialog, esc } from './ui.js';
 import { t } from './core/i18n.js';
 
 let zxing = null;
-function loadZXing() {
+export function loadZXing() {
   if (zxing) return zxing;
   zxing = new Promise((resolve, reject) => {
     if (window.ZXing) { resolve(window.ZXing); return; }
@@ -73,7 +73,7 @@ export async function decodeFile(file) {
   } finally { URL.revokeObjectURL(url); }
 }
 
-function cameraError(err) {
+export function cameraError(err) {
   if (!window.isSecureContext) return t('The camera only works over HTTPS.');
   if (err?.name === 'NotAllowedError') return t('Camera permission was refused. Allow it in the browser settings, or type the code below.');
   if (err?.name === 'NotFoundError' || err?.name === 'OverconstrainedError') return t('No camera found on this device. Type the code below or use a handheld scanner.');
