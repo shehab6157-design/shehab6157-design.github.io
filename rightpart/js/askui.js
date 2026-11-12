@@ -6,6 +6,7 @@ import { stepText, partText } from './core/content.js';
 import { thumb, partHref, sevIcon } from './components.js';
 import { answer, retrieveRecords } from './core/assistant.js';
 import { currentWorkspace } from './store.js';
+import { checkQuorum } from './core/quorum.js';
 
 const history = []; // this session's conversation, shared by the page and the panel
 
@@ -51,7 +52,7 @@ export function renderAnswer(a, lib) {
 }
 
 /** AI answers: [record ids] become links; nothing else from the model is trusted as markup. */
-function renderAI(app, res, records) {
+export function renderAI(app, res, records, question = '') {
   const byId = new Map(records.map((r) => [r.id, r]));
   const link = (id) => {
     const r = byId.get(id);
@@ -67,10 +68,20 @@ function renderAI(app, res, records) {
     const l = link(id);
     return l ? `<a class="chip" href="${esc(l.href)}">${esc(l.label)}</a>` : '';
   }).replace(/\n/g, '<br>'));
+  // Quorum light: every number and code in the answer must also be in the records it cites.
+  const q = checkQuorum(res.answer, records, res.cited || [], { question, index: app.index });
+  const body = html`${paras.map((p) => html`<p dir="auto">${raw(p)}</p>`)}${res.truncated ? html`<p class="small muted">${t('The answer was cut short.')}</p>` : ''}`;
+  if (!q.ok) {
+    const values = q.unsupported.slice(0, 4).map((u) => html`<bdi class="code nobr">${u.value}</bdi>`);
+    return html`<div class="a">
+      <div class="callout bad held" role="alert">${icon('stop')}<div><p class="t">${t('AI answer held back')}</p><p>${th('It gives {values}, which the records it cites do not contain. Do not act on it: follow the step, and ask your engineer or supervisor.', { values: html`${values.map((v, i) => html`${i ? ', ' : ''}${v}`)}` })}</p></div></div>
+      <details class="more"><summary><span class="ic">${icon('eye')}</span>${t('Show the held answer (for an engineer to check)')}</summary><div class="body held-body">${body}</div></details>
+    </div>`;
+  }
   return html`<div class="a">
     <p class="tiny muted">${icon('sparkle')} ${t("AI answer from the company's records. Check it against the step before acting.")}</p>
-    ${paras.map((p) => html`<p dir="auto">${raw(p)}</p>`)}
-    ${res.truncated ? html`<p class="small muted">${t('The answer was cut short.')}</p>` : ''}
+    ${body}
+    ${q.checked ? html`<p class="tiny quorum-ok">${icon('checkCircle')} ${t('{n, plural, one {The # number or code in this answer is in the records it cites.} other {All # numbers and codes in this answer are in the records it cites.}}', { n: q.checked })}</p>` : ''}
   </div>`;
 }
 
@@ -141,7 +152,7 @@ export function mountChat(root, { app, onLink, initial, autofocus = true }) {
         const cloud = await import('./cloud.js');
         // The AI answers in the worker's language; the records it cites stay as they are.
         const res = await cloud.askAI({ question: h.q, records, language: getLanguage() });
-        h.html += String(res.refused ? html`<div class="a"><p>${res.message}</p></div>` : renderAI(app, res, records));
+        h.html += String(res.refused ? html`<div class="a"><p>${res.message}</p></div>` : renderAI(app, res, records, h.q));
         paint();
       } catch (err) { toast(err.message, 'bad', 5000); ai.disabled = false; ai.textContent = t('Try the AI again'); }
       return;

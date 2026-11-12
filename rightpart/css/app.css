@@ -858,3 +858,14 @@ td.code, h3.code, div.code { unicode-bidi: plaintext; }
 .lang-checks .check input { grid-area: b; }
 .lang-checks .check .tiny { grid-area: e; }
 .lang-note .ico { color: var(--brand); }
+
+/* ---------- Quorum light: AI answers checked against their records ---------- */
+.quorum-ok { color: var(--ok); display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+.quorum-ok svg { width: 15px; height: 15px; flex: none; }
+.held-body { opacity: .75; }
+
+/* ---------- Night watch ---------- */
+.callout.nightwatch { background: color-mix(in srgb, #3b3f8f 10%, var(--surface)); border-color: color-mix(in srgb, #3b3f8f 35%, transparent); }
+.callout.nightwatch > svg { color: #4a4fb0; }
+.second-look .vdraw { margin-top: 8px; }
+.second-look b { white-space: nowrap; }

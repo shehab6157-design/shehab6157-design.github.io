@@ -3,7 +3,8 @@ import { t } from '../core/i18n.js';
 import { resolveCode, stepParts, qtyNumber, CODE_TYPES } from '../core/model.js';
 import { sizeLabel } from '../core/dims.js';
 import { stepText, partText } from '../core/content.js';
-import { addRecord, listRecords } from '../store.js';
+import { addRecord, listRecords, settings, setSetting } from '../store.js';
+import { touchSession } from '../core/nightwatch.js';
 import { partHref, stepHref, findingCard, thumb } from '../components.js';
 
 export default async function deviceView({ app, params, navigate }) {
@@ -140,6 +141,9 @@ export async function startBuild(app, dev, navigate) {
     onClose(d) { serial = d.querySelector('#bSerial').value.trim(); operator = d.querySelector('#bOp').value.trim(); },
   });
   if (!ok) return;
+  // Night watch counts this tablet's stretch of use; a different operator starts a new one (no names are kept for it).
+  const prev = (await listRecords('build'))[0];
+  setSetting('session', touchSession(settings().session, Date.now(), { newOperator: !!operator && !!prev?.operator && prev.operator !== operator }));
   const rec = await addRecord({ type: 'build', deviceId: dev.id, deviceName: dev.name, bomRev: dev.bom?.rev, instructionsRev: dev.instructions?.rev, serial, operator, steps: [], events: [] });
   toast(serial ? t('Build started for {serial}.', { serial }) : t('Build started.'), 'ok');
   navigate(`${stepHref(dev.id, dev.instructions.steps[0].id, 'build')}&build=${encodeURIComponent(rec.id)}`);

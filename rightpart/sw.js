@@ -42,6 +42,8 @@ const SHELL = [
   'js/core/translations.js',
   'js/core/immune.js',
   'js/core/signals.js',
+  'js/core/quorum.js',
+  'js/core/nightwatch.js',
   'js/memory.js',
   'js/views/home.js',
   'js/views/parts.js',

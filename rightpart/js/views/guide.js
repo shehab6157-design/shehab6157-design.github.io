@@ -1,13 +1,14 @@
 import { html, th, raw, icon, toast, beep, openDialog, fmtDate, fmtDay } from '../ui.js';
-import { t, lower, listJoin } from '../core/i18n.js';
+import { t, lower, listJoin, getLanguage } from '../core/i18n.js';
 import { esc, rich } from '../ui.js';
 import { stepText, partText } from '../core/content.js';
 import { languageInfo, englishName } from '../lang.js';
 import { stepParts, resolveCode, otherCodes, torqueText, CODE_TYPES } from '../core/model.js';
 import { findLookalikes, shortDifference } from '../core/lookalike.js';
-import { isFastener, sizeLabel } from '../core/dims.js';
+import { isFastener, sizeLabel, DRIVES } from '../core/dims.js';
 import { drawPart } from '../draw.js';
-import { get, updateRecord } from '../store.js';
+import { get, updateRecord, settings, setSetting } from '../store.js';
+import { policyOf, nightWatchState, touchSession } from '../core/nightwatch.js';
 import { partHref, stepHref, thumb, codePill, sevIcon } from '../components.js';
 import { reportDialog } from './part.js';
 import { startBuild } from './device.js';
@@ -41,10 +42,19 @@ export default async function guide({ app, params, query, navigate }) {
   const sps = stepParts(app.index, step);
   const memory = await getMemory(app); // mix-ups caught at this step before (learned at the bench)
   const signals = await getSignals(app); // colour + shape marks that tell look-alike bins apart
+  // Night watch: in the early-morning hours, or late in a long stretch on this tablet, parts with a look-alike get a second look.
+  const preview = (settings().nightPreviewUntil || 0) > Date.now();
+  const nightWatch = !build ? { active: false } : preview ? { active: true, reason: 'preview', hours: 0 } : nightWatchState(Date.now(), policyOf(app.lib), settings().session);
+  const careOf = new Map(); // ref -> the look-alike to compare with, for parts that get a second look
   const usedInDevice = new Set([...app.index.usage.entries()].filter(([, u]) => u.some((x) => x.deviceId === dev.id)).map(([id]) => id));
   const doneSteps = new Set((record?.steps || []).map((s) => s.stepId));
   const lastEvents = new Map();
-  for (const e of record?.events || []) if (e.stepId === step.id) lastEvents.set(e.ref, e);
+  const lastScan = new Map(); // the last scan or pick per part, without the second looks after it
+  for (const e of record?.events || []) {
+    if (e.stepId !== step.id) continue;
+    lastEvents.set(e.ref, e);
+    if (e.result !== 'second-look') lastScan.set(e.ref, e);
+  }
 
   const partBlock = (sp, i) => {
     const p = sp.part;
@@ -53,15 +63,20 @@ export default async function guide({ app, params, query, navigate }) {
     const learnedIds = new Set(learned.map((e) => e.taken));
     const looks = findLookalikes(app.lib.parts, p).filter((l) => !learnedIds.has(l.part.id) && l.score >= 0.75 && (usedInDevice.has(l.part.id) || l.score >= 0.85)).slice(0, 2);
     const flagged = disputedPart && p.id === disputedPart;
-    const needsScan = build && isFastener(p);
-    const ev = lastEvents.get(i);
+    const needsScan = build && (isFastener(p) || (nightWatch.active && learned.length > 0));
+    const twin = learned.length ? app.index.parts.get(learned[0].taken) : looks[0]?.part || [...(signals.rivals.get(p.id)?.keys() || [])].map((id) => app.index.parts.get(id)).find(Boolean);
+    if (nightWatch.active && needsScan && (learned.length || signals.rivals.has(p.id))) careOf.set(i, twin || null);
+    const ev = lastScan.get(i);
+    const looked = lastEvents.get(i)?.result === 'second-look';
     const legacy = sp.resolution.legacy;
     const others = otherCodes(p).slice(0, 4);
     const pt = partText(p, app.lib);
     const code = (c) => html`<span class="code">${c}</span>`;
+    const say = [sizeLabel(p), p.spec?.drive && DRIVES[p.spec.drive] ? DRIVES[p.spec.drive].label : ''].filter(Boolean).join(', ') || pt.name;
     const mark = signals.marks.get(p.id);
     const mName = mark ? markName(mark, t) : '';
-    return html`<div class="steppart ${flagged ? 'flag' : ''} ${ev?.result === 'ok' ? 'ok' : ''}" data-ref="${i}">
+    const isOk = looked || (ev?.result === 'ok' && !careOf.has(i));
+    return html`<div class="steppart ${flagged ? 'flag' : ''} ${isOk ? 'ok' : ''}" data-ref="${i}">
       <a class="thumb" href="${partHref(p.id)}" aria-label="${t('Open {name}', { name: pt.name })}">${thumb(p)}${mark ? raw(`<span class="thumb-mark">${markSVG(mark, { size: 26, title: t('Bin mark: {mark}', { mark: mName }) })}</span>`) : ''}</a>
       <div>
         <div class="t"><a href="${partHref(p.id)}" style="color:inherit;text-decoration:none">${pt.name}</a></div>
@@ -89,6 +104,12 @@ export default async function guide({ app, params, query, navigate }) {
             <button class="btn primary" type="submit">${t('verb::Check')}</button>
           </form>
           <div class="vslot" aria-live="assertive">${ev ? raw(verdictHTML(ev, app)) : ''}</div>
+          ${careOf.has(i) ? html`<div class="callout warn second-look" data-second="${i}" hidden>${icon('hand')}<div>
+            <p class="t">${t('Night watch: a second look')}</p>
+            <p>${th('Point at the part in your hand and say out loud: {say}.', { say: html`<b dir="auto">“${say}”</b>` })}</p>
+            ${careOf.get(i) ? html`<div class="vdraw">${raw(`<div>${drawPart(p, { view: twinView(p, careOf.get(i)) })}<div class="tiny center">${esc(t('needed'))}</div></div><div>${drawPart(careOf.get(i), { view: twinView(p, careOf.get(i)) })}<div class="tiny center">${esc(t('look-alike: {diff}', { diff: shortDifference(p, careOf.get(i)) }))}</div></div>`)}</div>` : ''}
+            <div class="acts"><button class="btn sm primary" type="button" data-second-ok="${i}">${icon('check')}${t('I pointed and said it')}</button></div>
+          </div></div>` : ''}
         </div>` : build ? html`<div class="verify"><label class="check ${ev?.result === 'ok' ? 'done' : ''}"><input type="checkbox" data-pick="${i}" ${ev?.result === 'ok' ? 'checked' : ''}><span>${sp.qty === 'A/R' ? t('Picked as required') : th('Picked {qty} × {name}', { qty: sp.qty, name: pt.name })}</span></label></div>` : ''}
     </div>`;
   };
@@ -97,6 +118,7 @@ export default async function guide({ app, params, query, navigate }) {
     const fl = (app.audit.byStep.get(`${dev.id}/${s.id}`) || []).some((f) => f.severity === 'critical');
     return html`<a href="${hrefStep(s)}" ${i === idx ? html`aria-current="step"` : ''} class="${doneSteps.has(s.id) ? 'done' : ''} ${fl ? 'flag' : ''}" title="${stepText(s, app.lib).title}">${doneSteps.has(s.id) ? icon('check') : i + 1}</a>`;
   })}</nav>`;
+  const clock = (h) => { try { return new Date(2020, 0, 1, Math.floor(h), Math.round((h % 1) * 60)).toLocaleTimeString(getLanguage(), { hour: 'numeric', minute: '2-digit', numberingSystem: 'latn' }); } catch { return `${h}:00`; } };
   const langName = (code) => { try { return new Intl.DisplayNames([document.documentElement.lang || 'en'], { type: 'language' }).of(code); } catch { return englishName(code); } };
   // Where the step's words come from: the original, a translation (checked or not), or the original because there is no translation yet.
   const textNote = txt.state === 'held'
@@ -146,6 +168,11 @@ export default async function guide({ app, params, query, navigate }) {
 
           ${txt.warnings.map((w) => html`<div class="warnbox ${w.level}">${icon(w.level === 'warning' ? 'stop' : w.level === 'caution' ? 'alert' : 'info')}<span>${rich(w.text)}</span></div>`)}
 
+          ${nightWatch.active ? html`<div class="callout info nightwatch" role="note">${icon('moon')}<div><p class="t">${t('Night watch is on')}</p><p>${nightWatch.reason === 'night'
+            ? t('Between {from} and {to}, parts that have a look-alike get a second look. Mistakes are more likely at night.', { from: clock(policyOf(app.lib).from), to: clock(policyOf(app.lib).to) })
+            : nightWatch.reason === 'long'
+              ? t('This tablet has been in use for {n} hours in a row, so parts that have a look-alike get a second look. Mistakes become more likely late in a long shift.', { n: Math.floor(nightWatch.hours) })
+              : t('Trying night watch: parts that have a look-alike get a second look.')}</p></div></div>` : ''}
           <section class="stack" aria-labelledby="partsH">
             <div class="row between"><h2 id="partsH">${t('Parts for this step')}</h2>${build ? html`<span class="tiny muted">${t('Scan the bin before you fit the part. A USB scanner types into the box.')}</span>` : ''}</div>
             ${sps.map(partBlock)}
@@ -206,12 +233,14 @@ export default async function guide({ app, params, query, navigate }) {
 
       // ---- Build mode: verification and completion ----
       const state = new Map();
-      for (const [ref, ev] of lastEvents) state.set(ref, ev.result);
+      for (const [ref, ev] of lastEvents) state.set(ref, ev.result === 'ok' && careOf.has(ref) && ev.code !== 'picked' ? 'second' : ev.result);
+      const second = (i, show) => { const box = root.querySelector(`[data-second="${i}"]`); if (box) box.hidden = !show; };
+      for (const [ref, r] of state) if (r === 'second') second(ref, true);
       const checks = new Set();
       const btn = root.querySelector('#complete');
       const required = sps.map((sp, i) => ({ sp, i })).filter(({ sp }) => sp.part);
       // A conflict (instructions vs BOM) counts as checked, but the step then needs a recorded decision below.
-      const passed = (r) => r === 'ok' || r === 'conflict' || r === 'conflict-bom';
+      const passed = (r) => r === 'ok' || r === 'second-look' || r === 'conflict' || r === 'conflict-bom';
       const canComplete = () => required.every(({ i }) => passed(state.get(i))) && checks.size === (step.checks?.length || 0);
       const refresh = () => { if (btn) btn.disabled = !canComplete(); };
 
@@ -219,6 +248,7 @@ export default async function guide({ app, params, query, navigate }) {
         if (!record) return;
         record.events = [...(record.events || []), { ...ev, stepId: step.id, at: Date.now() }];
         await updateRecord(record);
+        setSetting('session', touchSession(settings().session)); // this tablet's stretch of use, for night watch
       };
 
       const verify = async (i, code) => {
@@ -227,17 +257,20 @@ export default async function guide({ app, params, query, navigate }) {
         const card = root.querySelector(`[data-ref="${i}"]`);
         const ev = judge(app, sp, code, { disputedPart, bomPart, devRev: dev.bom?.rev });
         ev.ref = i;
-        state.set(i, ev.result);
+        const pending = ev.result === 'ok' && careOf.has(i);
+        state.set(i, pending ? 'second' : ev.result);
         slotEl.innerHTML = verdictHTML(ev, app);
         const v = slotEl.firstElementChild;
         v?.classList.add(ev.result === 'ok' ? 'pop' : 'shake');
-        card.classList.toggle('ok', ev.result === 'ok');
+        second(i, pending);
+        card.classList.toggle('ok', ev.result === 'ok' && !pending);
         card.classList.toggle('bad', ev.result === 'wrong');
         beep(ev.result === 'ok' ? 'ok' : 'bad');
         await logEvent(ev);
         if (ev.result === 'wrong') forgetMemory(); // the next person at this step is warned
         refresh();
-        if (passed(ev.result)) {
+        if (pending) root.querySelector(`[data-second-ok="${i}"]`)?.focus();
+        else if (passed(ev.result)) {
           const nextInput = [...root.querySelectorAll('[data-verify] input')].find((inp) => !passed(state.get(+inp.closest('[data-verify]').dataset.verify)));
           nextInput?.focus();
         }
@@ -250,6 +283,16 @@ export default async function guide({ app, params, query, navigate }) {
         const { scanDialog } = await import('../scan.js');
         const code = await scanDialog({ title: t('Scan the bin'), hint: t('Hold the label inside the frame.') });
         if (code) { const inp = root.querySelector(`[data-verify="${b.dataset.cam}"] input`); inp.value = code; verify(+b.dataset.cam, code); }
+      }));
+      root.querySelectorAll('[data-second-ok]').forEach((b) => b.addEventListener('click', async () => {
+        const i = +b.dataset.secondOk;
+        state.set(i, 'second-look');
+        second(i, false);
+        root.querySelector(`[data-ref="${i}"]`)?.classList.add('ok');
+        beep('ok');
+        await logEvent({ ref: i, partId: sps[i].part?.id, result: 'second-look' });
+        refresh();
+        [...root.querySelectorAll('[data-verify] input')].find((inp) => !passed(state.get(+inp.closest('[data-verify]').dataset.verify)))?.focus();
       }));
       root.querySelectorAll('[data-pick]').forEach((c) => c.addEventListener('change', async () => {
         const i = +c.dataset.pick;
@@ -340,6 +383,9 @@ function disposeKeep() {
 function pickToast(part) {
   toast(`${part.id}: ${part.name}`); // name shown as recorded: this toast names what was tapped in the model
 }
+
+/** Draw two look-alikes from above when only the drive or head tells them apart, from the side otherwise. */
+const twinView = (a, b) => (a.spec?.drive !== b.spec?.drive && a.spec?.length === b.spec?.length && a.spec?.d === b.spec?.d ? 'top' : 'auto');
 
 /** Decide whether a scanned or typed code is the right part for this step. */
 export function judge(app, sp, code, { disputedPart, bomPart, devRev } = {}) {

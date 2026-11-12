@@ -79,3 +79,56 @@ test('signal marks: locked marks stay as printed and the others move around them
   assert.equal(COLORS.length * SHAPES.length, 48);
   assert.ok(rivalries(index).size >= 3);
 });
+
+import { checkQuorum, normalizeNumbers, codesIn, numbersIn } from '../js/core/quorum.js';
+import { runAudit } from '../js/core/audit.js';
+import { retrieveRecords } from '../js/core/assistant.js';
+
+test('quorum light: an AI answer is held back when a number or code is not in the records it cites', () => {
+  const recs = retrieveRecords(index, runAudit(index), 'which screw goes in step 4 and what torque?', { deviceId: 'NOVA-1', stepId: 'S4' });
+  const cite = ['step:NOVA-1/S4'];
+  const tq = lib.parts.find((p) => p.id === '100-0237').torque?.value;
+  assert.ok(checkQuorum(`Use 4 × 100-0237 (M3 × 25) with 4 lock nuts 100-0311 [step:NOVA-1/S4].${tq ? ` Tighten to ${tq} N·m.` : ''}`, recs, cite, { index }).ok);
+  const bad = checkQuorum('Use 4 × 100-0237 [step:NOVA-1/S4]. Tighten to 1.7 N·m.', recs, cite, { index });
+  assert.equal(bad.ok, false);
+  assert.deepEqual(bad.unsupported, [{ kind: 'number', value: '1.7' }]);
+  assert.equal(checkQuorum('Use 100-0238 [step:NOVA-1/S4].', recs, cite, { index }).unsupported[0].value, '100-0238');
+  assert.equal(checkQuorum('Use 4 screws.', recs, [], { index }).ok, false, 'an answer with numbers and no citation is held');
+  assert.ok(checkQuorum('Ask your supervisor.', recs, [], { index }).ok, 'nothing to check, nothing held');
+  assert.ok(checkQuorum('1. Hold the fan.\n2. Fit the screws [step:NOVA-1/S4].', recs, cite, { index }).ok, 'list numbers are not facts');
+  assert.ok(checkQuorum('step 4: use the long screws [step:NOVA-1/S4]', recs, cite, { question: 'what goes in step 4?', index }).ok);
+  // Another code of a cited part counts (the supplier code of 100-0237, if it has one).
+  const alias = (lib.parts.find((p) => p.id === '100-0237').aliases || [])[0]?.code;
+  if (alias) assert.ok(checkQuorum(`Bin label ${alias} [step:NOVA-1/S4]`, recs, cite, { index }).ok);
+});
+
+test('quorum light: digits from other scripts and decimal commas are read as numbers', () => {
+  assert.equal(normalizeNumbers('٠٫٦ و 0,6 و ۴'), '0.6 و 0.6 و 4');
+  assert.deepEqual(codesIn('Fit M3 × 8, not M3x10 or #4-40 (100-0233, SCR-TX-36).'), ['M3 × 8', 'M3x10', '#4-40', '100-0233', 'SCR-TX-36']);
+  assert.deepEqual(numbersIn('1. Use 4 screws at 0,6 N·m\n2. Done'), [4, 0.6]);
+});
+
+import { inWindow, nightWatchState, touchSession, policyOf, DEFAULT_POLICY } from '../js/core/nightwatch.js';
+
+test('night watch: early-morning hours and long stretches of use turn on the second look', () => {
+  const at = (h, m = 0) => new Date(2026, 10, 12, h, m).getTime();
+  assert.ok(inWindow(2, 2, 6) && inWindow(5.99, 2, 6) && !inWindow(6, 2, 6) && !inWindow(1.5, 2, 6));
+  assert.ok(inWindow(23, 22, 6) && inWindow(3, 22, 6) && !inWindow(12, 22, 6), 'a window can cross midnight');
+  assert.equal(nightWatchState(at(3, 30), DEFAULT_POLICY, null).reason, 'night');
+  assert.equal(nightWatchState(at(14), DEFAULT_POLICY, null).active, false);
+  const long = { start: at(3), last: at(13, 50) };
+  assert.equal(nightWatchState(at(14), DEFAULT_POLICY, long).reason, 'long');
+  assert.equal(nightWatchState(at(14), DEFAULT_POLICY, { start: at(3), last: at(9) }).active, false, 'after a long pause the stretch is over');
+  assert.equal(nightWatchState(at(3), { ...DEFAULT_POLICY, enabled: false }, long).active, false);
+  assert.deepEqual(policyOf({ policy: { nightWatch: { from: 'x', to: 5, longHours: -1 } } }), { enabled: true, from: 2, to: 5, longHours: 0 });
+});
+
+test('night watch: this tablet\'s stretch of use restarts after a pause or with a new operator', () => {
+  const s1 = touchSession(null, 1000);
+  assert.deepEqual(s1, { start: 1000, last: 1000 });
+  const s2 = touchSession(s1, 1000 + 2 * 3.6e6);
+  assert.equal(s2.start, 1000);
+  assert.equal(touchSession(s2, s2.last + 3 * 3.6e6).start, s2.last + 3 * 3.6e6);
+  assert.equal(touchSession(s2, s2.last + 60000, { newOperator: true }).start, s2.last + 60000);
+  assert.ok(!('who' in s2), 'no person is stored');
+});
