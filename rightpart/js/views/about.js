@@ -31,6 +31,7 @@ export default async function about() {
           <li><b>Answer questions</b><span>"Which screw goes in this step?", "what is C-55013?", "M3×8 or M3×10?" The Ask assistant answers from the company's own data, with the source of each answer, offline and without AI, in the worker's own language. It never guesses a torque or a part number, and it warns when the data disagrees.</span></li>
           <li><b>Every language on the line</b><span>The interface in English and Hebrew today, with right-to-left layouts, and questions to Ask understood in 20 languages. Each step can carry its own translations; part codes, quantities and torques stay in the data, so they are the same in every language, and a translation that changes a number is held back. A company can add any other language from a spreadsheet.</span></li>
           <li><b>Every company, its own data</b><span>Any production company adds its own space and loads its parts, BOMs and steps from spreadsheets, from the PDF work instructions it already has, or with the step editor. With a company server, people sign in, roles decide who may change what, and every tablet gets the same published library.</span></li>
+          <li><b>Learned from nature</b><span>Seven safeguards copied from designs that already work in creation: an immune memory of every mix-up caught at the bench, signal marks that keep look-alikes apart the way similar species diverge where they live together, a quorum check that holds back unsupported AI answers, a night watch for the body's low hours, light sync between tablets with no network (fireflies, deep-space store-and-forward), floor trails that fade like ant scent, and sealed chambers like a nautilus shell. <a href="#/nature">How each one works</a>.</span></li>
           <li><b>Private and offline</b><span>A web app that installs on a tablet and works without a network. Without a company server the data never leaves the device; with one, it goes only to the company's own server.</span></li>
         </ol>
       </section>
@@ -55,7 +56,7 @@ export default async function about() {
             ['Connect to ERP and PLM', 'Read codes, BOMs and engineering changes automatically, so the integrity check runs on every change instead of once.'],
             ['3D from CAD', 'Load the real assembly model (glTF exported from the CAD system) instead of the generated one.'],
             ['Every language on the line', 'The interface is in English and Hebrew (right to left), with Arabic, Russian and 16 more languages being translated. Step text can already be translated into any language, and a translation that changes a number is held back. Next: native speakers on the line check each language, and the AI on the company server drafts step translations for an engineer to approve.'],
-            ['Signed records', 'Sign-in, roles and an activity log are there; next come electronic signatures for build records, then validation for production use.'],
+            ['Signed records', 'Sign-in, roles and an activity log are there, packages sent by light are signed, and completed builds are sealed into a hash chain; next come electronic signatures for build records, then validation for production use.'],
             ['Scanned documents', 'PDFs that are photos or scans need text recognition before their steps can be read; then AI help for documents without clear step numbers, always approved by an engineer.'],
             ['Shared photo identifier', 'Train once on the line\'s own parts and share it between stations.'],
           ].map(([title, d]) => html`<li class="card pad"><b>${title}</b><p class="small muted" style="margin-top:2px">${d}</p></li>`)}
@@ -64,7 +65,7 @@ export default async function about() {
 
       <section class="stack tight">
         <h2>Built with</h2>
-        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes · pdf.js (Apache 2.0) for reading PDF work instructions · supabase-js (MIT) for the optional company server · Claude, only for the optional AI answers on a company's own server. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
+        <p class="small muted">three.js (MIT) for 3D · TensorFlow.js and MobileNet v1 (Apache 2.0) for on-device photo identification · ZXing (Apache 2.0) for barcodes and the animated QR codes of light sync · pdf.js (Apache 2.0) for reading PDF work instructions · supabase-js (MIT) for the optional company server · Claude, only for the optional AI answers on a company's own server. Everything else is plain HTML, CSS and JavaScript with no build step. The demo device, its parts, codes and suppliers are fictional.</p>
       </section>
       </div>
     </div>`,

@@ -1,12 +1,12 @@
 # Problems to expect
 
-23 problems that products like RightPart, and the companies using them, have run into: what goes wrong, what happened elsewhere, how RightPart handles it today, and what is still open.
+24 problems that products like RightPart, and the companies using them, have run into: what goes wrong, what happened elsewhere, how RightPart handles it today, and what is still open.
 
 Most sources are vendor or consultancy articles. Read them as experience, not as statistics.
 
 The same list is in the app under **More → Problems to expect**. This file is generated from `js/problems.js` by `node tools/problems-md.mjs`; edit that file, not this one.
 
-- [People on the floor](#people-on-the-floor) (4)
+- [People on the floor](#people-on-the-floor) (5)
 - [Content and data](#content-and-data) (4)
 - [Technology](#technology) (5)
 - [Security, IP and compliance](#security-ip-and-compliance) (4)
@@ -20,7 +20,7 @@ The same list is in the app under **More → Problems to expect**. This file is 
 Tablets are mounted, accounts are created, and people keep building from the paper copy because it is what they know.
 
 - **Seen elsewhere:** Playbooks warn that assuming deployment equals adoption is a classic mistake and recommend measuring weekly use. Frontline resistance to change is often named as the first obstacle. ([Manual.to](https://manual.to/the-paper-to-digital-sop-playbook/), [Fabrico](https://www.fabrico.io/blog/digital-work-instructions-vs-paper/))
-- **Handled today:** Runs on any phone or tablet and works offline; Learn mode, a quiz and the Ask assistant make it useful to new people from day one.
+- **Handled today:** Runs on any phone or tablet and works offline; Learn mode, a quiz and the Ask assistant make it useful to new people from day one. Floor trails show, without names, which steps trouble people, so the pilot can fix what slows the floor first.
 - **Still open:** In the pilot, count weekly use per line and ask operators what slows them down. Keep the paper copy as a safety net until the digital one has proven itself.
 
 ### Designed in an office, not at the bench
@@ -28,7 +28,7 @@ Tablets are mounted, accounts are created, and people keep building from the pap
 Every extra screen, click or code to type becomes a reason to work around the system.
 
 - **Seen elsewhere:** MES failure studies describe systems "designed in conference rooms" that make the floor feed them, and operators quietly working around steps configured for checklists instead of real work. ([Panorama Consulting](https://www.panorama-consulting.com/top-reasons-for-mes-failure-and-why-executives-miss-them-early/), [Tulip](https://tulip.co/blog/why-mes-adoption-fails-at-scale/))
-- **Handled today:** One scan per bin, big buttons for gloved hands, handheld scanners that type into the box, and only fasteners need a scan in build mode.
+- **Handled today:** One scan per bin, big buttons for gloved hands, handheld scanners that type into the box, and only fasteners need a scan in build mode. Floor trails mark the steps where people go wrong, stop for long or report a doubt, and fade once a fix works.
 - **Still open:** Watch real builds during the pilot, count taps per step, and remove anything nobody uses.
 
 ### People feel watched
@@ -36,7 +36,7 @@ Every extra screen, click or code to type becomes a reason to work around the sy
 Build records name the operator. Without clear rules this reads as surveillance, and in some countries it needs a works council agreement or a privacy assessment.
 
 - **Seen elsewhere:** In several EU countries systems that can monitor performance need works council consent; guides recommend line-level reports, limited access and written retention rules. ([Fabrico](https://www.fabrico.io/blog/oee-monitoring-works-council-approval-guide/))
-- **Handled today:** Operators can only see their own records on the company server; supervisors see all. Records hold scans and decisions, not speed.
+- **Handled today:** Operators can only see their own records on the company server; supervisors see all. Records hold scans and decisions, not speed. Learned mix-ups and floor trails keep no names: they say what happened where, never who. Night watch reads the clock, not people.
 - **Still open:** Write down what records are for, who sees them and how long they are kept, and agree it with the team before the pilot. Check local privacy law.
 
 ### Many languages on one line
@@ -44,8 +44,16 @@ Build records name the operator. Without clear rules this reads as surveillance,
 Instructions in one language exclude people who read another one better.
 
 - **Seen elsewhere:** Production lines often mix several native languages, and literacy levels differ.
-- **Handled today:** Ask understands questions in English, Hebrew and Arabic; part numbers work in any language; drawings carry the meaning without words.
-- **Still open:** Translated step text and right-to-left layouts.
+- **Handled today:** The interface is in English and Hebrew (right to left), with Arabic, Russian and 16 more being translated; Ask understands questions in 20 languages; step text can be translated into any language, and a translation that changes a number is held back. Signal marks and true-scale drawings need no words at all.
+- **Still open:** Native speakers on the line check each language, and the planned translations are finished.
+
+### Tired eyes on the night shift
+
+The same check that works at 10 a.m. can fail at 4 a.m.: attention drops in the early-morning hours and late in long shifts.
+
+- **Seen elsewhere:** Shift-work studies found the risk of incidents about 30% higher on night shifts than on morning shifts, and more than twice as high by the 12th hour on duty. Japanese railway workers point at what they check and call it out loud; a 1994 study found this cut mistakes on a simple task by almost 85%. ([Folkard and Tucker (NIOSH)](https://webarchive.library.unt.edu/web/20090507180940/http:/www.cdc.gov/niosh/topics/workschedules/abstracts/folkard.html), [Wikipedia](https://en.wikipedia.org/wiki/Pointing_and_calling))
+- **Handled today:** Night watch: from 2 to 6 a.m., or after a long stretch of use on a tablet, parts that have a look-alike need a second look after the scan (point at the part and say its size). It reads the clock, not people, and the hours are a company setting.
+- **Still open:** Agree the hours with the pilot team, and check in the pilot that the second look catches mistakes without slowing the day shift.
 
 ## Content and data
 
@@ -78,8 +86,8 @@ Duplicate part records, one code used for two parts, codes that say M3×12 on a 
 M3×8 next to M3×10, Phillips next to Pozidriv, M3 next to #4-40: impossible to tell apart at a glance.
 
 - **Seen elsewhere:** This kind of mix-up is the most common way a wrong part is fitted.
-- **Handled today:** Look-alike warnings in every step, true-scale drawings and labels, an on-screen gauge, and a scan before fitting.
-- **Still open:** Separate look-alike bins physically, use bin colours, and ask engineering to reduce the number of screw types.
+- **Handled today:** Look-alike warnings in every step, true-scale drawings and labels, an on-screen gauge, and a scan before fitting. Learned mix-ups warn at the step where a mix-up really happened; signal marks give look-alikes used in the same device different colours and shapes; night watch adds a second look in the early-morning hours.
+- **Still open:** Separate look-alike bins physically, print and lock the signal marks, and ask engineering to reduce the number of screw types.
 
 ## Technology
 
@@ -87,9 +95,9 @@ M3×8 next to M3×10, Phillips next to Pozidriv, M3 next to #4-40: impossible to
 
 Factory Wi-Fi has dead spots; a system that needs the network stops the line.
 
-- **Seen elsewhere:** Lack of an offline mode is named as a common reason digital instructions fail. ([Fabrico](https://www.fabrico.io/blog/digital-work-instructions-vs-paper/))
-- **Handled today:** RightPart installs as an app and works fully offline; records upload when the network is back.
-- **Still open:** Test sync with several tablets editing at once (the server already refuses to overwrite a newer version).
+- **Seen elsewhere:** Lack of an offline mode is named as a common reason digital instructions fail. ([Fabrico](https://www.fabrico.io/blog/digital-work-instructions-vs-paper/), [ISS National Lab](https://issnationallab.org/?p=49542), [Blockchain Commons](https://developer.blockchaincommons.com/animated-qrs/))
+- **Handled today:** RightPart installs as an app and works fully offline; records upload when the network is back. With no network at all, light sync passes the library and the records between tablets through the screen and the camera.
+- **Still open:** Test sync with several tablets editing at once (the server already refuses to overwrite a newer version), and test light sync with the pilot's own tablets and lights.
 
 ### Consumer tablets do not survive the floor
 
@@ -112,7 +120,7 @@ SAP, Priority, Oracle, Arena, Windchill, Excel: each with its own codes and expo
 Glare, worn labels, tiny parts with no label at all.
 
 - **Seen elsewhere:** Barcode scanning that works in the office fails under bench lights.
-- **Handled today:** Camera scanning, handheld scanners, typing, reading a code from a photo, plus true-scale labels to check by eye.
+- **Handled today:** Camera scanning, handheld scanners, typing, reading a code from a photo, plus true-scale labels to check by eye. Signal marks give a second cue when a label is worn.
 - **Still open:** Test with the real lights and labels; agree a label standard for bins.
 
 ### AI that makes things up
@@ -120,7 +128,7 @@ Glare, worn labels, tiny parts with no label at all.
 A confident, wrong answer about a torque or a safety step can hurt someone.
 
 - **Seen elsewhere:** Practitioners warn that a confidently wrong answer about a safety procedure can be catastrophic, recommend grounding answers in verified documents with citations, and keep safety-critical content under human approval. NIST lists confabulation among the main risks. ([iFactory](https://ifactoryapp.com/article/ai-hallucination-manufacturing-grounding-strategy), [IndustryWeek](https://industryweek.com/technology-and-iiot/emerging-technologies/article/55316007/making-generative-ai-work-for-everyone-in-a-factory-setting))
-- **Handled today:** Ask answers from the data itself, without AI, and shows the source of every answer. The optional AI only sees the company's records, must cite them, is told to refuse when the records do not answer, and never edits instructions.
+- **Handled today:** Ask answers from the data itself, without AI, and shows the source of every answer. The optional AI only sees the company's records, must cite them, is told to refuse when the records do not answer, and never edits instructions. Quorum light holds back any AI answer that gives a number or a code that the records it cites do not contain.
 - **Still open:** Test the AI on a set of real questions before turning it on, and keep it off for safety-critical steps until reviewed.
 
 ## Security, IP and compliance
@@ -130,15 +138,15 @@ A confident, wrong answer about a torque or a safety step can hurt someone.
 A contract manufacturer builds for customers who own the drawings, BOMs and part numbers. Putting them into a new system may break the contract.
 
 - **Seen elsewhere:** Guides advise stating in contracts that BOM and sourcing data belong to the product owner, and note that an NDA alone is not enough. ([OpenBOM](https://www.openbom.com/blog/4-questions-to-ask-your-contract-manufacturer-before-sharing-product-data), [Fractory](https://fractory.com/intellectual-property-protection/))
-- **Handled today:** Each company (or each customer) is a separate space; data can stay on the device or on a server the company runs itself.
+- **Handled today:** Each company (or each customer) is a separate space; data can stay on the device or on a server the company runs itself. Light sync moves data between the customer's own tablets without any server.
 - **Still open:** Get the customer's written approval before loading their data, and keep one space per customer.
 
 ### Fear of the cloud
 
 Manufacturers worry that product data stored outside the plant will leak.
 
-- **Seen elsewhere:** Security publications describe this as the core fear; attackers increasingly target intellectual property. ([Fractory](https://fractory.com/intellectual-property-protection/))
-- **Handled today:** Row-level security tested on a real database: one company never sees another, operators cannot publish or rewrite records, published versions cannot be changed. The server can be self-hosted.
+- **Seen elsewhere:** Security publications describe this as the core fear; attackers increasingly target intellectual property. ([Fractory](https://fractory.com/intellectual-property-protection/), [EU Digital COVID Certificate](https://github.com/ehn-dcc-development/hcert-spec/blob/53f7a2626f8b6853c04ef246954ca8b3b32af617/hcert_spec.md))
+- **Handled today:** Row-level security tested on a real database: one company never sees another, operators cannot publish or rewrite records, published versions cannot be changed. The server can be self-hosted. With light sync a site can run with no cloud and no network at all; every package is signed and checked.
 - **Still open:** An independent security review, single sign-on with the company's accounts, and a data processing agreement.
 
 ### Regulated production
@@ -146,7 +154,7 @@ Manufacturers worry that product data stored outside the plant will leak.
 In medical devices, software that guides or records production is part of the quality system: it must be validated, and electronic records and signatures have their own rules. Every vendor update can force a revalidation.
 
 - **Seen elsewhere:** Guides on the FDA QMSR (in force since February 2026, aligned with ISO 13485) and 21 CFR Part 11 list validation, audit trails and integration with production records as requirements. ([eDHR and the QMSR](https://meddeviceguide.com/blog/electronic-device-history-record-edhr-digital-manufacturing-qmsr-2026-guide))
-- **Handled today:** Library versions are append-only, every publish and role change is logged, build records keep each scan and each override with who decided it.
+- **Handled today:** Library versions are append-only, every publish and role change is logged, build records keep each scan and each override with who decided it. Every library version and every completed build is sealed into a hash chain on the tablet: a later change shows, and the line can go back to a sealed version.
 - **Still open:** A validation package (requirements, risk assessment, test scripts), electronic signatures, and the option to pin a validated version per site.
 
 ### Export-controlled technical data
@@ -154,7 +162,7 @@ In medical devices, software that guides or records production is part of the qu
 Some products carry drawings that may not be shown to foreign persons or stored abroad.
 
 - **Seen elsewhere:** Vendors serving regulated industries offer on-premises or country-specific hosting for this reason. ([Fractory](https://fractory.com/intellectual-property-protection/))
-- **Handled today:** Fully on-device mode, or a self-hosted server in the right country.
+- **Handled today:** Fully on-device mode, or a self-hosted server in the right country. Light sync keeps the data inside the room.
 - **Still open:** Not handled: access by nationality. Keep such products out until it is.
 
 ## The business
@@ -172,7 +180,7 @@ Digital work instruction and connected worker platforms already exist and are be
 Companies that built their instructions on one vendor's platform can lose it.
 
 - **Seen elsewhere:** Microsoft stopped selling Dynamics 365 Guides and Remote Assist in November 2025 and ends them on 31 December 2026; HoloLens 2 production ended in 2024 with no successor. ([Microsoft Learn](https://learn.microsoft.com/en-us/dynamics365/mixed-reality/remote-assist/ra-overview))
-- **Handled today:** Standard web technology on ordinary devices, and every piece of data exports to plain JSON and CSV.
+- **Handled today:** Standard web technology on ordinary devices, and every piece of data exports to plain JSON and CSV. Seals can be checked offline, without the vendor.
 - **Still open:** Promise customers a full export at any time, in writing.
 
 ### Betting on special hardware
@@ -188,7 +196,7 @@ Products that need new hardware on every bench are expensive to buy and slow to 
 A pilot that never becomes a rollout, because nobody agreed what success means.
 
 - **Seen elsewhere:** Vendors often quote a high failure rate for digital transformation; the numbers are not independent, but the pattern of endless pilots is widely reported. ([Manual.to](https://manual.to/the-paper-to-digital-sop-playbook/), [Tulip](https://tulip.co/blog/why-mes-adoption-fails-at-scale/))
-- **Handled today:** Build records already count wrong parts stopped, steps completed and questions answered.
+- **Handled today:** Build records already count wrong parts stopped, steps completed and questions answered. Learned mix-ups and floor trails give the before and after of each fix.
 - **Still open:** Agree three numbers before the pilot starts (for example: wrong parts stopped, onboarding time for a new operator, questions answered without a supervisor) and a date to decide.
 
 ### Who is responsible when it is wrong?
@@ -225,3 +233,8 @@ An idea developed during work hours, on company equipment or with company data m
 - [Engadget: AR headset startup Daqri is closing](https://engadget.com/2019/09/13/daqri-ar-headset-startup-closing)
 - [IFS acquires Poka (2023)](https://www.ifs.com/news/corporate/ifs-acquires-poka)
 - [eDHR and the QMSR: 2026 guide](https://meddeviceguide.com/blog/electronic-device-history-record-edhr-digital-manufacturing-qmsr-2026-guide)
+- [Folkard and Tucker (NIOSH): Shift work, safety and productivity](https://webarchive.library.unt.edu/web/20090507180940/http:/www.cdc.gov/niosh/topics/workschedules/abstracts/folkard.html)
+- [Wikipedia: Pointing and calling](https://en.wikipedia.org/wiki/Pointing_and_calling)
+- [Blockchain Commons: Animated QRs with fountain codes](https://developer.blockchaincommons.com/animated-qrs/)
+- [EU Digital COVID Certificate: QR code specification](https://github.com/ehn-dcc-development/hcert-spec/blob/53f7a2626f8b6853c04ef246954ca8b3b32af617/hcert_spec.md)
+- [ISS National Lab: Delay-tolerant networking in space](https://issnationallab.org/?p=49542)

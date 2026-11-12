@@ -8,11 +8,14 @@ import { toCSV } from '../core/csv.js';
 import { translatedLanguages, contentLanguage } from '../core/content.js';
 import { uiCSV, importUiCSV } from '../core/translations.js';
 import { LANGUAGES, KNOWN_LANGUAGES, catalog, builtInMessages } from '../lang.js';
+import { chambers, checkAll, openChamber, newChain } from '../chambers.js';
 
 const nativeName = (code) => { try { return new Intl.DisplayNames([code], { type: 'language' }).of(code) || code; } catch { return code; } };
 
-export default async function dataView({ app, navigate }) {
+export default async function dataView({ app, navigate, query }) {
   const ws = currentWorkspace();
+  const versions = (await chambers()).slice().reverse();
+  const current = versions[0];
   const builds = await listRecords('build');
   const reports = await listRecords('report');
   const est = await storageEstimate();
@@ -86,6 +89,19 @@ export default async function dataView({ app, navigate }) {
         </div>
       </section>
 
+      <section class="card anchor-target" id="versions">
+        <div class="card-head"><div><h2>${t('Sealed versions')}</h2><p class="small muted">${t('Every library version this tablet runs is sealed, like the chambers of a nautilus shell: each seal includes the one before it, so an old version or a completed build cannot be changed without it showing.')}</p></div><span class="chip">${versions.length}</span></div>
+        ${app.sealOk === false ? html`<div class="card-body"><div class="callout bad">${icon('stop')}<div><p class="t">${t('The library does not match its seal')}</p><p>${t('It was changed outside RightPart after it was sealed. Go back to a sealed version below, or ask your engineer before building.')}</p></div></div></div>` : ''}
+        ${versions.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Version')}</th><th>${t('Sealed')}</th><th>${t('What changed')}</th><th>${t('Seal')}</th><th></th></tr></thead><tbody>${versions.map((v) => html`<tr>
+            <td class="num"><b>${v.n}</b></td>
+            <td class="small nowrap">${fmtDate(v.at)}</td>
+            <td class="small">${v.note || '—'}<div class="tiny muted">${t('{parts} parts, {steps} steps', { parts: v.parts, steps: v.steps })}</div></td>
+            <td><span class="code tiny" title="${v.hash}">${v.hash.slice(0, 10)}</span></td>
+            <td>${v === current && app.sealOk !== false ? html`<span class="chip ok">${t('running')}</span>` : v.dropped ? html`<span class="tiny muted">${t('seal only')}</span>` : html`<button class="btn sm" type="button" data-restore="${v.hash}">${icon('history')}${t('Go back to it')}</button>`}</td>
+          </tr>`)}</tbody></table></div>` : html`<div class="card-body muted small">${t('Nothing sealed yet: the first import, edit or download seals a version.')}</div>`}
+        <div class="card-body row" style="border-top:1px solid var(--line)"><button class="btn" type="button" id="checkSeals">${icon('shield')}${t('Check every seal')}</button><span class="small" id="sealResult" aria-live="polite"></span></div>
+      </section>
+
       <section class="callout info">${icon('shield')}<div>
         <p class="t">${t('Before using real company data')}</p>
         <p>${t("Keep confidential drawings, BOMs and customer part numbers off public websites: on this device they stay in the browser, and on a company server they are protected per company. If your company builds for customers, check the contract allows putting the customer's data into a new system. In a medical-device factory, software that guides or records production has to be validated and released through the quality system (ISO 13485 §4.1.6 and §7.5.6, FDA QMSR) before it replaces controlled documents: run RightPart as a pilot next to the official instructions until then.")}</p>
@@ -99,6 +115,24 @@ export default async function dataView({ app, navigate }) {
       root.querySelector('[data-pdf]')?.addEventListener('click', async () => { const id = await importPdfSteps(app); if (id) navigate(`#/editor/${encodeURIComponent(id)}`); });
       root.querySelectorAll('[data-tpl]').forEach((b) => b.addEventListener('click', () => templates[b.dataset.tpl]()));
       root.querySelector('#expLib').addEventListener('click', () => download(`rightpart-${ws.name.replace(/[^\w-]+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(app.lib, null, 1)));
+      if (query?.get('go')) root.querySelector(`#${CSS.escape(query.get('go'))}`)?.scrollIntoView({ block: 'start' });
+      root.querySelector('#checkSeals').addEventListener('click', async () => {
+        const out = root.querySelector('#sealResult');
+        out.textContent = t('Checking…');
+        const r = await checkAll();
+        const ok = r.versions.ok && r.records.ok;
+        out.innerHTML = String(ok
+          ? html`<span style="color:var(--ok)">${icon('checkCircle')} ${t('All seals hold: {v, plural, one {# version} other {# versions}} and {b, plural, one {# completed build} other {# completed builds}}.', { v: r.versions.count, b: r.records.sealed })}</span>`
+          : html`<span style="color:var(--bad)">${icon('stop')} ${r.versions.ok ? '' : t('The chain of versions breaks at version {n}.', { n: r.versions.broken })} ${r.records.problems.length ? t('{n, plural, one {# build record was changed or removed after it was sealed.} other {# build records were changed or removed after they were sealed.}}', { n: r.records.problems.length }) : ''}</span>`);
+      });
+      root.querySelectorAll('[data-restore]').forEach((b) => b.addEventListener('click', async () => {
+        const v = versions.find((x) => x.hash === b.dataset.restore);
+        if (!(await confirmDialog(t('Go back to version {n}?', { n: v.n }), t('The library on this tablet becomes version {n} again. It is sealed as a new version, so the history stays complete.', { n: v.n }), t('Go back')))) return;
+        const lib = await openChamber(v.hash);
+        if (!lib) { toast(t('That version no longer matches its seal: it cannot be restored.'), 'bad', 6000); return; }
+        await commitLibrary(app, lib, t('Back to version {n}', { n: v.n }));
+        navigate('#/data?go=versions');
+      }));
       root.querySelector('#resetDemo')?.addEventListener('click', async () => {
         if (!(await confirmDialog(t('Reset the demo?'), t('Your edits to the demo library are removed. Records and photo samples stay.'), t('Reset'), true))) return;
         await resetLibrary();
@@ -179,6 +213,7 @@ export default async function dataView({ app, navigate }) {
       root.querySelector('#clrRec')?.addEventListener('click', async () => {
         if (!(await confirmDialog(t('Clear all records on this device?'), t('Build records and floor reports on this device are deleted. Export them first if they are needed.'), t('Delete records'), true))) return;
         await clear('records');
+        await newChain(); // the next completed build starts a new chain of seals
         toast(t('Records cleared.'), 'ok');
         navigate('#/data');
       });

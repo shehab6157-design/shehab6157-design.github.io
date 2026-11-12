@@ -5,6 +5,7 @@ import { sizeLabel } from '../core/dims.js';
 import { stepText, partText } from '../core/content.js';
 import { addRecord, listRecords, settings, setSetting } from '../store.js';
 import { touchSession } from '../core/nightwatch.js';
+import { depositsFrom, trails, libraryDeposits, HALF_LIFE_DAYS } from '../core/trails.js';
 import { partHref, stepHref, findingCard, thumb } from '../components.js';
 
 export default async function deviceView({ app, params, navigate }) {
@@ -13,7 +14,12 @@ export default async function deviceView({ app, params, navigate }) {
   const steps = dev.instructions?.steps || [];
   const findings = app.audit.findings.filter((f) => f.deviceId === dev.id);
   const crit = findings.filter((f) => f.severity === 'critical');
-  const builds = (await listRecords('build')).filter((b) => b.deviceId === dev.id).slice(0, 8);
+  const allRecords = await listRecords();
+  const builds = allRecords.filter((b) => b.type === 'build' && b.deviceId === dev.id).slice(0, 8);
+  const examples = libraryDeposits(app.lib);
+  const trail = trails([...depositsFrom(allRecords), ...examples]).get(dev.id);
+  const KIND = { wrong: (n) => t('{n, plural, one {# wrong part} other {# wrong parts}}', { n }), conflict: (n) => t('{n, plural, one {# BOM conflict} other {# BOM conflicts}}', { n }), override: (n) => t('{n, plural, one {# override} other {# overrides}}', { n }), report: (n) => t('{n, plural, one {# report} other {# reports}}', { n }), unknown: (n) => t('{n, plural, one {# unknown code} other {# unknown codes}}', { n }), slow: (n) => t('{n, plural, one {# long pause} other {# long pauses}}', { n }) };
+  const STATE = { fresh: () => t('fresh'), steady: () => t('steady'), fading: () => t('fading') };
   const pname = (p) => partText(p, app.lib).name;
 
   // BOM vs steps
@@ -86,6 +92,22 @@ export default async function deviceView({ app, params, navigate }) {
           })}</ol>
         </div>
       </section>
+
+      ${steps.length ? html`<section class="card" id="trails">
+        <div class="card-head"><div><h2>${t('Floor trails')}</h2><p class="small muted">${t('Wrong parts, overrides, reports, unknown codes and long pauses leave a mark on their step, and every mark fades by half in {days} days, like an ant trail. Strong trails show where the floor struggles now. No names: only how many, where and when.', { days: HALF_LIFE_DAYS })}</p></div>${examples.length ? html`<span class="chip">${t('example data')}</span>` : ''}</div>
+        ${trail?.visible ? html`<ol class="trail-list">${steps.map((s, i) => {
+          const st = trail.steps.get(s.id);
+          const pct = st && trail.max ? Math.max(4, Math.round((st.strength / trail.max) * 100)) : 0;
+          const revs = st ? Object.entries(st.byRev) : [];
+          const cur = dev.instructions?.rev;
+          return html`<li class="${st ? '' : 'quiet'}"><a href="${stepHref(dev.id, s.id, 'learn')}">
+            <span class="no">${i + 1}</span>
+            <span class="tl"><span class="t">${stepText(s, app.lib).title}</span>
+              ${st ? html`<span class="trail-bar" aria-hidden="true"><i class="${st.state}" style="width:${pct}%"></i></span>
+              <span class="tiny muted">${Object.entries(st.kinds).map(([k, n]) => KIND[k](n)).join(' · ')} · ${STATE[st.state]()}${revs.length > 1 && cur && st.byRev[cur] != null ? ` · ${t('rev {rev}: {n, plural, one {# mark} other {# marks}}, earlier revisions: {m}', { rev: cur, n: st.byRev[cur], m: revs.filter(([r]) => r !== cur).reduce((a, [, n]) => a + n, 0) })}` : ''}</span>` : html`<span class="tiny muted">${t('no trail')}</span>`}
+            </span></a></li>`;
+        })}</ol>` : html`<div class="card-body muted small">${trail ? t('Trails appear once marks come from at least 3 different builds or reports, so that no single build stands out.') : t('No trails yet. They form as builds are recorded on this tablet or arrive from others.')}</div>`}
+      </section>` : ''}
 
       <section class="card">
         <div class="card-head"><h2>${t('Bill of materials, rev {rev}', { rev: dev.bom?.rev || '?' })}</h2><span class="chip">${disagree ? t('{n, plural, one {# line disagrees with the steps} other {# lines disagree with the steps}}', { n: disagree }) : t('Matches the steps')}</span></div>

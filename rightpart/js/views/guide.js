@@ -324,7 +324,11 @@ export default async function guide({ app, params, query, navigate }) {
         }
         if (record) {
           record.steps = [...(record.steps || []).filter((s) => s.stepId !== step.id), { stepId: step.id, completedAt: Date.now(), checks: [...checks].map(Number) }];
-          if (idx === steps.length - 1) record.completedAt = Date.now();
+          if (idx === steps.length - 1) {
+            record.completedAt = Date.now();
+            const { sealBuild } = await import('../chambers.js'); // sealed into this tablet's chain: a later change shows
+            record.seal = (await sealBuild(record)).seal;
+          }
           await updateRecord(record);
         }
         beep('ok');

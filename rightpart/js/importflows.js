@@ -22,12 +22,17 @@ function preview(title, lines, warnings, extra = '') {
 export async function commitLibrary(app, lib, message) {
   const ws = currentWorkspace();
   const name = ws.kind === 'demo' ? t('Demo (edited)') : ws.name;
+  // Sealed chambers: the version being replaced and the new one both join this tablet's chain of seals.
+  const { sealVersion } = await import('./chambers.js');
+  try { await sealVersion(app.lib, t('Before: {note}', { note: message || '' })); } catch (e) { console.warn('seal', e); }
   if (ws.kind === 'cloud') {
     const { markEdited } = await import('./cloud.js');
     await markEdited(lib);
   } else {
     await saveLibrary(lib, name);
   }
+  try { await sealVersion(lib, message || ''); } catch (e) { console.warn('seal', e); }
+  app.sealOk = true;
   setLibrary(lib, ws.kind === 'demo' ? 'imported' : ws.kind, name);
   if (message) toast(ws.kind === 'cloud' ? `${message} ${t('Publish it when ready so the team gets it.')}` : message, 'ok', 5000);
 }

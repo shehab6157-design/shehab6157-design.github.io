@@ -2625,5 +2625,138 @@
     ]
    }
   ]
+ },
+ "trails": {
+  "note": "Example floor trails for the fictional Nova-1, placed a number of days before today so the demo stays current. Not real events.",
+  "deposits": [
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "kind": "wrong",
+    "agoDays": 40,
+    "rev": "A",
+    "from": "demo-b03"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "kind": "wrong",
+    "agoDays": 33,
+    "rev": "A",
+    "from": "demo-b05"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "kind": "wrong",
+    "agoDays": 29,
+    "rev": "A",
+    "from": "demo-b06"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "kind": "slow",
+    "agoDays": 31,
+    "rev": "A",
+    "from": "demo-b05"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S3",
+    "kind": "wrong",
+    "agoDays": 9,
+    "rev": "B",
+    "from": "demo-b11"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S7",
+    "kind": "conflict",
+    "agoDays": 2,
+    "rev": "B",
+    "from": "demo-b14"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S7",
+    "kind": "conflict",
+    "agoDays": 5,
+    "rev": "B",
+    "from": "demo-b13"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S7",
+    "kind": "override",
+    "agoDays": 5,
+    "rev": "B",
+    "from": "demo-b13"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S7",
+    "kind": "conflict",
+    "agoDays": 6,
+    "rev": "B",
+    "from": "demo-b12"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S7",
+    "kind": "report",
+    "agoDays": 6,
+    "rev": null,
+    "from": "demo-r02"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S5",
+    "kind": "slow",
+    "agoDays": 4,
+    "rev": "B",
+    "from": "demo-b14"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S5",
+    "kind": "slow",
+    "agoDays": 11,
+    "rev": "B",
+    "from": "demo-b10"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S5",
+    "kind": "unknown",
+    "agoDays": 12,
+    "rev": "B",
+    "from": "demo-b09"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S6",
+    "kind": "wrong",
+    "agoDays": 10,
+    "rev": "B",
+    "from": "demo-b10"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S6",
+    "kind": "wrong",
+    "agoDays": 15,
+    "rev": "B",
+    "from": "demo-b08"
+   },
+   {
+    "deviceId": "NOVA-1",
+    "stepId": "S9",
+    "kind": "slow",
+    "agoDays": 20,
+    "rev": "B",
+    "from": "demo-b07"
+   }
+  ]
  }
 }

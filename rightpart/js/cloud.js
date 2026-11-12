@@ -184,6 +184,10 @@ export function linkWorkspace(org) {
 }
 
 // ---------- Library versions ----------
+async function sealSaved(lib, note) {
+  try { const { sealVersion } = await import('./chambers.js'); await sealVersion(lib, note); } catch (e) { console.warn('seal', e); }
+}
+
 /** Download the latest published version, unless this device holds unpublished edits. */
 export async function pullLibrary() {
   const ws = currentWorkspace();
@@ -197,6 +201,7 @@ export async function pullLibrary() {
   if (meta?.version === data.version) return { status: 'current', version: data.version };
   if (meta?.dirty) return { status: 'local-edits', remote: data.version, local: meta.version };
   await saveLibrary(data.data, ws.name, { version: data.version, dirty: false, note: data.note, publishedAt: data.published_at });
+  await sealSaved(data.data, t('Version {v} from the company server', { v: data.version }));
   return { status: 'updated', version: data.version, note: data.note };
 }
 
@@ -215,6 +220,7 @@ export async function publishLibrary(lib, note) {
   const { data: version, error } = await c.rpc('publish_library', { p_org: ws.org.id, p_data: lib, p_note: note || null, p_base_version: base });
   if (error) throw friendly(error);
   await saveLibrary(lib, ws.name, { version, dirty: false, note });
+  await sealSaved(lib, t('Version {v} published', { v: version }));
   return version;
 }
 

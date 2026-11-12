@@ -70,6 +70,7 @@ export default async function home({ app }) {
   return {
     title: t('Home'),
     html: html`<div class="page">
+      ${app.sealOk === false ? html`<div class="callout bad" role="alert">${icon('stop')}<div><p class="t">${t('The library does not match its seal')}</p><p>${t('It was changed outside RightPart after it was sealed. Go back to a sealed version before building.')}</p><div class="acts"><a class="btn sm" href="#/data?go=versions">${icon('history')}${t('Sealed versions')}</a></div></div></div>` : ''}
       ${app.source === 'demo' ? html`<div class="demo-banner">${icon('info')}<span>${th('Demo library: the Nova-1 is a fictional device made up for this demo. To use your own data, {link}: it gets its own space, and the demo stays as it is.', { link: html`<a href="#/companies">${t('add your company')}</a>` })}</span></div>` : ''}
       <section class="hero">
         <h1>${isDemo ? t('The right part, every time.') : app.workspace.name}</h1>
@@ -122,6 +123,12 @@ export default async function home({ app }) {
           <h3>${t('Learn fasteners')}</h3>
           <p>${t('Heads, drives, threads and how to read a code like ISO 7380 M3×8 A2. Then a short quiz on the real device.')}</p>
           <span class="meta">${t('For your first weeks on the line')}</span>
+        </a>
+        <a class="tile" href="#/nature">
+          <span class="ic">${icon('leaf')}</span>
+          <h3>${t('Learned from nature')}</h3>
+          <p>${t('Seven safeguards copied from creation: immune memory for mix-ups, marks that keep look-alikes apart, light between tablets with no network, trails that fade, and more.')}</p>
+          <span class="meta">${t('What each one solves')}</span>
         </a>
         ${isDemo ? html`<a class="tile" href="#/companies">
           <span class="ic">${icon('building')}</span>
