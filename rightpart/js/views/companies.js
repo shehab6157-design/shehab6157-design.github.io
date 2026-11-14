@@ -6,7 +6,7 @@ import { t } from '../core/i18n.js';
 
 const ROLE = { owner: () => t('role::Owner'), admin: () => t('role::Admin'), engineer: () => t('role::Engineer'), supervisor: () => t('role::Supervisor'), operator: () => t('role::Operator'), viewer: () => t('role::Viewer') };
 const roleName = (r) => ROLE[r]?.() || r || t('member');
-const wsName = (w) => (w.kind === 'demo' ? t('Demo: Nova-1 (fictional)') : w.name);
+const wsName = (w) => (w.kind === 'demo' ? t('Demo (fictional products)') : w.name);
 const kindLabel = (w) => (w.kind === 'demo' ? t('Demo') : w.kind === 'cloud' ? t('Signed in · {role}', { role: roleName(w.org?.role) }) : t('On this device only'));
 const avatar = (w) => (w.kind === 'demo' ? icon('cube') : w.kind === 'cloud' ? icon('cloud') : raw(esc(w.name.split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0].toUpperCase()).join(''))));
 

@@ -423,6 +423,17 @@ function answerHelp(ctx) {
     : t("I answer from this company's parts, codes, steps, BOMs and integrity check. Every answer shows where it comes from. Ask in your own language; part numbers work in any language.")], followUps: ex.slice(0, 6) };
 }
 
+// A step number means nothing until we know the product: with several products, ask which one.
+function answerPickDevice(ctx) {
+  const devs = [...ctx.index.devices.values()];
+  return {
+    intent: 'pickDevice',
+    confidence: 'low',
+    text: [t('Which product? Each one has its own steps:')],
+    followUps: devs.slice(0, 8).map((d) => t('{device}: {question}', { device: d.name, question: ctx.q })),
+  };
+}
+
 function fallback(ctx) {
   const { index, q } = ctx;
   const res = search(index, q, { limit: 4 }).results;
@@ -463,7 +474,9 @@ export function answer(index, audit, question, pageCtx = {}) {
   const ctx = { index, audit, dev, step, q, cat };
   const is = (k) => KW[k].test(q);
   let a;
+  const asksStep = STEP_RE.test(q) || STEP_RE_AFTER.test(q);
   if (!q || is('help')) a = answerHelp(ctx);
+  else if (!dev && asksStep && !parts.length && index.devices.size > 1) a = answerPickDevice(ctx);
   else if (codes.some((c) => c.resolution.status === 'ambiguous') && !parts.length) a = answerWhatIs(ctx, codes);
   else if (is('diff') && parts.length) a = answerDiff(ctx, parts);
   else if (is('torque') && (parts.length || step)) a = answerTorque(ctx, parts);

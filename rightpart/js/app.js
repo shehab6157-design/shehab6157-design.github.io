@@ -72,6 +72,8 @@ const ROUTES = [
   { path: 'sync', nav: 'sync', load: () => import('./views/sync.js') },
   { path: 'nature', nav: 'nature', load: () => import('./views/nature.js') },
   { path: 'load', nav: 'load', load: () => import('./views/load.js') },
+  { path: 'show/:device/:step', nav: 'guides', load: () => import('./views/show.js') },
+  { path: 'show/:device', nav: 'guides', load: () => import('./views/show.js') },
 ];
 
 function parseHash() {
@@ -164,7 +166,7 @@ function renderNav() {
     side.innerHTML = String(html`${NAV.map((n) => item(n))}
       <div class="group">${t('More')}</div>
       ${NAV_MORE.map((n) => item(n))}
-      <div class="foot">${ws.kind === 'demo' ? t('Demo: a fictional device. Add your own company with the company button at the top.') : ws.kind === 'cloud' ? th('Signed-in company: {company}. A copy is kept on this device for offline work.', { company: ws.name }) : th('{company}: stored only on this device.', { company: ws.name })}</div>`);
+      <div class="foot">${ws.kind === 'demo' ? t('Demo: made-up products. Add your own company with the company button at the top.') : ws.kind === 'cloud' ? th('Signed-in company: {company}. A copy is kept on this device for offline work.', { company: ws.name }) : th('{company}: stored only on this device.', { company: ws.name })}</div>`);
   }
   const bottom = $('#bottomnav');
   if (bottom) bottom.innerHTML = String(html`${NAV.map((n) => item(n))}`);
@@ -184,7 +186,7 @@ function renderWorkspaceButton() {
   const ws = currentWorkspace();
   const initials = ws.kind === 'demo' ? t('Demo') : ws.name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('');
   b.innerHTML = String(html`${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}<span class="ws-name">${ws.kind === 'demo' ? t('Demo') : ws.name}</span><span class="ws-init">${initials}</span>${icon('chevronDown', 'chev')}`);
-  b.setAttribute('aria-label', t('Company: {company}. Switch company', { company: ws.kind === 'demo' ? t('Demo: Nova-1 (fictional)') : ws.name }));
+  b.setAttribute('aria-label', t('Company: {company}. Switch company', { company: ws.kind === 'demo' ? t('Demo (fictional products)') : ws.name }));
   searchPlaceholder();
 }
 
@@ -326,7 +328,7 @@ function openMenu() {
   d.setAttribute('aria-label', t('Menu'));
   d.innerHTML = String(html`<div class="dh"><h2>${icon('menu')} ${t('Menu')}</h2><button class="icon-btn" type="button" data-close aria-label="${t('Close')}">${icon('x')}</button></div>
     <div class="db">
-      <button class="ws-item menu-ws" type="button" data-ws><span class="av">${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}</span><span><span class="t">${ws.kind === 'demo' ? t('Demo: Nova-1 (fictional)') : ws.name}</span><br><span class="s">${t('Company: switch or add one')}</span></span>${icon('chevronRight', 'flip')}</button>
+      <button class="ws-item menu-ws" type="button" data-ws><span class="av">${icon(ws.kind === 'cloud' ? 'cloud' : 'building')}</span><span><span class="t">${ws.kind === 'demo' ? t('Demo (fictional products)') : ws.name}</span><br><span class="s">${t('Company: switch or add one')}</span></span>${icon('chevronRight', 'flip')}</button>
       <button class="ws-item menu-ws" type="button" data-lang><span class="av">${icon('globe')}</span><span><span class="t" lang="${lang.code}">${lang.native}</span><br><span class="s">${t('Language')}</span></span>${icon('chevronRight', 'flip')}</button>
       <nav class="menu-list" aria-label="${t('More pages')}">${NAV_MORE.map((n) => html`<a href="${n.href}" ${n.id === currentNav ? html`aria-current="page"` : ''}>${icon(n.icon)}<span>${n.label()}</span></a>`)}</nav>
       <button class="btn" type="button" data-theme>${icon(dark ? 'sun' : 'moon')}${dark ? t('Light theme') : t('Dark theme')}</button>

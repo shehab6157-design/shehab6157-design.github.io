@@ -30,7 +30,7 @@ export default async function dataView({ app, navigate, query }) {
     title: t('Data and records'),
     html: html`<div class="page narrow">
       <div class="page-head"><div>
-        <h1>${t('Data and records: {company}', { company: isDemo ? t('Demo: Nova-1 (fictional)') : ws.name })}</h1>
+        <h1>${t('Data and records: {company}', { company: isDemo ? t('Demo (fictional products)') : ws.name })}</h1>
         <p class="lede">${ws.kind === 'cloud' ? t('This company is shared through the company server. A copy is kept on this device so the floor keeps working offline.') : t('Everything for this company lives in this browser, on this device. Nothing is uploaded. Export to back up or to move it to another tablet.')}</p>
       </div></div>
 

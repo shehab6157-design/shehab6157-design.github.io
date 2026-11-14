@@ -115,7 +115,7 @@ test('draft: steps, parts, tools, warnings, checks, torque and ESD from a work i
 test('applying a draft: new device, then the check flags drafts, the old code, the unknown code and the missing BOM', () => {
   const d = draftSteps(pages, index, { file: 'WI-NV1-FAN-001.pdf' });
   const out = applyDraft(lib, d, { deviceId: 'NOVA-1-FAN', deviceName: 'Nova-1 fan tray', rev: 'A' });
-  assert.equal(lib.devices.length, 1, 'original untouched');
+  assert.ok(!lib.devices.some((x) => x.id === 'NOVA-1-FAN'), 'original untouched');
   const dev = out.devices.find((x) => x.id === 'NOVA-1-FAN');
   assert.equal(dev.instructions.steps.length, 5);
   const audit = runAudit(buildIndex(out));

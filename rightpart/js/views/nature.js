@@ -93,7 +93,7 @@ export default async function nature({ app, navigate }) {
         t('Instructions are written in an office, and people feel watched when every mistake carries their name.'),
         t('Wrong parts, overrides, reports, unknown codes and long pauses leave a mark on their step, and every mark fades by half in two weeks. Engineers see which steps trouble the floor now, and whether a change to the instructions made the trail fade. No names are kept, and trails show only once several builds contribute.'),
         hot.length ? th('Strongest trail now: {where}.', { where: html`<a href="#/device/${encodeURIComponent(hot[0].dev.id)}">${hot[0].dev.name} · ${t('step {n}', { n: hot[0].no })}</a>` }) : t('No trails yet.'),
-        hot.length ? html`<a class="btn sm" href="#/device/${encodeURIComponent(hot[0].dev.id)}">${icon('layers')}${t('Floor trails')}</a>` : '')}
+        hot.length ? html`<a class="btn sm" href="#/device/${encodeURIComponent(hot[0].dev.id)}?go=trails">${icon('layers')}${t('Floor trails')}</a>` : '')}
 
       ${card('seals', 'lock', t('Sealed chambers'),
         t('A nautilus seals each chamber it outgrows, and no inner tree ring can change without cutting through every ring outside it.'),

@@ -1,14 +1,14 @@
 import { html, th, icon, openDialog, toast, fmtDate } from '../ui.js';
+import { fillPosters } from '../posters.js';
 import { t } from '../core/i18n.js';
 import { resolveCode, stepParts, qtyNumber, CODE_TYPES } from '../core/model.js';
-import { sizeLabel } from '../core/dims.js';
 import { stepText, partText } from '../core/content.js';
 import { addRecord, listRecords, settings, setSetting } from '../store.js';
 import { touchSession } from '../core/nightwatch.js';
 import { depositsFrom, trails, libraryDeposits, HALF_LIFE_DAYS } from '../core/trails.js';
-import { partHref, stepHref, findingCard, thumb } from '../components.js';
+import { partHref, stepHref, findingCard, thumb, guideHref, poster } from '../components.js';
 
-export default async function deviceView({ app, params, navigate }) {
+export default async function deviceView({ app, params, navigate, query }) {
   const dev = app.index.devices.get(params.id);
   if (!dev) return { title: t('Not found'), html: html`<div class="page narrow"><div class="empty">${th('No device {id}.', { id: params.id })}</div></div>` };
   const steps = dev.instructions?.steps || [];
@@ -49,104 +49,103 @@ export default async function deviceView({ app, params, navigate }) {
   });
   const disagree = bomRows.filter((r) => r.status !== 'ok').length;
 
+  const nParts = new Set(steps.flatMap((s) => stepParts(app.index, s).filter((x) => x.part).map((x) => x.part.id))).size || kit.length;
+  // A section that stays closed until someone asks for it.
+  const fold = (id, ic, title, badge, body, open = false) => html`<details class="fold" id="${id}" ${open ? html`open` : ''}>
+    <summary><span class="ic">${icon(ic)}</span><span class="grow">${title}</span>${badge || ''}${icon('chevronDown', 'chev')}</summary>
+    <div class="fold-body">${body}</div>
+  </details>`;
+  const go = query?.get('go');
+
   return {
     title: dev.name,
-    html: html`<div class="page">
-      <div class="page-head">
-        <div>
-          <div class="crumbs"><a href="#/devices">${t('nav::Build')}</a><span>/</span><span class="code">${dev.id}</span></div>
+    html: html`<div class="page dev2">
+      <div class="crumbs"><a href="#/devices">${t('nav::Build')}</a><span>/</span><span class="code">${dev.id}</span></div>
+      <section class="dev-top">
+        ${dev.scene ? html`<a class="dev-pic" href="${guideHref(dev)}" aria-label="${t('Open the 3D guide: {device}', { device: dev.name })}">${poster(dev, { cls: 'big' })}</a>`
+          : html`<div class="dev-pic"><div class="viewer board-mode"><div class="board">${kit.map(({ part, qty }) => html`<a class="kit" href="${partHref(part.id)}">${thumb(part)}<span class="q">${qty}</span><span class="n">${pname(part)}</span><span class="tiny muted code">${part.id}</span></a>`)}</div></div></div>`}
+        <div class="dev-info">
           <h1>${dev.name}</h1>
-          <p class="lede">${dev.description || ''}</p>
-          <div class="row" style="margin-top:10px"><span class="chip">${t('BOM {doc} rev {rev}', { doc: dev.bom?.doc || '', rev: dev.bom?.rev || '?' })}</span><span class="chip ${dev.bom?.rev !== dev.instructions?.rev ? 'warn' : ''}">${t('Instructions {doc} rev {rev}', { doc: dev.instructions?.doc || '', rev: dev.instructions?.rev || '?' })}</span><span class="chip">${t('{n, plural, one {# step} other {# steps}}', { n: steps.length })}</span></div>
+          <p class="prod-meta">${t('{n, plural, one {# step} other {# steps}}', { n: steps.length })} · ${t('{n, plural, one {# part} other {# parts}}', { n: nParts })}</p>
+          ${steps.length ? html`<div class="dev-acts">
+            <a class="btn primary big" href="${guideHref(dev)}">${icon(dev.scene ? 'cube' : 'play')}${dev.scene ? t('3D guide') : t('Start')}</a>
+            <button class="btn big" id="startBuild" type="button">${icon('scan')}${t('Start a build')}</button>
+          </div>` : html`<a class="btn primary big" href="#/editor/${encodeURIComponent(dev.id)}">${icon('edit')}${t('Write the steps')}</a>`}
+          <div class="dev-tools">
+            ${steps.length ? html`<a class="btn sm ghost" href="${stepHref(dev.id, steps[0].id, 'learn')}">${icon('guide')}${t('Text view')}</a>
+            <a class="btn sm ghost" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}${t('Quiz')}</a>
+            <a class="btn sm ghost" href="#/editor/${encodeURIComponent(dev.id)}">${icon('edit')}${t('Edit steps')}</a>` : ''}
+            <a class="btn sm ghost" href="#/editor/new" title="${t('Add another device')}">${icon('plus')}${t('Device')}</a>
+          </div>
         </div>
-        <div class="row">
-          ${steps.length ? html`<a class="btn" href="${stepHref(dev.id, steps[0].id, 'learn')}">${icon('learn')}${t('mode::Learn')}</a>
-          <button class="btn primary" id="startBuild" type="button">${icon('play')}${t('Start a build')}</button>
-          <a class="btn" href="#/quiz/${encodeURIComponent(dev.id)}">${icon('quiz')}${t('Quiz')}</a>` : ''}
-          <a class="btn ${steps.length ? '' : 'primary'}" href="#/editor/${encodeURIComponent(dev.id)}">${icon('edit')}${steps.length ? t('Edit steps') : t('Write the steps')}</a>
-          <a class="btn ghost" href="#/editor/new" title="${t('Add another device')}">${icon('plus')}${t('Device')}</a>
-        </div>
-      </div>
+      </section>
 
       ${crit.length ? html`<div class="callout bad">${icon('stop')}<div><p class="t">${t("{n, plural, one {# critical issue in this device's documents} other {# critical issues in this device's documents}}", { n: crit.length })}</p><p>${crit[0].title}.</p><div class="acts"><a class="btn sm" href="#/audit">${icon('shield')}${t('Open the integrity check')}</a></div></div></div>` : ''}
 
-      <section class="split">
-        <div class="stack">
-          ${dev.scene ? html`<div class="viewer" id="viewer"><div class="vhint">${t('Drag to turn · pinch to zoom · tap a part')}</div>
-            <div class="vbar"><div class="grp"><button class="vbtn" type="button" id="explode" aria-pressed="false">${icon('explode')}${t('Exploded')}</button></div><div class="grp"><button class="vbtn" type="button" id="resetCam">${icon('reset')}${t('Reset view')}</button></div></div>
-          </div>
-          <p class="tiny muted">${t('The 3D model is generated from the library: each screw is drawn from its own spec, so its length on screen is its real length.')}</p>` : html`<div class="viewer board-mode"><div class="board">${kit.map(({ part, qty }) => html`<a class="kit" href="${partHref(part.id)}">${thumb(part)}<span class="q">${qty}</span><span class="n">${pname(part)}</span><span class="tiny muted code">${part.id}</span></a>`)}</div></div>
-          <p class="tiny muted">${t('No 3D model for this device: every step shows its photos and its kit of parts with true-proportion drawings. A 3D scene can be added to the library file (see the README).')}</p>`}
-        </div>
-        <div class="stack">
-          <h2>${t('Steps')}</h2>
-          ${steps.length ? '' : html`<div class="empty">${th('No steps yet. {write} or import them from a spreadsheet on {setup}.', { write: html`<a href="#/editor/${encodeURIComponent(dev.id)}">${t('Write them')}</a>`, setup: html`<a href="#/setup">${t('Set up this company')}</a>` })}</div>`}
-          <ol class="list-plain">${steps.map((s, i) => {
-            const fl = (app.audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info');
-            const sp = stepParts(app.index, s);
-            return html`<li><a class="pcard" href="${stepHref(dev.id, s.id, 'learn')}" style="grid-template-columns:44px minmax(0,1fr)">
-              <span class="qty" style="min-width:44px">${i + 1}</span>
-              <span><span class="t">${stepText(s, app.lib).title}</span>${s.critical ? html` <span class="chip bad">${t('critical')}</span>` : ''}${fl.some((f) => f.severity === 'critical') ? html` <span class="chip bad">${icon('alert')}${t('verb::Check')}</span>` : fl.length ? html` <span class="chip warn">${icon('alert')}${fl.length}</span>` : ''}
-              <span class="s" style="display:block" dir="ltr">${sp.filter((x) => x.part).map((x) => `${x.qty === 'A/R' ? t('qty::A/R') : x.qty + '×'} ${sizeLabel(x.part) || pname(x.part).split(',')[0]}`).join(' · ')}</span></span>
-            </a></li>`;
-          })}</ol>
-        </div>
-      </section>
-
-      ${steps.length ? html`<section class="card" id="trails">
-        <div class="card-head"><div><h2>${t('Floor trails')}</h2><p class="small muted">${t('Wrong parts, overrides, reports, unknown codes and long pauses leave a mark on their step, and every mark fades by half in {days} days, like an ant trail. Strong trails show where the floor struggles now. No names: only how many, where and when.', { days: HALF_LIFE_DAYS })}</p></div>${examples.length ? html`<span class="chip">${t('example data')}</span>` : ''}</div>
-        ${trail?.visible ? html`<ol class="trail-list">${steps.map((s, i) => {
-          const st = trail.steps.get(s.id);
-          const pct = st && trail.max ? Math.max(4, Math.round((st.strength / trail.max) * 100)) : 0;
-          const revs = st ? Object.entries(st.byRev) : [];
-          const cur = dev.instructions?.rev;
-          return html`<li class="${st ? '' : 'quiet'}"><a href="${stepHref(dev.id, s.id, 'learn')}">
+      ${steps.length ? html`<section class="stack">
+        <h2 class="sec-h">${icon('guide')}${t('Steps')}</h2>
+        <ol class="step-tiles">${steps.map((s, i) => {
+          const fl = (app.audit.byStep.get(`${dev.id}/${s.id}`) || []).filter((f) => f.severity !== 'info');
+          const bad = fl.some((f) => f.severity === 'critical');
+          return html`<li><a class="stp" href="${guideHref(dev, s.id)}">
             <span class="no">${i + 1}</span>
-            <span class="tl"><span class="t">${stepText(s, app.lib).title}</span>
-              ${st ? html`<span class="trail-bar" aria-hidden="true"><i class="${st.state}" style="width:${pct}%"></i></span>
-              <span class="tiny muted">${Object.entries(st.kinds).map(([k, n]) => KIND[k](n)).join(' · ')} · ${STATE[st.state]()}${revs.length > 1 && cur && st.byRev[cur] != null ? ` · ${t('rev {rev}: {n, plural, one {# mark} other {# marks}}, earlier revisions: {m}', { rev: cur, n: st.byRev[cur], m: revs.filter(([r]) => r !== cur).reduce((a, [, n]) => a + n, 0) })}` : ''}</span>` : html`<span class="tiny muted">${t('no trail')}</span>`}
-            </span></a></li>`;
-        })}</ol>` : html`<div class="card-body muted small">${trail ? t('Trails appear once marks come from at least 3 different builds or reports, so that no single build stands out.') : t('No trails yet. They form as builds are recorded on this tablet or arrive from others.')}</div>`}
-      </section>` : ''}
+            <span class="t" dir="auto">${stepText(s, app.lib).title}</span>
+            ${s.critical ? html`<span class="flag bad" title="${t('critical')}">${icon('flag')}</span>` : bad ? html`<span class="flag bad" title="${t('verb::Check')}">${icon('alert')}</span>` : fl.length ? html`<span class="flag warn" title="${t('{n, plural, one {# warning} other {# warnings}}', { n: fl.length })}">${icon('alert')}</span>` : ''}
+          </a></li>`;
+        })}</ol>
+      </section>` : html`<div class="empty">${th('No steps yet. {write} or import them from a spreadsheet on {setup}.', { write: html`<a href="#/editor/${encodeURIComponent(dev.id)}">${t('Write them')}</a>`, setup: html`<a href="#/setup">${t('Set up this company')}</a>` })}</div>`}
 
-      <section class="card">
-        <div class="card-head"><h2>${t('Bill of materials, rev {rev}', { rev: dev.bom?.rev || '?' })}</h2><span class="chip">${disagree ? t('{n, plural, one {# line disagrees with the steps} other {# lines disagree with the steps}}', { n: disagree }) : t('Matches the steps')}</span></div>
-        <div class="tbl-wrap"><table class="tbl">
-          <thead><tr><th>${t('Item')}</th><th>${t('Code on the BOM')}</th><th>${t('Part')}</th><th>${t('BOM qty')}</th><th>${t('In the steps')}</th><th></th></tr></thead>
-          <tbody>${bomRows.map(({ l, r, sq, status }) => html`<tr class="${status === 'bad' ? 'flag' : ''}">
-            <td>${l.item}</td>
-            <td><span class="code">${l.code}</span>${r.alias && r.alias.type !== 'internal' ? html`<div class="tiny muted">${CODE_TYPES[r.alias.type]}</div>` : ''}</td>
-            <td>${r.part ? html`<a href="${partHref(r.part.id)}" class="row nowrap" style="gap:8px;text-decoration:none"><span class="tthumb">${thumb(r.part)}</span><span><span class="code">${r.part.id}</span><br><span class="small">${pname(r.part)}</span></span></a>` : html`<span class="chip bad">${r.status === 'ambiguous' ? t('Ambiguous code') : t('Unknown code')}</span>`}</td>
-            <td><b>${l.qty}</b>${l.where ? html`<div class="tiny muted">${l.where}</div>` : ''}</td>
-            <td>${sq ? html`<b>${sq.ar ? t('qty::A/R') : sq.qty}</b><div class="tiny muted">${t('step {n}', { n: [...new Set(sq.steps)].join(', ') })}</div>` : html`<span class="chip bad">${t('never')}</span>`}</td>
-            <td>${status === 'ok' ? html`<span class="chip ok">${icon('check')}</span>` : html`<span class="chip bad">${icon('alert')}</span>`}</td>
-          </tr>`)}</tbody>
-        </table></div>
-      </section>
+      <div class="folds">
+        ${fold('bom', 'layers', t('Bill of materials, rev {rev}', { rev: dev.bom?.rev || '?' }), html`<span class="chip ${disagree ? 'bad' : 'ok'}">${disagree ? icon('alert') : icon('check')}${disagree ? disagree : (dev.bom?.lines || []).length}</span>`, html`
+          <p class="small muted">${disagree ? t('{n, plural, one {# line disagrees with the steps} other {# lines disagree with the steps}}', { n: disagree }) : t('Matches the steps')}</p>
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>${t('Item')}</th><th>${t('Code on the BOM')}</th><th>${t('Part')}</th><th>${t('BOM qty')}</th><th>${t('In the steps')}</th><th></th></tr></thead>
+            <tbody>${bomRows.map(({ l, r, sq, status }) => html`<tr class="${status === 'bad' ? 'flag' : ''}">
+              <td>${l.item}</td>
+              <td><span class="code">${l.code}</span>${r.alias && r.alias.type !== 'internal' ? html`<div class="tiny muted">${CODE_TYPES[r.alias.type]}</div>` : ''}</td>
+              <td>${r.part ? html`<a href="${partHref(r.part.id)}" class="row nowrap" style="gap:8px;text-decoration:none"><span class="tthumb">${thumb(r.part)}</span><span><span class="code">${r.part.id}</span><br><span class="small">${pname(r.part)}</span></span></a>` : html`<span class="chip bad">${r.status === 'ambiguous' ? t('Ambiguous code') : t('Unknown code')}</span>`}</td>
+              <td><b>${l.qty}</b>${l.where ? html`<div class="tiny muted">${l.where}</div>` : ''}</td>
+              <td>${sq ? html`<b>${sq.ar ? t('qty::A/R') : sq.qty}</b><div class="tiny muted">${t('step {n}', { n: [...new Set(sq.steps)].join(', ') })}</div>` : html`<span class="chip bad">${t('never')}</span>`}</td>
+              <td>${status === 'ok' ? html`<span class="chip ok">${icon('check')}</span>` : html`<span class="chip bad">${icon('alert')}</span>`}</td>
+            </tr>`)}</tbody>
+          </table></div>`, go === 'bom')}
 
-      ${dev.changes?.length ? html`<section class="card"><div class="card-head"><h2>${t('Change history')}</h2></div><div class="card-body"><ul class="list-plain">${dev.changes.map((c) => html`<li class="row nowrap" style="align-items:flex-start"><span class="chip ${dev.instructions?.rev && c.rev > dev.instructions.rev ? 'warn' : ''}">${t('rev {rev}', { rev: c.rev })}</span><span><b>${c.eco}</b> · ${c.date}<br><span class="small">${c.text}</span>${dev.instructions?.rev && c.rev > dev.instructions.rev ? html`<br><span class="tiny" style="color:var(--warn);font-weight:650">${t('Not in the instructions (rev {rev})', { rev: dev.instructions.rev })}</span>` : ''}</span></li>`)}</ul></div></section>` : ''}
+        ${findings.length ? fold('check', 'shield', t('Integrity check for this device'), html`<span class="chip ${crit.length ? 'bad' : 'warn'}">${icon('alert')}${findings.length}</span>`, html`${findings.slice(0, 4).map((f) => findingCard(f, app, { compact: true }))}${findings.length > 4 ? html`<a class="btn" href="#/audit">${t('See all {n}', { n: findings.length })}</a>` : ''}`, go === 'check') : ''}
 
-      ${findings.length ? html`<section class="stack"><h2>${t('Integrity check for this device')}</h2>${findings.slice(0, 4).map((f) => findingCard(f, app, { compact: true }))}${findings.length > 4 ? html`<a class="btn" href="#/audit">${t('See all {n}', { n: findings.length })}</a>` : ''}</section>` : ''}
+        ${steps.length ? fold('trails', 'layers', t('Floor trails'), examples.length ? html`<span class="chip">${t('example data')}</span>` : '', html`
+          <p class="small muted">${t('Wrong parts, overrides, reports, unknown codes and long pauses leave a mark on their step, and every mark fades by half in {days} days, like an ant trail. Strong trails show where the floor struggles now. No names: only how many, where and when.', { days: HALF_LIFE_DAYS })}</p>
+          ${trail?.visible ? html`<ol class="trail-list">${steps.map((s, i) => {
+            const st = trail.steps.get(s.id);
+            const pct = st && trail.max ? Math.max(4, Math.round((st.strength / trail.max) * 100)) : 0;
+            const revs = st ? Object.entries(st.byRev) : [];
+            const cur = dev.instructions?.rev;
+            return html`<li class="${st ? '' : 'quiet'}"><a href="${stepHref(dev.id, s.id, 'learn')}">
+              <span class="no">${i + 1}</span>
+              <span class="tl"><span class="t">${stepText(s, app.lib).title}</span>
+                ${st ? html`<span class="trail-bar" aria-hidden="true"><i class="${st.state}" style="width:${pct}%"></i></span>
+                <span class="tiny muted">${Object.entries(st.kinds).map(([k, n]) => KIND[k](n)).join(' · ')} · ${STATE[st.state]()}${revs.length > 1 && cur && st.byRev[cur] != null ? ` · ${t('rev {rev}: {n, plural, one {# mark} other {# marks}}, earlier revisions: {m}', { rev: cur, n: st.byRev[cur], m: revs.filter(([r]) => r !== cur).reduce((a, [, n]) => a + n, 0) })}` : ''}</span>` : html`<span class="tiny muted">${t('no trail')}</span>`}
+              </span></a></li>`;
+          })}</ol>` : html`<p class="muted small">${trail ? t('Trails appear once marks come from at least 3 different builds or reports, so that no single build stands out.') : t('No trails yet. They form as builds are recorded on this tablet or arrive from others.')}</p>`}`, go === 'trails') : ''}
 
-      <section class="card"><div class="card-head"><h2>${t('Build records on this device')}</h2><a class="btn sm" href="#/data#records">${icon('download')}${t('Export')}</a></div>
-        ${builds.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Serial')}</th><th>${t('Operator')}</th><th>${t('Started')}</th><th>${t('Progress')}</th></tr></thead><tbody>${builds.map((b) => {
-          const wrong = (b.events || []).filter((e) => e.result === 'wrong').length;
-          return html`<tr><td class="code">${b.serial || '—'}</td><td>${b.operator || '—'}</td><td>${fmtDate(b.createdAt)}</td><td>${b.completedAt ? html`<span class="chip ok">${icon('check')}${t('complete')}</span>` : (() => { const done = new Set((b.steps || []).map((x) => x.stepId)); const ni = Math.max(0, steps.findIndex((x) => !done.has(x.id))); return html`<a class="chip" href="${stepHref(dev.id, steps[ni]?.id, 'build')}&build=${encodeURIComponent(b.id)}">${t('Continue at step {n}', { n: ni + 1 })}</a>`; })()}${wrong ? html` <span class="chip bad">${t('{n, plural, one {# wrong scan stopped} other {# wrong scans stopped}}', { n: wrong })}</span>` : ''}</td></tr>`;
-        })}</tbody></table></div>` : html`<div class="card-body muted">${t('No builds recorded yet. "Start a build" records who built which serial number, every scan and every completed step.')}</div>`}
-      </section>
+        ${dev.changes?.length ? fold('changes', 'history', t('Change history'), html`<span class="chip">${dev.changes.length}</span>`, html`<ul class="list-plain">${dev.changes.map((c) => html`<li class="row nowrap" style="align-items:flex-start"><span class="chip ${dev.instructions?.rev && c.rev > dev.instructions.rev ? 'warn' : ''}">${t('rev {rev}', { rev: c.rev })}</span><span><b>${c.eco}</b> · ${c.date}<br><span class="small">${c.text}</span>${dev.instructions?.rev && c.rev > dev.instructions.rev ? html`<br><span class="tiny" style="color:var(--warn);font-weight:650">${t('Not in the instructions (rev {rev})', { rev: dev.instructions.rev })}</span>` : ''}</span></li>`)}</ul>`, go === 'changes') : ''}
+
+        ${fold('records', 'checklist', t('Build records on this device'), html`<span class="chip">${builds.length}</span>`, html`
+          ${builds.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Serial')}</th><th>${t('Operator')}</th><th>${t('Started')}</th><th>${t('Progress')}</th></tr></thead><tbody>${builds.map((b) => {
+            const wrong = (b.events || []).filter((e) => e.result === 'wrong').length;
+            return html`<tr><td class="code">${b.serial || '—'}</td><td>${b.operator || '—'}</td><td>${fmtDate(b.createdAt)}</td><td>${b.completedAt ? html`<span class="chip ok">${icon('check')}${t('complete')}</span>` : (() => { const done = new Set((b.steps || []).map((x) => x.stepId)); const ni = Math.max(0, steps.findIndex((x) => !done.has(x.id))); return html`<a class="chip" href="${stepHref(dev.id, steps[ni]?.id, 'build')}&build=${encodeURIComponent(b.id)}">${t('Continue at step {n}', { n: ni + 1 })}</a>`; })()}${wrong ? html` <span class="chip bad">${t('{n, plural, one {# wrong scan stopped} other {# wrong scans stopped}}', { n: wrong })}</span>` : ''}</td></tr>`;
+          })}</tbody></table></div>` : html`<p class="muted small">${t('No builds recorded yet. "Start a build" records who built which serial number, every scan and every completed step.')}</p>`}
+          <div><a class="btn sm" href="#/data#records">${icon('download')}${t('Export')}</a></div>`, go === 'records')}
+
+        ${fold('about', 'info', t('About this product'), '', html`
+          ${dev.description ? html`<p dir="auto">${dev.description}</p>` : ''}
+          <div class="row"><span class="chip">${t('BOM {doc} rev {rev}', { doc: dev.bom?.doc || '', rev: dev.bom?.rev || '?' })}</span><span class="chip ${dev.bom?.rev !== dev.instructions?.rev ? 'warn' : ''}">${t('Instructions {doc} rev {rev}', { doc: dev.instructions?.doc || '', rev: dev.instructions?.rev || '?' })}</span><span class="chip">${t('{n, plural, one {# step} other {# steps}}', { n: steps.length })}</span></div>
+          <p class="tiny muted">${dev.scene ? t('The 3D model is generated from the library: each screw is drawn from its own spec, so its length on screen is its real length.') : t('No 3D model for this device: every step shows its photos and its kit of parts with true-proportion drawings. A 3D scene can be added to the library file (see the README).')}</p>`, go === 'about')}
+      </div>
     </div>`,
     mount(root) {
-      let viewer = null;
-      if (dev.scene) import('../viewer3d.js').then(({ createViewer }) => {
-        const el = root.querySelector('#viewer');
-        if (!el?.isConnected) return;
-        viewer = createViewer(el, { app, device: dev, mode: 'overview', onPick: (part) => toast(`${part.id}: ${pname(part)}`) });
-        if (!viewer) { const fb = document.createElement('div'); fb.className = 'vfallback'; fb.textContent = t('3D needs WebGL, which this browser does not offer. Every step still has drawings and instructions.'); el.append(fb); }
-      });
-      root.querySelector('#explode')?.addEventListener('click', (e) => { const on = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', String(on)); viewer?.setExploded(on); });
-      root.querySelector('#resetCam')?.addEventListener('click', () => viewer?.resetView());
+      fillPosters(app, root);
       root.querySelector('#startBuild')?.addEventListener('click', () => startBuild(app, dev, navigate));
-      return () => viewer?.dispose();
+      if (go) root.querySelector(`#${CSS.escape(go)}`)?.scrollIntoView({ block: 'start' });
     },
   };
 }

@@ -12,7 +12,6 @@ import { CATEGORY_LABELS, isFastener, sizeLabel } from '../core/dims.js';
 import { barcodeSVG } from '../core/code128.js';
 import { settings, listRecords, addRecord } from '../store.js';
 import { partHref, stepHref, specFacts, factsGrid, findingCard, statusChip, shortType } from '../components.js';
-import { decodedBlock } from './search.js';
 
 export default async function partView({ app, params, query }) {
   const part = app.index.parts.get(params.id);
@@ -49,6 +48,12 @@ export default async function partView({ app, params, query }) {
   const collisions = new Set(findings.filter((f) => f.check === 'code-collision').flatMap((f) => f.codes || []).map(normCode));
   const cal = settings().pxPerMm;
   const usedIn = new Set(used.map((u) => u.device?.id));
+  // Sections that stay closed until someone asks for them.
+  const fold = (id, ic, title, badge, body, open = false) => html`<details class="fold" id="${id}" ${open ? html`open` : ''}>
+    <summary><span class="ic">${icon(ic)}</span><span class="grow">${title}</span>${badge || ''}${icon('chevronDown', 'chev')}</summary>
+    <div class="fold-body">${body}</div>
+  </details>`;
+  const go = query.get('go');
 
   return {
     title: pt.name,
@@ -59,7 +64,7 @@ export default async function partView({ app, params, query }) {
           <div class="stack tight">
             <h1>${pt.name}</h1>
             ${pt.state === 'translated' && pt.name !== part.name ? html`<p class="small muted" dir="auto">${part.name}</p>` : ''}
-            <div class="row"><span class="code-pill big" title="${t('Internal code')}">${part.id}</span>${statusChip(part)}${part.esd ? html`<span class="chip warn">${icon('esd')}${t('Static-sensitive')}</span>` : ''}${critN ? html`<a class="chip bad" href="#issues">${icon('stop')}${t('{n, plural, one {# critical issue} other {# critical issues}}', { n: critN })}</a>` : ''}</div>
+            <div class="row"><span class="code-pill big" title="${t('Internal code')}">${part.id}</span>${statusChip(part)}${part.esd ? html`<span class="chip warn">${icon('esd')}${t('Static-sensitive')}</span>` : ''}${critN ? html`<button type="button" class="chip bad" data-open="issues">${icon('stop')}${t('{n, plural, one {# critical issue} other {# critical issues}}', { n: critN })}</button>` : ''}</div>
           </div>
           <div class="row no-print">
             <a class="btn" href="#/labels?ids=${encodeURIComponent(part.id)}">${icon('print')}${t('Bin label')}</a>
@@ -87,67 +92,64 @@ export default async function partView({ app, params, query }) {
           ${factsGrid(specFacts(part))}
           ${mark ? html`<a class="markline" href="#/labels">${raw(markSVG(mark, { size: 28 }))}<span>${th('Bin mark: {mark}', { mark: html`<b>${markName(mark, t)}</b>` })}${mark.locked ? '' : html` <span class="tiny muted">(${t('not locked yet')})</span>`}</span></a>` : ''}
           ${torque || part.tool ? html`<div class="facts">${torque ? html`<div class="fact"><div class="k">${t('Torque')}</div><div class="v" dir="ltr">${torque}</div></div>` : ''}${part.tool ? html`<div class="fact"><div class="k">${t('Tool')}</div><div class="v" style="font-size:15px">${part.tool}</div></div>` : ''}</div>` : ''}
-          ${pt.state === 'missing' && (d.function || d.why) ? html`<p class="tiny muted lang-note">${icon('globe')} ${t('The explanations below are not translated yet: they are shown as the company wrote them.')}</p>` : ''}
-          ${d.function ? html`<div class="why-box"><div class="t">${t('What it does')}</div><p>${d.function}</p></div>` : ''}
-          <div class="stack tight">
-            ${d.why ? html`<details class="more" open><summary><span class="ic">${icon('info')}</span>${t('Why this part')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${d.why}</p></div></details>` : ''}
-            ${d.ifWrong ? html`<details class="more"><summary><span class="ic bad">${icon('alert')}</span>${t('If the wrong part is fitted')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${d.ifWrong}</p></div></details>` : ''}
-            ${d.tips ? html`<details class="more"><summary><span class="ic ok">${icon('hand')}</span>${t('Tips at the bench')}<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></summary><div class="body"><p>${d.tips}</p></div></details>` : ''}
-            ${!d.function ? html`<div class="callout">${icon('info')}<div><p class="t">${t('No explanation yet')}</p><p>${t('Nobody has written what this part does or why it was chosen. Engineers can add it through Your data.')}</p></div></div>` : ''}
-          </div>
+          ${d.function ? html`<p class="pc-what" dir="auto">${d.function}</p>` : ''}
         </div>
       </section>
-
-      <section class="card">
-        <div class="card-head"><h2>${t('Every code for this part')}</h2><span class="chip">${t('{n, plural, one {# code} other {# codes}}', { n: aliasRows.length })}</span></div>
-        <div class="tbl-wrap"><table class="tbl">
-          <thead><tr><th>${t('Type')}</th><th>${t('Code')}</th><th>${t('Where it comes from')}</th><th class="no-print"></th></tr></thead>
-          <tbody>${aliasRows.map((a) => html`<tr class="${collisions.has(normCode(a.code)) ? 'flag' : ''}">
-            <td><span class="chip ${a.type === 'legacy' ? 'warn' : a.type === 'internal' ? 'brand' : ''}" title="${CODE_TYPES[a.type] || a.type}">${shortType(a.type)}</span> <span class="small muted">${CODE_TYPES[a.type] || a.type}</span></td>
-            <td><span class="code">${a.code}</span>${collisions.has(normCode(a.code)) ? html` <span class="chip bad">${icon('stop')}${t('also on another part')}</span>` : ''}${a.note ? html`<div class="tiny muted">${a.note}</div>` : ''}</td>
-            <td class="small">${a.source || ''}</td>
-            <td class="no-print" style="text-align:end"><button class="btn sm ghost" type="button" data-copy="${a.code}" aria-label="${t('Copy {code}', { code: a.code })}">${icon('copy')}</button></td>
-          </tr>`)}</tbody>
-        </table></div>
-        <div class="card-foot" style="align-items:center">
-          <div style="background:#fff;padding:6px 8px;border-radius:8px;width:min(100%,300px)">${raw(barcodeSVG(part.id, { height: 36, width: '100%', heightAttr: 56, label: true }))}</div>
-          <p class="tiny muted" style="max-width:46ch">${t('Scanners read this Code 128 label. Every code above resolves to this one part, with or without dashes and spaces.')}</p>
-        </div>
-      </section>
-
-      ${dec ? decodedBlock(dec, t('How to read {code}', { code: part.designation })) : ''}
 
       ${mixups.length ? html`<div class="callout bad">${icon('antibody')}<div><p class="t">${t('Mix-ups caught at the bench')}</p><ul class="list-plain small" style="margin-top:4px">${mixups.map((e) => html`<li>${mixupLine(e)}</li>`)}</ul></div></div>` : ''}
       ${looks.length ? html`<section class="stack" aria-labelledby="lk">
-        <h2 id="lk">${t("Don't confuse it with")}</h2>
-        <div class="compare">${looks.slice(0, 6).map((l) => html`<article class="lookalike">
+        <h2 id="lk" class="sec-h">${icon('layers')}${t("Don't confuse it with")}</h2>
+        <div class="compare">${looks.slice(0, 4).map((l) => html`<article class="lookalike">
           <div class="row between"><a href="${partHref(l.part.id)}"><b class="code">${l.part.id}</b></a><span class="chip ${l.duplicate ? 'bad' : l.score >= 0.85 ? 'warn' : ''}">${l.duplicate ? t('Same spec: duplicate?') : l.score >= 0.85 ? t('Very similar') : t('Similar')}</span></div>
           <div class="pair">
             <div>${raw(drawPart(part, { view: 'side' }))}<span class="code">${sizeLabel(part) || part.id}</span><br><b>${t('this part')}</b></div>
             <div>${raw(drawPart(l.part, { view: 'side' }))}<span class="code">${sizeLabel(l.part) || l.part.id}</span><br><b>${shortDifference(part, l.part)}</b></div>
           </div>
-          <div class="diffs">${l.diffs.length ? l.diffs.map((x) => html`<div class="${x.important ? 'imp' : ''}">${rich(x.text)}</div>`) : html`<div class="imp">${t('No difference in the spec: probably the same part under two codes.')}</div>`}</div>
           ${[...usedIn].some((dev) => whereUsed(app.index, l.part.id).some((u) => u.device?.id === dev)) ? html`<span class="chip warn">${icon('alert')}${t('Also used in the same device')}</span>` : ''}
           ${confused.get([part.id, l.part.id].sort().join('|')) ? html`<span class="chip bad">${icon('antibody')}${t('Confused at the bench {n, plural, one {once} other {# times}}', { n: confused.get([part.id, l.part.id].sort().join('|')) })}</span>` : ''}
+          <details class="pc-more"><summary>${icon('info')}${t('More details')}</summary><div class="diffs">${l.diffs.length ? l.diffs.map((x) => html`<div class="${x.important ? 'imp' : ''}">${rich(x.text)}</div>`) : html`<div class="imp">${t('No difference in the spec: probably the same part under two codes.')}</div>`}</div></details>
         </article>`)}</div>
       </section>` : ''}
 
-      <section class="card">
-        <div class="card-head"><h2>${t("Where it's used")}</h2></div>
-        ${used.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Device')}</th><th>${t('Steps')}</th><th>${t('BOM')}</th></tr></thead><tbody>
-          ${used.map((u) => html`<tr>
-            <td><a href="#/device/${encodeURIComponent(u.device.id)}">${u.device.name}</a></td>
-            <td>${u.steps.length ? u.steps.map((s) => html`<a class="chip" href="${stepHref(u.device.id, s.stepId)}" style="margin:2px">${t('Step {n}', { n: s.stepNo })} · ${s.qty}×${s.legacy ? ` (${t('old code')})` : ''}</a>`) : html`<span class="chip bad">${icon('alert')}${t('No step fits it')}</span>`}</td>
-            <td>${u.bom.length ? u.bom.map((b) => html`<span class="small">${t('Item {item}:', { item: b.item })} ${b.qty}× <span class="code">${b.code}</span>${b.where ? ` (${b.where})` : ''}</span><br>`) : html`<span class="chip bad">${icon('alert')}${t('Not in the BOM')}</span>`}</td>
-          </tr>`)}
-        </tbody></table></div>` : html`<div class="card-body muted">${t('Not used in any device in this library.')}</div>`}
-      </section>
+      <div class="folds">
+        ${d.function || d.why || d.ifWrong || d.tips ? fold('why', 'info', t('Why this part'), '', html`
+          ${pt.state === 'missing' ? html`<p class="tiny muted lang-note">${icon('globe')} ${t('The explanations below are not translated yet: they are shown as the company wrote them.')}</p>` : ''}
+          ${d.why ? html`<p dir="auto">${d.why}</p>` : ''}
+          ${d.ifWrong ? html`<div class="warnbox caution">${icon('alert')}<span><b>${t('If the wrong part is fitted')}.</b> <span dir="auto">${d.ifWrong}</span></span></div>` : ''}
+          ${d.tips ? html`<p><b>${t('Tips at the bench')}.</b> <span dir="auto">${d.tips}</span></p>` : ''}`, go === 'why') : ''}
 
-      ${findings.length ? html`<section class="stack" id="issues"><h2>${t('Integrity check')}</h2>${findings.map((f) => findingCard(f, app))}</section>` : ''}
+        ${fold('codes', 'tag', t('Every code for this part'), html`<span class="chip">${aliasRows.length}</span>`, html`
+          <div class="tbl-wrap"><table class="tbl">
+            <thead><tr><th>${t('Type')}</th><th>${t('Code')}</th><th>${t('Where it comes from')}</th><th class="no-print"></th></tr></thead>
+            <tbody>${aliasRows.map((a) => html`<tr class="${collisions.has(normCode(a.code)) ? 'flag' : ''}">
+              <td><span class="chip ${a.type === 'legacy' ? 'warn' : a.type === 'internal' ? 'brand' : ''}" title="${CODE_TYPES[a.type] || a.type}">${shortType(a.type)}</span> <span class="small muted">${CODE_TYPES[a.type] || a.type}</span></td>
+              <td><span class="code">${a.code}</span>${collisions.has(normCode(a.code)) ? html` <span class="chip bad">${icon('stop')}${t('also on another part')}</span>` : ''}${a.note ? html`<div class="tiny muted">${a.note}</div>` : ''}</td>
+              <td class="small">${a.source || ''}</td>
+              <td class="no-print" style="text-align:end"><button class="btn sm ghost" type="button" data-copy="${a.code}" aria-label="${t('Copy {code}', { code: a.code })}">${icon('copy')}</button></td>
+            </tr>`)}</tbody>
+          </table></div>
+          <div class="row" style="align-items:center">
+            <div style="background:#fff;padding:6px 8px;border-radius:8px;width:min(100%,300px)">${raw(barcodeSVG(part.id, { height: 36, width: '100%', heightAttr: 56, label: true }))}</div>
+            <p class="tiny muted" style="max-width:46ch">${t('Scanners read this Code 128 label. Every code above resolves to this one part, with or without dashes and spaces.')}</p>
+          </div>`, go === 'codes' || collisions.size > 0)}
 
-      ${reports.length ? html`<section class="stack"><h2>${t('Reports from the floor')}</h2>${reports.map((r) => html`<div class="callout warn">${icon('flag')}<div><p class="t">${r.who || t('Someone')} · ${fmtDate(r.createdAt)}</p><p dir="auto">${r.text}</p>${r.photo ? html`<img src="${r.photo}" alt="${t('Photo attached to the report')}" style="max-width:220px;border-radius:10px;margin-top:8px">` : ''}</div></div>`)}</section>` : ''}
+        ${dec?.parts?.length ? fold('read', 'sparkle', t('How to read {code}', { code: part.designation }), '', html`<div class="pieces">${dec.parts.map((x) => html`<div class="piece"><span class="tok" dir="ltr">${x.token}</span><span class="m">${x.meaning}</span></div>`)}</div>`, go === 'read') : ''}
 
-      <div class="row no-print"><a class="btn" href="#/teach?part=${encodeURIComponent(part.id)}">${icon('sparkle')}${t('Teach the photo identifier this part')}</a></div>
+        ${fold('used', 'cube', t("Where it's used"), html`<span class="chip">${used.length}</span>`, used.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>${t('Device')}</th><th>${t('Steps')}</th><th>${t('BOM')}</th></tr></thead><tbody>
+            ${used.map((u) => html`<tr>
+              <td><a href="#/device/${encodeURIComponent(u.device.id)}">${u.device.name}</a></td>
+              <td>${u.steps.length ? u.steps.map((s) => html`<a class="chip" href="${stepHref(u.device.id, s.stepId)}" style="margin:2px">${t('Step {n}', { n: s.stepNo })} · ${s.qty}×${s.legacy ? ` (${t('old code')})` : ''}</a>`) : html`<span class="chip bad">${icon('alert')}${t('No step fits it')}</span>`}</td>
+              <td>${u.bom.length ? u.bom.map((b) => html`<span class="small">${t('Item {item}:', { item: b.item })} ${b.qty}× <span class="code">${b.code}</span>${b.where ? ` (${b.where})` : ''}</span><br>`) : html`<span class="chip bad">${icon('alert')}${t('Not in the BOM')}</span>`}</td>
+            </tr>`)}
+          </tbody></table></div>` : html`<p class="muted small">${t('Not used in any device in this library.')}</p>`, go === 'used')}
+
+        ${findings.length ? fold('issues', 'shield', t('Integrity check'), html`<span class="chip ${critN ? 'bad' : 'warn'}">${icon('alert')}${findings.length}</span>`, html`${findings.map((f) => findingCard(f, app))}`, go === 'issues') : ''}
+
+        ${reports.length ? fold('reports', 'flag', t('Reports from the floor'), html`<span class="chip warn">${reports.length}</span>`, html`${reports.map((r) => html`<div class="callout warn">${icon('flag')}<div><p class="t">${r.who || t('Someone')} · ${fmtDate(r.createdAt)}</p><p dir="auto">${r.text}</p>${r.photo ? html`<img src="${r.photo}" alt="${t('Photo attached to the report')}" style="max-width:220px;border-radius:10px;margin-top:8px">` : ''}</div></div>`)}`, go === 'reports') : ''}
+      </div>
+
+      ${!d.function ? html`<p class="tiny muted">${icon('info')} ${t('Nobody has written what this part does or why it was chosen. Engineers can add it through Your data.')}</p>` : ''}
+      <div class="row no-print"><a class="btn sm ghost" href="#/teach?part=${encodeURIComponent(part.id)}">${icon('sparkle')}${t('Teach the photo identifier this part')}</a></div>
     </div>`,
     mount(root) {
       root.querySelectorAll('[data-copy]').forEach((b) => b.addEventListener('click', () => copyText(b.dataset.copy)));
@@ -174,6 +176,8 @@ export default async function partView({ app, params, query }) {
       root.querySelectorAll('[data-size]').forEach((b) => b.addEventListener('click', () => { mode = b.dataset.size; syncSeg(); redraw(); }));
       root.querySelector('#ghostBtn')?.addEventListener('click', (e) => { ghost = !ghost; e.currentTarget.setAttribute('aria-pressed', String(ghost)); redraw(); });
       root.querySelector('#reportBtn')?.addEventListener('click', () => reportDialog({ part }));
+      root.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => { const el = root.querySelector(`#${b.dataset.open}`); if (el) { el.open = true; el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } }));
+      if (go) root.querySelector(`#${CSS.escape(go)}`)?.scrollIntoView({ block: 'start' });
     },
   };
 }

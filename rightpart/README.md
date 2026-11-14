@@ -6,7 +6,7 @@ Live (once this folder is on `main`): **https://shehab6157-design.github.io/righ
 
 Most assembly lines still build from step-by-step PDFs. One screw can go by four names (internal, customer, supplier, an old code), two screws can differ by 2 mm, and a PDF cannot check anything. When an engineering change swaps one screw for another and the instructions are never updated, the old screw keeps being fitted for years. RightPart connects the data so a computer catches that in milliseconds.
 
-The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 parts under 106 codes and 10 assembly steps. Its instructions contain one deliberate mistake (step 7 still fits the screw an engineering change replaced) for the integrity check to find. No real company data is used anywhere.
+The demo library has two **fictional** products: a bench-top console, the *Nova-1* (10 steps; its instructions contain one deliberate mistake, step 7 still fits the screw an engineering change replaced, for the integrity check to find), and a desktop laser engraver, the *Lumen LX-1* (10 steps: frame, feet, gantry, belts, limit switches, laser module, controller, cables, focus, first test). The engraver is modelled on how such kits are commonly assembled; its parts, numbers and values are invented, and no manufacturer's documents were copied. No real company data is used anywhere.
 
 ## What it does
 
@@ -16,7 +16,8 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 | **Reads codes** | `ISO 7380 M3x8 A2`, `DIN 912 M4x10 12.9`, `#4-40 x 1/4 PPH`, `AF-7045-M3-6-A2`: every piece explained in plain words. |
 | **Drawn from the data** | Screws, nuts, washers and standoffs are drawn from their own spec in 2D and 3D, at true size on a calibrated screen or a printed label. The picture cannot disagree with the data. |
 | **Look-alike guard** | Finds parts that are easy to confuse (length, diameter, metric vs inch, Phillips vs Pozidriv, plain vs lock nut, duplicate records) and names the difference. |
-| **Build guide in 3D** | Each step: which parts, how many, torque, tools, how, why, what to check. The step's parts fly into place in a 3D model generated from the library (an M3 × 10 is really 10 mm long). |
+| **3D guide, few words** | The whole product turns in 3D. Press Start and each step shows only its parts: they fly into place, and numbered spots appear as they land (the red, pulsing **1** is where to start). Tap a part, on the model or in the strip of 3D pictures, and the camera flies to it while everything else turns to glass; the words (what it does, why, what goes wrong, tool, codes) open only when asked. Swipe or tap the numbers to move between steps. |
+| **Build guide** | Each step: which parts, how many, torque, tools, how, why, what to check, in a text view for learning and a build mode with bin scanning. The 3D model is generated from the library (an M3 × 10 is really 10 mm long). |
 | **Learn and Build modes** | Learn: explanations and "More about this part". Build: scan or type the bin code before fitting; wrong part = red stop with the reason; a critical issue needs a recorded supervisor decision; everything goes into a build record. |
 | **Integrity check** | BOM vs instructions vs change history vs part records: likely wrong part in a step, one code for two parts, unknown codes, retired parts, quantity mismatches, revision mismatch, old codes, codes that spell a different size, duplicates, look-alikes on the same device, missing torque. |
 | **Identify a loose part** | Lay it on the screen and measure it (calibrated with a bank card), photograph it (the identifier learns your parts on the device), or scan any code. |
@@ -33,15 +34,16 @@ The demo library is a **fictional** bench-top console, the *Nova-1*, with 32 par
 
 ## Five-minute tour
 
-1. **Home → Try** the example codes: `C-55013` (customer code), `DS-103-308` (one code, two parts), `100-0283` (typo).
-2. **Check**: the integrity check finds that step 7 fits `100-0234` (M3 × 10) where BOM rev C asks for `100-0233` (M3 × 8), and names the engineering change that never reached the instructions.
-3. **Build → Learn**: walk the 10 steps in 3D. Step 7 is flagged.
-4. **Build → Start a build**: scan or type `AF-SO-M3-12-MF` at step 1 (wrong standoff: red stop), then `C-55030` (right one: green).
-5. **Identify → Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
-6. **Part page → Bin label**, then print at 100 %.
-7. **Ask** (the button at the bottom right of every page): open step 7, press Ask, and ask "which screw here?".
-8. **Learned from nature**: at step 3 the guide warns that `100-0232` (Pozidriv) was picked by mistake before; *Try it for 10 minutes* turns on night watch for a build; the device page shows floor trails; *Light sync* sends the library to a second phone through its camera.
-9. **Set up this company → Try the sample PDF**: a fictional two-page work instruction becomes five draft steps; the check flags its old code, its unknown code and the missing BOM.
+1. **Home → Lumen LX-1 laser engraver**: the 3D guide opens. Turn it, press **Start**, watch step 1 build the frame, tap a part, then **More details**.
+2. **Home → Examples**: `C-55013` (customer code), `DS-103-308` (one code, two parts), `100-0283` (typo).
+3. **Check**: the integrity check finds that step 7 fits `100-0234` (M3 × 10) where BOM rev C asks for `100-0233` (M3 × 8), and names the engineering change that never reached the instructions.
+4. **Build → Nova-1 → Text view**: walk the 10 steps. Step 7 is flagged.
+5. **Nova-1 → Start a build**: scan or type `AF-SO-M3-12-MF` at step 1 (wrong standoff: red stop), then `C-55030` (right one: green).
+6. **Identify → Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
+7. **Part page → Bin label**, then print at 100 %.
+8. **Ask** (the button at the bottom right of every page): open step 7, press Ask, and ask "which screw here?".
+9. **Learned from nature**: at step 3 the guide warns that `100-0232` (Pozidriv) was picked by mistake before; *Try it for 10 minutes* turns on night watch for a build; the device page shows floor trails; *Light sync* sends the library to a second phone through its camera.
+10. **Set up this company → Try the sample PDF**: a fictional two-page work instruction becomes five draft steps; the check flags its old code, its unknown code and the missing BOM.
 
 ## Your own company
 
@@ -92,8 +94,21 @@ Each step remembers its PDF and page. It stays a draft until an engineer ticks *
               instructions: { rev, steps: [{ id, title, summary, parts: [{ code, qty, torque?, note? }],
                                              tools, instructions, checks, warnings, why, critical, esd }] },
               changes: [{ rev, eco, date, text, parts }],
-              scene: { overview, cameras, objects: [{ kind, code, step, pos | at+dir, from, ... }] } }] }
+              scene: { overview, cameras, objects: [{ kind, code, step, pos | at+dir, from, order, ... }] } }] }
 ```
+
+Scene objects are drawn from the data: `fastener` (one per position in `at`, drawn from the part's own spec, flying in along `dir`), `cable` (`points`, `color`, `radius`), `tie`, and for everything else `model`, a group of simple shapes in millimetres (y up, z toward the front):
+
+```text
+{ kind: "model", code: "820-0001", step: "S6", pos: [0, 82, 58], from: [0, 0, 170], order: 0,
+  shapes: [ { t: "box", s: [w, h, d], p: [x, y, z], r: [rx, ry, rz], m: "plastic-black" },
+            { t: "cyl", d: 12, d2: 8, h: 20, p: [x, y, z], m: "alu" },
+            { t: "profile", size: "2040", len: 560, axis: "x", m: "alu-black" },
+            { t: "torus", R: 10, tube: 2 }, { t: "bar", a: [x, y, z], b: [x, y, z], w: 3, h: 3 },
+            { t: "label", s: [w, h], text: ["LX-C1"], bg: "#2a2f36", fg: "#e9edf2" } ] }
+```
+
+`from` is where the part starts its flight (an offset), `order` which parts go in first; the numbered spots in the 3D guide follow `order`. Materials: `alu`, `alu-black`, `steel`, `rubber`, `plastic-black|grey|white`, `belt`, `wood`, `brass`, `acrylic-orange|clear`, `led-green|blue`, `laser`, `burn`, `warning`, `pcb` or any `#rrggbb`.
 
 ## Before using it with real data
 
@@ -125,12 +140,13 @@ js/core/              pure logic, runs in the browser and in Node tests
   importer.js         CSV / JSON import, including steps
   code128.js, csv.js, dims.js
 js/draw.js            parametric 2D drawings (true scale)
-js/viewer3d.js        3D assembly viewer (three.js), parts generated from specs
+js/viewer3d.js        3D assembly viewer (three.js), parts generated from specs; numbered spots, part close-ups, 3D part pictures
+js/posters.js         product pictures for cards, rendered once from each product's 3D scene and kept on the device
 js/gauge.js           screen calibration and on-screen measuring
 js/vision.js          on-device photo identification (TensorFlow.js + MobileNet v1, loaded only when used)
 js/scan.js            barcode scanning (BarcodeDetector, or ZXing)
-js/views/             one file per page
-data/demo-library.json   the fictional Nova-1 library
+js/views/             one file per page (show.js is the full-screen 3D guide)
+data/demo-library.json   the fictional demo library: the Nova-1 console and the Lumen LX-1 laser engraver
 backend/              optional company server (Supabase): schema with row-level security, tests, AI function
 docs/PROBLEMS.md      problems to expect, with sources
 vendor/               three.js (tree-shaken bundle), TensorFlow.js, MobileNet weights, ZXing, supabase-js, pdf.js

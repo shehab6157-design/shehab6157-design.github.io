@@ -1040,6 +1040,338 @@
     "function": "A line of lacquer across nut and stud shows the joint was torqued and has not moved since.",
     "why": "An inspector can see at a glance whether a safety-critical joint is untouched."
    }
+  },
+  {
+   "id": "810-0001",
+   "category": "mechanical",
+   "name": "Frame profile 2040 × 560 mm, black",
+   "spec": {},
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "EX-2040-560-BK",
+     "source": "Extrusion supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "Front and rear side of the base frame.",
+    "why": "A 20 × 40 profile is stiff enough to keep the frame flat and square."
+   }
+  },
+  {
+   "id": "810-0003",
+   "category": "mechanical",
+   "name": "Y rail, left, 2040 × 600 mm with belt",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Left side of the frame. The gantry rolls along it.",
+    "ifWrong": "Left and right rails are mirror images: swapped, the belts end up on the inside."
+   }
+  },
+  {
+   "id": "810-0004",
+   "category": "mechanical",
+   "name": "Y rail, right, 2040 × 600 mm with belt",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Right side of the frame. The gantry rolls along it.",
+    "ifWrong": "Left and right rails are mirror images: swapped, the belts end up on the inside."
+   }
+  },
+  {
+   "id": "810-0010",
+   "category": "module",
+   "name": "X gantry with Y motors",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Carries the laser across the work area. Its two motors drive it front to back."
+   }
+  },
+  {
+   "id": "820-0001",
+   "category": "module",
+   "name": "Laser module 10 W, 450 nm (fictional)",
+   "spec": {},
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "LM-10W-450",
+     "source": "Module supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "details": {
+    "function": "The blue diode laser that marks and cuts.",
+    "why": "The orange shield blocks the scattered blue light toward the front.",
+    "ifWrong": "A loose module makes blurred, doubled lines."
+   }
+  },
+  {
+   "id": "820-0002",
+   "category": "module",
+   "name": "Controller box LX-C1",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Drives the motors and the laser from the computer or the app."
+   }
+  },
+  {
+   "id": "820-0003",
+   "category": "module",
+   "name": "Power adapter 24 V 3 A",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Feeds the controller.",
+    "ifWrong": "A 12 V adapter fits the same plug but the motors lose steps and the laser stays weak."
+   }
+  },
+  {
+   "id": "830-0001",
+   "category": "mechanical",
+   "name": "Foot with bracket",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Holds the frame 26 mm above the table so the gantry wheels clear it."
+   }
+  },
+  {
+   "id": "830-0002",
+   "category": "mechanical",
+   "name": "Belt clamp",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Holds the end of a Y belt at the right tension."
+   }
+  },
+  {
+   "id": "830-0003",
+   "category": "mechanical",
+   "name": "Focus gauge, 8 mm acrylic",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Sets the distance between the laser and the material.",
+    "why": "The beam is thinnest 8 mm below this module: in focus it marks finely, out of focus it only warms."
+   }
+  },
+  {
+   "id": "830-0004",
+   "category": "consumable",
+   "name": "Test card, 3 mm plywood",
+   "spec": {},
+   "aliases": [],
+   "status": "active"
+  },
+  {
+   "id": "840-0001",
+   "category": "screw",
+   "name": "Socket head cap screw M5 × 25, black",
+   "spec": {
+    "head": "socket",
+    "drive": "hex",
+    "thread": "M5",
+    "d": 5,
+    "pitch": 0.8,
+    "system": "metric",
+    "length": 25,
+    "material": "black-oxide",
+    "driveSize": "4 mm"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "LS-4762-M5-25-BK",
+     "source": "Fastener supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "designation": "ISO 4762 M5x25 black",
+   "torque": {
+    "value": 3.5,
+    "unit": "N·m"
+   },
+   "tool": "4 mm hex key, torque driver at 3.5 N·m",
+   "details": {
+    "function": "Joins the rails to the front and rear profiles, into the tapped profile ends."
+   }
+  },
+  {
+   "id": "840-0002",
+   "category": "screw",
+   "name": "Button head screw M5 × 8, black",
+   "spec": {
+    "head": "button",
+    "drive": "hex",
+    "thread": "M5",
+    "d": 5,
+    "pitch": 0.8,
+    "system": "metric",
+    "length": 8,
+    "material": "black-oxide",
+    "driveSize": "3 mm"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "LS-7380-M5-8-BK",
+     "source": "Fastener supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "designation": "ISO 7380 M5x8 black",
+   "torque": {
+    "value": 2.5,
+    "unit": "N·m"
+   },
+   "tool": "3 mm hex key",
+   "details": {
+    "function": "Feet and belt clamps, into slot nuts.",
+    "ifWrong": "Mixed up with M5 × 10, it is 2 mm short and the controller box works loose."
+   }
+  },
+  {
+   "id": "840-0003",
+   "category": "screw",
+   "name": "Button head screw M5 × 10, black",
+   "spec": {
+    "head": "button",
+    "drive": "hex",
+    "thread": "M5",
+    "d": 5,
+    "pitch": 0.8,
+    "system": "metric",
+    "length": 10,
+    "material": "black-oxide",
+    "driveSize": "3 mm"
+   },
+   "aliases": [
+    {
+     "type": "supplier",
+     "code": "LS-7380-M5-10-BK",
+     "source": "Fastener supplier (fictional)"
+    }
+   ],
+   "status": "active",
+   "designation": "ISO 7380 M5x10 black",
+   "torque": {
+    "value": 2.5,
+    "unit": "N·m"
+   },
+   "tool": "3 mm hex key",
+   "details": {
+    "function": "Fixes the controller box, through its 2 mm mounting ears.",
+    "why": "10 mm = 2 mm ear + 3 mm slot wall + enough thread in the slot nut."
+   }
+  },
+  {
+   "id": "840-0004",
+   "category": "screw",
+   "name": "Thumb screw M4 × 10, cheese head",
+   "spec": {
+    "head": "cheese",
+    "drive": "slotted",
+    "thread": "M4",
+    "d": 4,
+    "pitch": 0.7,
+    "system": "metric",
+    "length": 10,
+    "material": "steel"
+   },
+   "aliases": [],
+   "status": "active",
+   "designation": "M4x10 cheese head slotted",
+   "tool": "Fingers",
+   "details": {
+    "function": "Clamps the laser module in its holder: hand tight, no tools."
+   }
+  },
+  {
+   "id": "840-0005",
+   "category": "mechanical",
+   "name": "Slot nut M5 for 20 mm profile",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Sits inside the profile slot so a screw can hold anything anywhere along it."
+   }
+  },
+  {
+   "id": "840-0007",
+   "category": "screw",
+   "name": "Socket head cap screw M3 × 6, black",
+   "spec": {
+    "head": "socket",
+    "drive": "hex",
+    "thread": "M3",
+    "d": 3,
+    "pitch": 0.5,
+    "system": "metric",
+    "length": 6,
+    "material": "black-oxide",
+    "driveSize": "2.5 mm"
+   },
+   "aliases": [],
+   "status": "active",
+   "designation": "ISO 4762 M3x6 black",
+   "torque": {
+    "value": 0.6,
+    "unit": "N·m"
+   },
+   "tool": "2.5 mm hex key",
+   "details": {
+    "function": "Holds each limit switch.",
+    "ifWrong": "Over-tightened, it cracks the switch body."
+   }
+  },
+  {
+   "id": "850-0001",
+   "category": "cable",
+   "name": "Main cable harness LX-1",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Motors and limit switches to the controller."
+   }
+  },
+  {
+   "id": "850-0002",
+   "category": "cable",
+   "name": "Laser cable, 3-pin, 600 mm",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Power and control for the laser module."
+   }
+  },
+  {
+   "id": "860-0001",
+   "category": "electrical",
+   "name": "Limit switch with cable",
+   "spec": {},
+   "aliases": [],
+   "status": "active",
+   "details": {
+    "function": "Tells the controller where the corner is, so every job starts from the same point."
+   }
   }
  ],
  "devices": [
@@ -2570,6 +2902,2282 @@
      }
     ]
    }
+  },
+  {
+   "id": "LX-1",
+   "name": "Lumen LX-1 laser engraver",
+   "description": "Fictional desktop laser engraver for the demo: aluminium frame, moving gantry, 10 W diode laser.",
+   "bom": {
+    "rev": "A",
+    "doc": "BOM-LX1",
+    "lines": [
+     {
+      "item": 1,
+      "code": "810-0001",
+      "qty": 2,
+      "where": "Front and rear"
+     },
+     {
+      "item": 2,
+      "code": "810-0003",
+      "qty": 1,
+      "where": "Left rail"
+     },
+     {
+      "item": 3,
+      "code": "810-0004",
+      "qty": 1,
+      "where": "Right rail"
+     },
+     {
+      "item": 4,
+      "code": "840-0001",
+      "qty": 8,
+      "where": "Frame corners"
+     },
+     {
+      "item": 5,
+      "code": "830-0001",
+      "qty": 4,
+      "where": "Feet"
+     },
+     {
+      "item": 6,
+      "code": "840-0002",
+      "qty": 8,
+      "where": "Feet and belt clamps"
+     },
+     {
+      "item": 7,
+      "code": "840-0005",
+      "qty": 6,
+      "where": "Feet and controller"
+     },
+     {
+      "item": 8,
+      "code": "810-0010",
+      "qty": 1,
+      "where": "Gantry"
+     },
+     {
+      "item": 9,
+      "code": "830-0002",
+      "qty": 4,
+      "where": "Belt ends"
+     },
+     {
+      "item": 10,
+      "code": "860-0001",
+      "qty": 2,
+      "where": "X and Y home"
+     },
+     {
+      "item": 11,
+      "code": "840-0007",
+      "qty": 4,
+      "where": "Limit switches"
+     },
+     {
+      "item": 12,
+      "code": "820-0001",
+      "qty": 1,
+      "where": "Laser"
+     },
+     {
+      "item": 13,
+      "code": "840-0004",
+      "qty": 1,
+      "where": "Laser holder"
+     },
+     {
+      "item": 14,
+      "code": "820-0002",
+      "qty": 1,
+      "where": "Controller"
+     },
+     {
+      "item": 15,
+      "code": "840-0003",
+      "qty": 2,
+      "where": "Controller ears"
+     },
+     {
+      "item": 16,
+      "code": "850-0001",
+      "qty": 1,
+      "where": "Harness"
+     },
+     {
+      "item": 17,
+      "code": "850-0002",
+      "qty": 1,
+      "where": "Laser cable"
+     },
+     {
+      "item": 18,
+      "code": "400-3003",
+      "qty": 3,
+      "where": "Cable ties"
+     },
+     {
+      "item": 19,
+      "code": "830-0003",
+      "qty": 1,
+      "where": "Focus"
+     },
+     {
+      "item": 20,
+      "code": "830-0004",
+      "qty": 1,
+      "where": "Test"
+     },
+     {
+      "item": 21,
+      "code": "820-0003",
+      "qty": 1,
+      "where": "Power"
+     }
+    ]
+   },
+   "instructions": {
+    "rev": "A",
+    "doc": "WI-LX1",
+    "steps": [
+     {
+      "id": "S1",
+      "title": "Build the frame",
+      "summary": "Join the four profiles into a square frame.",
+      "parts": [
+       {
+        "code": "810-0003",
+        "qty": 1
+       },
+       {
+        "code": "810-0004",
+        "qty": 1
+       },
+       {
+        "code": "810-0001",
+        "qty": 2
+       },
+       {
+        "code": "840-0001",
+        "qty": 8,
+        "torque": {
+         "value": 3.5,
+         "unit": "N·m"
+        }
+       }
+      ],
+      "tools": [
+       "4 mm hex key",
+       "Torque driver"
+      ],
+      "instructions": [
+       "Lay the two rails on the table, belts facing out.",
+       "Put the front and rear profiles between them.",
+       "Fit two screws through each rail end into each profile.",
+       "Tighten all eight to 3.5 N·m."
+      ],
+      "checks": [
+       "The frame sits flat",
+       "Both diagonals measure the same"
+      ],
+      "why": "A frame out of square makes every engraving slightly skewed."
+     },
+     {
+      "id": "S2",
+      "title": "Fit the feet",
+      "summary": "One foot under each corner.",
+      "parts": [
+       {
+        "code": "830-0001",
+        "qty": 4
+       },
+       {
+        "code": "840-0002",
+        "qty": 4,
+        "torque": {
+         "value": 2.5,
+         "unit": "N·m"
+        }
+       },
+       {
+        "code": "840-0005",
+        "qty": 4
+       }
+      ],
+      "tools": [
+       "3 mm hex key"
+      ],
+      "instructions": [
+       "Slide a slot nut into the outer slot near each corner.",
+       "Hold a foot bracket on it and fit the screw.",
+       "Tighten to 2.5 N·m."
+      ],
+      "checks": [
+       "The frame does not rock"
+      ]
+     },
+     {
+      "id": "S3",
+      "title": "Put on the gantry",
+      "summary": "Lower the gantry onto the rails and check it rolls.",
+      "parts": [
+       {
+        "code": "810-0010",
+        "qty": 1
+       }
+      ],
+      "tools": [
+       "8 mm spanner"
+      ],
+      "instructions": [
+       "Hold the gantry by the beam with both hands.",
+       "Set the wheels on the rails from the rear.",
+       "Turn the eccentric nuts until the wheels grip but still roll."
+      ],
+      "checks": [
+       "The gantry rolls freely end to end",
+       "No wobble when you push it sideways"
+      ],
+      "warnings": [
+       {
+        "level": "caution",
+        "text": "Lift the gantry by the beam, never by the motors."
+       }
+      ]
+     },
+     {
+      "id": "S4",
+      "title": "Clamp the belts",
+      "summary": "Fix both belt ends on each rail.",
+      "parts": [
+       {
+        "code": "830-0002",
+        "qty": 4
+       },
+       {
+        "code": "840-0002",
+        "qty": 4,
+        "torque": {
+         "value": 2.5,
+         "unit": "N·m"
+        }
+       }
+      ],
+      "tools": [
+       "3 mm hex key"
+      ],
+      "instructions": [
+       "Pull the belt end into the clamp.",
+       "Fit the clamp on the rail end and tighten the screw.",
+       "Do the same at all four ends."
+      ],
+      "checks": [
+       "Press a belt in the middle: it gives a little and springs back",
+       "Both belts feel the same"
+      ],
+      "why": "Loose belts draw wavy lines; over-tight belts wear the motors."
+     },
+     {
+      "id": "S5",
+      "title": "Fit the limit switches",
+      "summary": "One switch on the beam, one on the left rail.",
+      "parts": [
+       {
+        "code": "860-0001",
+        "qty": 2
+       },
+       {
+        "code": "840-0007",
+        "qty": 4,
+        "torque": {
+         "value": 0.6,
+         "unit": "N·m"
+        }
+       }
+      ],
+      "tools": [
+       "2.5 mm hex key"
+      ],
+      "instructions": [
+       "Fit one switch on the left end of the beam.",
+       "Fit the other on the left rail, near the rear.",
+       "Tighten gently: the switch body is plastic."
+      ],
+      "checks": [
+       "Push the gantry to the rear-left corner: both switches click"
+      ]
+     },
+     {
+      "id": "S6",
+      "title": "Mount the laser",
+      "summary": "Slide the laser module into its holder.",
+      "parts": [
+       {
+        "code": "820-0001",
+        "qty": 1
+       },
+       {
+        "code": "840-0004",
+        "qty": 1
+       }
+      ],
+      "tools": [],
+      "instructions": [
+       "Slide the module down into the holder on the carriage.",
+       "Tighten the thumb screw by hand."
+      ],
+      "checks": [
+       "The module cannot move in the holder"
+      ],
+      "warnings": [
+       {
+        "level": "warning",
+        "text": "Laser light can blind in an instant. Wear the safety glasses whenever the machine has power."
+       }
+      ]
+     },
+     {
+      "id": "S7",
+      "title": "Fit the controller",
+      "summary": "Fix the controller box on the front profile.",
+      "parts": [
+       {
+        "code": "820-0002",
+        "qty": 1
+       },
+       {
+        "code": "840-0003",
+        "qty": 2,
+        "torque": {
+         "value": 2.5,
+         "unit": "N·m"
+        }
+       },
+       {
+        "code": "840-0005",
+        "qty": 2
+       }
+      ],
+      "tools": [
+       "3 mm hex key"
+      ],
+      "instructions": [
+       "Slide two slot nuts into the front slot, right side.",
+       "Hold the box against the profile.",
+       "Fit the two screws through its ears."
+      ],
+      "checks": [
+       "The box sits tight against the frame"
+      ],
+      "why": "M5 × 10 here, not M5 × 8: the ears are thicker than the foot brackets."
+     },
+     {
+      "id": "S8",
+      "title": "Connect the cables",
+      "summary": "Motors, switches and laser to the controller.",
+      "parts": [
+       {
+        "code": "850-0001",
+        "qty": 1
+       },
+       {
+        "code": "850-0002",
+        "qty": 1
+       },
+       {
+        "code": "400-3003",
+        "qty": 3
+       }
+      ],
+      "tools": [
+       "Side cutter"
+      ],
+      "instructions": [
+       "Plug the harness into the controller.",
+       "Plug each motor and switch: every plug is labelled.",
+       "Plug the laser cable into the module.",
+       "Tie the cables to the beam."
+      ],
+      "checks": [
+       "Every plug clicks home",
+       "Move the gantry by hand: no cable snags"
+      ],
+      "warnings": [
+       {
+        "level": "caution",
+        "text": "Never plug or unplug anything while the power is on."
+       }
+      ]
+     },
+     {
+      "id": "S9",
+      "title": "Set the focus",
+      "summary": "Use the gauge to set the laser height.",
+      "parts": [
+       {
+        "code": "830-0004",
+        "qty": 1
+       },
+       {
+        "code": "830-0003",
+        "qty": 1
+       }
+      ],
+      "tools": [],
+      "instructions": [
+       "Put the test card under the laser.",
+       "Loosen the focus knob.",
+       "Lower the module until the gauge just touches the card.",
+       "Tighten the knob and take the gauge away."
+      ],
+      "checks": [
+       "The gauge slides out with a light touch"
+      ]
+     },
+     {
+      "id": "S10",
+      "title": "Power on and test",
+      "summary": "Home the machine and burn a small test square.",
+      "parts": [
+       {
+        "code": "820-0003",
+        "qty": 1
+       }
+      ],
+      "tools": [
+       "Laser safety glasses"
+      ],
+      "critical": true,
+      "instructions": [
+       "Put on the safety glasses.",
+       "Connect the power adapter and switch on.",
+       "Press Home: the gantry goes to the rear-left corner.",
+       "Burn a 10 mm square at 10% power on the test card."
+      ],
+      "checks": [
+       "Homing stops at both switches",
+       "The test square is sharp and dark"
+      ],
+      "warnings": [
+       {
+        "level": "warning",
+        "text": "Wear laser safety glasses. Never leave the laser running unattended, and keep a fire extinguisher at hand."
+       }
+      ]
+     }
+    ]
+   },
+   "changes": [],
+   "scene": {
+    "units": "mm",
+    "overview": {
+     "pos": [
+      620,
+      470,
+      760
+     ],
+     "target": [
+      0,
+      70,
+      20
+     ]
+    },
+    "cameras": {
+     "S1": {
+      "pos": [
+       520,
+       560,
+       640
+      ],
+      "target": [
+       0,
+       40,
+       0
+      ]
+     },
+     "S2": {
+      "pos": [
+       -520,
+       170,
+       470
+      ],
+      "target": [
+       0,
+       20,
+       0
+      ]
+     },
+     "S3": {
+      "pos": [
+       560,
+       420,
+       560
+      ],
+      "target": [
+       0,
+       90,
+       0
+      ]
+     },
+     "S4": {
+      "pos": [
+       -480,
+       380,
+       -420
+      ],
+      "target": [
+       0,
+       66,
+       0
+      ]
+     },
+     "S5": {
+      "pos": [
+       -520,
+       360,
+       260
+      ],
+      "target": [
+       -280,
+       100,
+       -120
+      ]
+     },
+     "S6": {
+      "pos": [
+       280,
+       210,
+       420
+      ],
+      "target": [
+       0,
+       80,
+       58
+      ]
+     },
+     "S7": {
+      "pos": [
+       420,
+       200,
+       660
+      ],
+      "target": [
+       180,
+       46,
+       328
+      ]
+     },
+     "S8": {
+      "pos": [
+       420,
+       520,
+       620
+      ],
+      "target": [
+       0,
+       120,
+       120
+      ]
+     },
+     "S9": {
+      "pos": [
+       190,
+       90,
+       330
+      ],
+      "target": [
+       0,
+       15,
+       58
+      ]
+     },
+     "S10": {
+      "pos": [
+       640,
+       360,
+       640
+      ],
+      "target": [
+       140,
+       40,
+       120
+      ]
+     }
+    },
+    "objects": [
+     {
+      "id": "railL",
+      "kind": "model",
+      "code": "810-0003",
+      "step": "S1",
+      "pos": [
+       -290,
+       46,
+       0
+      ],
+      "shapes": [
+       {
+        "t": "profile",
+        "size": "2040",
+        "len": 600,
+        "axis": "z",
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         6,
+         1.6,
+         590
+        ],
+        "p": [
+         0,
+         20.8,
+         0
+        ],
+        "m": "belt"
+       }
+      ],
+      "from": [
+       -220,
+       0,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "railR",
+      "kind": "model",
+      "code": "810-0004",
+      "step": "S1",
+      "pos": [
+       290,
+       46,
+       0
+      ],
+      "shapes": [
+       {
+        "t": "profile",
+        "size": "2040",
+        "len": 600,
+        "axis": "z",
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         6,
+         1.6,
+         590
+        ],
+        "p": [
+         0,
+         20.8,
+         0
+        ],
+        "m": "belt"
+       }
+      ],
+      "from": [
+       220,
+       0,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "beamF",
+      "kind": "model",
+      "code": "810-0001",
+      "step": "S1",
+      "pos": [
+       0,
+       46,
+       290
+      ],
+      "shapes": [
+       {
+        "t": "profile",
+        "size": "2040",
+        "len": 560,
+        "axis": "x",
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       160,
+       0
+      ],
+      "order": 1
+     },
+     {
+      "id": "beamB",
+      "kind": "model",
+      "code": "810-0001",
+      "step": "S1",
+      "pos": [
+       0,
+       46,
+       -290
+      ],
+      "shapes": [
+       {
+        "t": "profile",
+        "size": "2040",
+        "len": 560,
+        "axis": "x",
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       160,
+       0
+      ],
+      "order": 1
+     },
+     {
+      "id": "S1-840-0001-L",
+      "kind": "fastener",
+      "code": "840-0001",
+      "step": "S1",
+      "dir": [
+       1,
+       0,
+       0
+      ],
+      "at": [
+       [
+        -300,
+        36,
+        290
+       ],
+       [
+        -300,
+        56,
+        290
+       ],
+       [
+        -300,
+        36,
+        -290
+       ],
+       [
+        -300,
+        56,
+        -290
+       ]
+      ],
+      "from": 45,
+      "order": 2
+     },
+     {
+      "id": "S1-840-0001-R",
+      "kind": "fastener",
+      "code": "840-0001",
+      "step": "S1",
+      "dir": [
+       -1,
+       0,
+       0
+      ],
+      "at": [
+       [
+        300,
+        36,
+        290
+       ],
+       [
+        300,
+        56,
+        290
+       ],
+       [
+        300,
+        36,
+        -290
+       ],
+       [
+        300,
+        56,
+        -290
+       ]
+      ],
+      "from": 45,
+      "order": 3
+     },
+     {
+      "id": "foot0",
+      "kind": "model",
+      "code": "830-0001",
+      "step": "S2",
+      "pos": [
+       -290,
+       0,
+       262
+      ],
+      "shapes": [
+       {
+        "t": "cyl",
+        "d": 32,
+        "h": 10,
+        "p": [
+         0,
+         5,
+         0
+        ],
+        "m": "rubber"
+       },
+       {
+        "t": "box",
+        "s": [
+         24,
+         16,
+         30
+        ],
+        "p": [
+         0,
+         18,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         30,
+         30
+        ],
+        "p": [
+         -14,
+         31,
+         0
+        ],
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       -70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "foot1",
+      "kind": "model",
+      "code": "830-0001",
+      "step": "S2",
+      "pos": [
+       290,
+       0,
+       262
+      ],
+      "shapes": [
+       {
+        "t": "cyl",
+        "d": 32,
+        "h": 10,
+        "p": [
+         0,
+         5,
+         0
+        ],
+        "m": "rubber"
+       },
+       {
+        "t": "box",
+        "s": [
+         24,
+         16,
+         30
+        ],
+        "p": [
+         0,
+         18,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         30,
+         30
+        ],
+        "p": [
+         14,
+         31,
+         0
+        ],
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       -70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "foot2",
+      "kind": "model",
+      "code": "830-0001",
+      "step": "S2",
+      "pos": [
+       -290,
+       0,
+       -262
+      ],
+      "shapes": [
+       {
+        "t": "cyl",
+        "d": 32,
+        "h": 10,
+        "p": [
+         0,
+         5,
+         0
+        ],
+        "m": "rubber"
+       },
+       {
+        "t": "box",
+        "s": [
+         24,
+         16,
+         30
+        ],
+        "p": [
+         0,
+         18,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         30,
+         30
+        ],
+        "p": [
+         -14,
+         31,
+         0
+        ],
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       -70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "foot3",
+      "kind": "model",
+      "code": "830-0001",
+      "step": "S2",
+      "pos": [
+       290,
+       0,
+       -262
+      ],
+      "shapes": [
+       {
+        "t": "cyl",
+        "d": 32,
+        "h": 10,
+        "p": [
+         0,
+         5,
+         0
+        ],
+        "m": "rubber"
+       },
+       {
+        "t": "box",
+        "s": [
+         24,
+         16,
+         30
+        ],
+        "p": [
+         0,
+         18,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         30,
+         30
+        ],
+        "p": [
+         14,
+         31,
+         0
+        ],
+        "m": "alu-black"
+       }
+      ],
+      "from": [
+       0,
+       -70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "S2-840-0002",
+      "kind": "fastener",
+      "code": "840-0002",
+      "step": "S2",
+      "dir": [
+       1,
+       0,
+       0
+      ],
+      "at": [
+       [
+        -306,
+        46,
+        262
+       ],
+       [
+        -306,
+        46,
+        -262
+       ]
+      ],
+      "from": 30,
+      "order": 1
+     },
+     {
+      "id": "S2-840-0002-R",
+      "kind": "fastener",
+      "code": "840-0002",
+      "step": "S2",
+      "dir": [
+       -1,
+       0,
+       0
+      ],
+      "at": [
+       [
+        306,
+        46,
+        262
+       ],
+       [
+        306,
+        46,
+        -262
+       ]
+      ],
+      "from": 30,
+      "order": 2
+     },
+     {
+      "id": "gantry",
+      "kind": "model",
+      "code": "810-0010",
+      "step": "S3",
+      "pos": [
+       0,
+       74,
+       0
+      ],
+      "shapes": [
+       {
+        "t": "profile",
+        "size": "2040",
+        "len": 606,
+        "axis": "x",
+        "p": [
+         0,
+         36,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         6,
+         132,
+         72
+        ],
+        "p": [
+         -306,
+         0,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         -292,
+         4,
+         -24
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         -292,
+         4,
+         24
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         -292,
+         -60,
+         0
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         40,
+         42,
+         42
+        ],
+        "p": [
+         -329,
+         26,
+         0
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         2,
+         36,
+         36
+        ],
+        "p": [
+         -349.5,
+         26,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         6,
+         132,
+         72
+        ],
+        "p": [
+         306,
+         0,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         292,
+         4,
+         -24
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         292,
+         4,
+         24
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "cyl",
+        "d": 24,
+        "h": 10,
+        "p": [
+         292,
+         -60,
+         0
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         40,
+         42,
+         42
+        ],
+        "p": [
+         329,
+         26,
+         0
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         2,
+         36,
+         36
+        ],
+        "p": [
+         349.5,
+         26,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         42,
+         40,
+         42
+        ],
+        "p": [
+         -262,
+         77,
+         0
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         36,
+         2,
+         36
+        ],
+        "p": [
+         -262,
+         98,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "bar",
+        "a": [
+         -280,
+         44,
+         11
+        ],
+        "b": [
+         280,
+         44,
+         11
+        ],
+        "w": 1.5,
+        "h": 6,
+        "m": "belt"
+       },
+       {
+        "t": "box",
+        "s": [
+         72,
+         84,
+         14
+        ],
+        "p": [
+         0,
+         36,
+         17
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         52,
+         96,
+         5
+        ],
+        "p": [
+         0,
+         18,
+         26.5
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "label",
+        "s": [
+         60,
+         14
+        ],
+        "p": [
+         0,
+         66,
+         10.2
+        ],
+        "text": [
+         "LUMEN LX-1"
+        ],
+        "bg": "#1d2026",
+        "fg": "#f2f4f7"
+       }
+      ],
+      "from": [
+       0,
+       220,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "clamp0",
+      "kind": "model",
+      "code": "830-0002",
+      "step": "S4",
+      "pos": [
+       -290,
+       70,
+       292
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         16,
+         8,
+         12
+        ],
+        "m": "alu"
+       }
+      ],
+      "from": [
+       0,
+       70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "clamp1",
+      "kind": "model",
+      "code": "830-0002",
+      "step": "S4",
+      "pos": [
+       290,
+       70,
+       292
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         16,
+         8,
+         12
+        ],
+        "m": "alu"
+       }
+      ],
+      "from": [
+       0,
+       70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "clamp2",
+      "kind": "model",
+      "code": "830-0002",
+      "step": "S4",
+      "pos": [
+       -290,
+       70,
+       -292
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         16,
+         8,
+         12
+        ],
+        "m": "alu"
+       }
+      ],
+      "from": [
+       0,
+       70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "clamp3",
+      "kind": "model",
+      "code": "830-0002",
+      "step": "S4",
+      "pos": [
+       290,
+       70,
+       -292
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         16,
+         8,
+         12
+        ],
+        "m": "alu"
+       }
+      ],
+      "from": [
+       0,
+       70,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "S4-840-0002",
+      "kind": "fastener",
+      "code": "840-0002",
+      "step": "S4",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -290,
+        74,
+        292
+       ],
+       [
+        290,
+        74,
+        292
+       ],
+       [
+        -290,
+        74,
+        -292
+       ],
+       [
+        290,
+        74,
+        -292
+       ]
+      ],
+      "from": 30,
+      "order": 1
+     },
+     {
+      "id": "limX",
+      "kind": "model",
+      "code": "860-0001",
+      "step": "S5",
+      "pos": [
+       -282,
+       135,
+       -4
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         20,
+         10,
+         12
+        ],
+        "m": "#c0392b"
+       },
+       {
+        "t": "box",
+        "s": [
+         3,
+         2,
+         10
+        ],
+        "p": [
+         6,
+         6,
+         0
+        ],
+        "m": "steel"
+       }
+      ],
+      "from": [
+       0,
+       60,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "limY",
+      "kind": "model",
+      "code": "860-0001",
+      "step": "S5",
+      "pos": [
+       -290,
+       71,
+       -270
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         12,
+         10,
+         20
+        ],
+        "m": "#c0392b"
+       },
+       {
+        "t": "box",
+        "s": [
+         10,
+         2,
+         3
+        ],
+        "p": [
+         0,
+         6,
+         -6
+        ],
+        "m": "steel"
+       }
+      ],
+      "from": [
+       0,
+       60,
+       0
+      ],
+      "order": 1
+     },
+     {
+      "id": "S5-840-0007",
+      "kind": "fastener",
+      "code": "840-0007",
+      "step": "S5",
+      "dir": [
+       0,
+       -1,
+       0
+      ],
+      "at": [
+       [
+        -288,
+        140,
+        -4
+       ],
+       [
+        -276,
+        140,
+        -4
+       ],
+       [
+        -290,
+        76,
+        -276
+       ],
+       [
+        -290,
+        76,
+        -264
+       ]
+      ],
+      "from": 25,
+      "order": 2
+     },
+     {
+      "id": "laser",
+      "kind": "model",
+      "code": "820-0001",
+      "step": "S6",
+      "pos": [
+       0,
+       82,
+       58
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         44,
+         72,
+         44
+        ],
+        "p": [
+         0,
+         0,
+         0
+        ],
+        "m": "alu-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         44,
+         18,
+         2
+        ],
+        "p": [
+         0,
+         44,
+         -20
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         44,
+         18,
+         2
+        ],
+        "p": [
+         0,
+         44,
+         -10
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         44,
+         18,
+         2
+        ],
+        "p": [
+         0,
+         44,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         44,
+         18,
+         2
+        ],
+        "p": [
+         0,
+         44,
+         10
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         44,
+         18,
+         2
+        ],
+        "p": [
+         0,
+         44,
+         20
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "cyl",
+        "d": 40,
+        "h": 10,
+        "p": [
+         0,
+         58,
+         0
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "cyl",
+        "d": 14,
+        "h": 3,
+        "p": [
+         0,
+         63.6,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         52,
+         30,
+         52
+        ],
+        "p": [
+         0,
+         -48,
+         0
+        ],
+        "m": "acrylic-orange"
+       },
+       {
+        "t": "cyl",
+        "d": 14,
+        "h": 22,
+        "p": [
+         0,
+         -46,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "cyl",
+        "d": 6,
+        "d2": 12,
+        "h": 6,
+        "p": [
+         0,
+         -60,
+         0
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "cyl",
+        "d": 12,
+        "h": 8,
+        "p": [
+         26,
+         14,
+         0
+        ],
+        "r": [
+         0,
+         0,
+         90
+        ],
+        "m": "plastic-black"
+       },
+       {
+        "t": "box",
+        "s": [
+         30,
+         12,
+         0.6
+        ],
+        "p": [
+         0,
+         8,
+         22.4
+        ],
+        "m": "warning"
+       }
+      ],
+      "from": [
+       0,
+       0,
+       170
+      ],
+      "order": 0
+     },
+     {
+      "id": "S6-840-0004",
+      "kind": "fastener",
+      "code": "840-0004",
+      "step": "S6",
+      "dir": [
+       1,
+       0,
+       0
+      ],
+      "at": [
+       [
+        -29,
+        100,
+        40
+       ]
+      ],
+      "from": 30,
+      "order": 1
+     },
+     {
+      "id": "controller",
+      "kind": "model",
+      "code": "820-0002",
+      "step": "S7",
+      "pos": [
+       180,
+       46,
+       328
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         110,
+         36,
+         52
+        ],
+        "p": [
+         0,
+         0,
+         0
+        ],
+        "m": "#2a2f36"
+       },
+       {
+        "t": "box",
+        "s": [
+         10,
+         30,
+         4
+        ],
+        "p": [
+         -60,
+         0,
+         -24
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         10,
+         30,
+         4
+        ],
+        "p": [
+         60,
+         0,
+         -24
+        ],
+        "m": "alu"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         4,
+         1
+        ],
+        "p": [
+         -40,
+         8,
+         26.3
+        ],
+        "m": "led-green"
+       },
+       {
+        "t": "box",
+        "s": [
+         12,
+         6,
+         2
+        ],
+        "p": [
+         30,
+         -6,
+         26.5
+        ],
+        "m": "steel"
+       },
+       {
+        "t": "label",
+        "s": [
+         44,
+         12
+        ],
+        "p": [
+         -10,
+         6,
+         26.2
+        ],
+        "text": [
+         "LX-C1"
+        ],
+        "bg": "#2a2f36",
+        "fg": "#e9edf2"
+       }
+      ],
+      "from": [
+       0,
+       0,
+       150
+      ],
+      "order": 0
+     },
+     {
+      "id": "S7-840-0003",
+      "kind": "fastener",
+      "code": "840-0003",
+      "step": "S7",
+      "dir": [
+       0,
+       0,
+       -1
+      ],
+      "at": [
+       [
+        120,
+        46,
+        304
+       ],
+       [
+        240,
+        46,
+        304
+       ]
+      ],
+      "from": 35,
+      "order": 1
+     },
+     {
+      "id": "harness",
+      "kind": "cable",
+      "code": "850-0001",
+      "step": "S8",
+      "color": "#202327",
+      "radius": 2.6,
+      "order": 0,
+      "from": [
+       0,
+       60,
+       0
+      ],
+      "points": [
+       [
+        150,
+        56,
+        330
+       ],
+       [
+        120,
+        120,
+        250
+       ],
+       [
+        40,
+        175,
+        120
+       ],
+       [
+        -200,
+        182,
+        30
+       ],
+       [
+        -262,
+        172,
+        0
+       ]
+      ]
+     },
+     {
+      "id": "laser-cable",
+      "kind": "cable",
+      "code": "850-0002",
+      "step": "S8",
+      "color": "#b42318",
+      "radius": 1.6,
+      "order": 1,
+      "from": [
+       0,
+       50,
+       0
+      ],
+      "points": [
+       [
+        0,
+        150,
+        58
+       ],
+       [
+        -40,
+        168,
+        40
+       ],
+       [
+        -160,
+        176,
+        24
+       ],
+       [
+        -262,
+        176,
+        6
+       ]
+      ]
+     },
+     {
+      "id": "ties",
+      "kind": "tie",
+      "code": "400-3003",
+      "step": "S8",
+      "order": 2,
+      "at": [
+       [
+        -120,
+        179,
+        27
+       ],
+       [
+        -200,
+        181,
+        29
+       ],
+       [
+        60,
+        172,
+        110
+       ]
+      ],
+      "from": 25
+     },
+     {
+      "id": "card",
+      "kind": "model",
+      "code": "830-0004",
+      "step": "S9",
+      "pos": [
+       0,
+       1.5,
+       58
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         200,
+         3,
+         140
+        ],
+        "m": "wood"
+       }
+      ],
+      "from": [
+       0,
+       0,
+       160
+      ],
+      "order": 0
+     },
+     {
+      "id": "gauge",
+      "kind": "model",
+      "code": "830-0003",
+      "step": "S9",
+      "pos": [
+       0,
+       11,
+       58
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         22,
+         16,
+         6
+        ],
+        "m": "acrylic-clear"
+       }
+      ],
+      "from": [
+       70,
+       0,
+       0
+      ],
+      "order": 1
+     },
+     {
+      "id": "psu",
+      "kind": "model",
+      "code": "820-0003",
+      "step": "S10",
+      "pos": [
+       420,
+       17,
+       200
+      ],
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         120,
+         32,
+         60
+        ],
+        "m": "#1f2328"
+       },
+       {
+        "t": "box",
+        "s": [
+         4,
+         4,
+         1
+        ],
+        "p": [
+         -44,
+         8,
+         30.3
+        ],
+        "m": "led-blue"
+       }
+      ],
+      "from": [
+       160,
+       0,
+       0
+      ],
+      "order": 0
+     },
+     {
+      "id": "dc-cable",
+      "kind": "cable",
+      "step": "S10",
+      "label": "DC cable (part of the power adapter)",
+      "color": "#202327",
+      "radius": 1.8,
+      "order": 1,
+      "from": [
+       0,
+       30,
+       0
+      ],
+      "points": [
+       [
+        360,
+        17,
+        200
+       ],
+       [
+        300,
+        6,
+        260
+       ],
+       [
+        255,
+        20,
+        330
+       ],
+       [
+        236,
+        42,
+        340
+       ]
+      ]
+     },
+     {
+      "id": "burn",
+      "kind": "model",
+      "step": "S10",
+      "pos": [
+       0,
+       3.2,
+       58
+      ],
+      "order": 2,
+      "from": [
+       0,
+       0,
+       0
+      ],
+      "label": "Test square",
+      "shapes": [
+       {
+        "t": "box",
+        "s": [
+         10,
+         0.4,
+         10
+        ],
+        "m": "burn"
+       },
+       {
+        "t": "cyl",
+        "d": 2.4,
+        "h": 14,
+        "p": [
+         0,
+         7,
+         0
+        ],
+        "m": "laser"
+       }
+      ]
+     }
+    ]
+   }
   }
  ],
  "memory": {
@@ -2621,6 +5229,22 @@
      {
       "key": "demo-b018#1793354520000",
       "at": 1793354520000
+     }
+    ]
+   },
+   {
+    "deviceId": "LX-1",
+    "stepId": "S7",
+    "expected": "840-0003",
+    "taken": "840-0002",
+    "events": [
+     {
+      "key": "demo-x07#1762420200000",
+      "at": 1762420200000
+     },
+     {
+      "key": "demo-x09#1762779600000",
+      "at": 1762779600000
      }
     ]
    }

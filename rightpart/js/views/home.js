@@ -2,7 +2,8 @@ import { html, th, icon, fmtDate } from '../ui.js';
 import { t } from '../core/i18n.js';
 import { listRecords } from '../store.js';
 import { submitQuery } from '../app.js';
-import { LANGUAGES, PLANNED } from '../lang.js';
+import { productCard } from '../components.js';
+import { fillPosters } from '../posters.js';
 
 const DEMO_EXAMPLES = [
   ['C-55013', () => t('customer code')],
@@ -63,105 +64,67 @@ export default async function home({ app }) {
   const isDemo = app.workspace?.kind === 'demo';
   if (!isDemo && !app.lib.parts.length && !(app.lib.devices || []).length) return welcome(app);
   const { counts } = app.audit;
-  const codes = app.index.byCode.size;
-  const dev = app.lib.devices?.[0];
+  const devices = app.lib.devices || [];
   const builds = (await listRecords('build')).slice(0, 3);
   const examples = app.source === 'demo' ? DEMO_EXAMPLES : ownExamples(app.lib);
-  const nSteps = dev?.instructions?.steps?.length || 0;
+  // One icon and a few words each: the explanations live on the pages themselves.
+  const apps = [
+    { href: '#/audit', icon: 'shield', label: t('Integrity check'), cls: counts.critical ? 'bad' : 'ok', badge: counts.critical },
+    { href: '#/ask', icon: 'chat', label: t('Ask a question') },
+    { href: '#/identify', icon: 'camera', label: t('Identify a loose part') },
+    { href: '#/parts', icon: 'parts', label: t('Parts library') },
+    { href: '#/learn', icon: 'learn', label: t('Learn fasteners') },
+    { href: '#/nature', icon: 'leaf', label: t('Learned from nature') },
+    { href: '#/load', icon: 'upload', label: t('Load company data') },
+    isDemo ? { href: '#/companies', icon: 'building', label: t('Companies and sign-in') } : { href: '#/setup', icon: 'checklist', label: t('Set up this company') },
+  ];
   return {
     title: t('Home'),
-    html: html`<div class="page">
+    html: html`<div class="page home2">
       ${app.sealOk === false ? html`<div class="callout bad" role="alert">${icon('stop')}<div><p class="t">${t('The library does not match its seal')}</p><p>${t('It was changed outside RightPart after it was sealed. Go back to a sealed version before building.')}</p><div class="acts"><a class="btn sm" href="#/data?go=versions">${icon('history')}${t('Sealed versions')}</a></div></div></div>` : ''}
-      ${app.source === 'demo' ? html`<div class="demo-banner">${icon('info')}<span>${th('Demo library: the Nova-1 is a fictional device made up for this demo. To use your own data, {link}: it gets its own space, and the demo stays as it is.', { link: html`<a href="#/companies">${t('add your company')}</a>` })}</span></div>` : ''}
-      <section class="hero">
+      ${app.source === 'demo' ? html`<div class="demo-pill">${icon('info')}<span>${t('Demo: made-up products and parts.')}</span><a href="#/companies">${t('Use your own data')}</a></div>` : ''}
+
+      <section class="hero compact">
         <h1>${isDemo ? t('The right part, every time.') : app.workspace.name}</h1>
-        <p class="lede">${t('Type or scan any code a part goes by (internal, customer, supplier or an old one) and get the one physical part behind it, drawn at true size. Build step by step, verify every bin at the bench, ask when in doubt, and let the integrity check find the mistakes that paper instructions hide for years.')}</p>
         <form class="hero-search" id="heroSearch" role="search" autocomplete="off">
           ${icon('search')}
           <input id="hq" type="search" placeholder="${t('Code, size, name or a question')}" aria-label="${t('Search any code, size or name, or ask a question')}" enterkeyhint="search" spellcheck="false">
           <button class="btn primary" type="submit">${t('Find')}</button>
         </form>
-        ${examples.length ? html`<div class="try"><span class="lbl">${t('Try:')}</span>${examples.map(([q, label]) => html`<button class="chip" type="button" data-q="${q}" title="${label()}"><span class="code">${q}</span><span class="muted">${label()}</span></button>`)}</div>` : ''}
+        ${examples.length ? html`<details class="try-more"><summary>${icon('sparkle')}${t('Examples')}</summary><div class="try">${examples.map(([q, label]) => html`<button class="chip" type="button" data-q="${q}" title="${label()}"><span class="code">${q}</span><span class="muted">${label()}</span></button>`)}</div></details>` : ''}
       </section>
 
-      <section class="tiles" aria-label="${t('Start here')}">
-        <a class="tile" href="#/audit">
-          <span class="ic ${counts.critical ? 'bad' : 'ok'}">${icon('shield')}</span>
-          <h3>${t('Integrity check')}</h3>
-          <p>${counts.critical
-            ? (app.source === 'demo'
-              ? t('{n, plural, one {# critical issue found by comparing the BOM, the instructions and the part records, including a wrong screw in the instructions.} other {# critical issues found by comparing the BOM, the instructions and the part records, including a wrong screw in the instructions.}}', { n: counts.critical })
-              : t('{n, plural, one {# critical issue found by comparing the BOM, the instructions and the part records.} other {# critical issues found by comparing the BOM, the instructions and the part records.}}', { n: counts.critical }))
-            : t('No critical issues: the BOM, the instructions and the part records agree.')}</p>
-          <span class="meta">${t('{n, plural, one {# warning} other {# warnings}}', { n: counts.warning })} · ${t('{n, plural, one {# note} other {# notes}}', { n: counts.info })}</span>
-        </a>
-        ${dev ? html`<a class="tile" href="#/device/${encodeURIComponent(dev.id)}">
-          <span class="ic">${icon('cube')}</span>
-          <h3>${t('Build the {device}', { device: dev.name.replace(/ demo console$/i, '') })}</h3>
-          <p>${nSteps ? (dev.scene ? t('{n} steps in 3D: which part, how many, what torque, and why. Learn mode for new people, build mode with bin scanning.', { n: nSteps }) : t('{n} steps: which part, how many, what torque, and why. Learn mode for new people, build mode with bin scanning.', { n: nSteps })) : t('No steps yet: write them in the step editor or import them from a spreadsheet.')}</p>
-          <span class="meta">${(app.lib.devices || []).length > 1 ? `${t('{n} devices', { n: app.lib.devices.length })} · ` : ''}${t('BOM rev {rev}', { rev: dev.bom?.rev || '–' })} · ${t('instructions rev {rev}', { rev: dev.instructions?.rev || '–' })}</span>
-        </a>` : ''}
-        <a class="tile" href="#/ask">
-          <span class="ic">${icon('chat')}</span>
-          <h3>${t('Ask a question')}</h3>
-          <p>${t('"Which screw goes in this step?", "what is this code?", "M3×8 or M3×10?" Answers from this company\'s own parts, steps and BOMs, with the source of each one.')}</p>
-          <span class="meta">${t('Ask in {n} languages · works offline', { n: LANGUAGES.length + PLANNED.length })}</span>
-        </a>
-        <a class="tile" href="#/identify">
-          <span class="ic">${icon('camera')}</span>
-          <h3>${t('Identify a loose part')}</h3>
-          <p>${t('Lay a screw on the screen to measure it at true size, pick its head and drive, or photograph it after you teach the app your parts.')}</p>
-          <span class="meta">${t('Works offline, on this device')}</span>
-        </a>
-        <a class="tile" href="#/parts">
-          <span class="ic">${icon('parts')}</span>
-          <h3>${t('Parts library')}</h3>
-          <p>${t('{parts} parts known under {codes} codes. Every part with what it does, why it was chosen and what goes wrong with the wrong one.', { parts: app.lib.parts.length, codes })}</p>
-          <span class="meta">${t('Print true-scale bin labels')}</span>
-        </a>
-        <a class="tile" href="#/learn">
-          <span class="ic">${icon('learn')}</span>
-          <h3>${t('Learn fasteners')}</h3>
-          <p>${t('Heads, drives, threads and how to read a code like ISO 7380 M3×8 A2. Then a short quiz on the real device.')}</p>
-          <span class="meta">${t('For your first weeks on the line')}</span>
-        </a>
-        <a class="tile" href="#/nature">
-          <span class="ic">${icon('leaf')}</span>
-          <h3>${t('Learned from nature')}</h3>
-          <p>${t('Seven safeguards copied from creation: immune memory for mix-ups, marks that keep look-alikes apart, light between tablets with no network, trails that fade, and more.')}</p>
-          <span class="meta">${t('What each one solves')}</span>
-        </a>
-        ${isDemo ? html`<a class="tile" href="#/companies">
-          <span class="ic">${icon('building')}</span>
-          <h3>${t('Your own company')}</h3>
-          <p>${t('Add your company and load its parts, BOMs and steps from Excel or your ERP. Sign in to share one library with the whole team.')}</p>
-          <span class="meta">${t('Each company in its own space')}</span>
-        </a>` : html`<a class="tile" href="#/setup">
-          <span class="ic">${icon('checklist')}</span>
-          <h3>${t('Set up and data')}</h3>
-          <p>${t('Import parts, codes, BOMs and steps from Excel (CSV) or JSON, write steps in the editor, export build records and reports.')}</p>
-          <span class="meta">${app.version ? t('Using: {name} · version {v}', { name: app.libName, v: app.version }) : t('Using: {name}', { name: app.libName })}</span>
-        </a>`}
-      </section>
-
-      <section class="stack">
-        <h2>${t('How it stops a wrong part')}</h2>
-        <ol class="how">
-          <li><b>${t('One part, every code')}</b><span>${t('Internal, customer, supplier and retired codes all point to one record. A code that points to two parts is flagged.')}</span></li>
-          <li><b>${t('Look-alike guard')}</b><span>${t('M3×8 next to M3×10, Phillips next to Pozidriv, M3 next to 4-40: shown side by side at true size, with the difference named.')}</span></li>
-          <li><b>${t('Verify at the bench')}</b><span>${t('Scan the bin before fitting. The wrong part gets a red stop and the reason, the right one a green tick.')}</span></li>
-          <li><b>${t('Integrity check')}</b><span>${t('BOM against instructions against changes. Finds the step that still fits the old screw after an engineering change.')}</span></li>
-        </ol>
-      </section>
-
-      ${builds.length ? html`<section class="stack"><h2>${t('Recent builds')}</h2>
-        <div class="grid three">${builds.map((b) => html`<a class="tile" href="#/device/${encodeURIComponent(b.deviceId)}"><span class="ic ${b.completedAt ? 'ok' : ''}">${icon(b.completedAt ? 'checkCircle' : 'history')}</span><h3 class="code">${b.serial || t('No serial')}</h3><p>${b.deviceName || b.deviceId} · ${b.completedAt ? t('completed') : t('step {n}', { n: (b.steps?.length || 0) + 1 })}</p><span class="meta">${fmtDate(b.createdAt)}</span></a>`)}</div>
+      ${devices.length ? html`<section class="stack" aria-labelledby="prodH">
+        <h2 id="prodH" class="sec-h">${icon('cube')}${t('Build')}</h2>
+        <div class="prods">${devices.slice(0, 6).map((d) => productCard(app, d))}</div>
+        ${devices.length > 6 ? html`<a class="btn" href="#/devices">${t('All {n} products', { n: devices.length })}</a>` : ''}
       </section>` : ''}
+
+      <nav class="tools-grid" aria-label="${t('Start here')}">
+        ${apps.map((a) => html`<a class="tool-tile" href="${a.href}"><span class="ic ${a.cls || ''}">${icon(a.icon)}</span><span>${a.label}</span>${a.badge ? html`<span class="badge" aria-label="${t('{n, plural, one {# critical issue} other {# critical issues}}', { n: a.badge })}">${a.badge}</span>` : ''}</a>`)}
+      </nav>
+
+      ${builds.length ? html`<section class="stack"><h2 class="sec-h">${icon('history')}${t('Recent builds')}</h2>
+        <div class="recent">${builds.map((b) => html`<a class="recent-b" href="#/device/${encodeURIComponent(b.deviceId)}"><span class="ic ${b.completedAt ? 'ok' : ''}">${icon(b.completedAt ? 'checkCircle' : 'history')}</span><span class="code">${b.serial || t('No serial')}</span><span class="muted">${b.completedAt ? t('completed') : t('step {n}', { n: (b.steps?.length || 0) + 1 })} · ${fmtDate(b.createdAt)}</span></a>`)}</div>
+      </section>` : ''}
+
+      <details class="fold">
+        <summary><span class="ic">${icon('shield')}</span><span class="grow">${t('How it stops a wrong part')}</span>${icon('chevronDown', 'chev')}</summary>
+        <div class="fold-body">
+          <ol class="how">
+            <li><b>${t('One part, every code')}</b><span>${t('Internal, customer, supplier and retired codes all point to one record. A code that points to two parts is flagged.')}</span></li>
+            <li><b>${t('Look-alike guard')}</b><span>${t('M3×8 next to M3×10, Phillips next to Pozidriv, M3 next to 4-40: shown side by side at true size, with the difference named.')}</span></li>
+            <li><b>${t('Verify at the bench')}</b><span>${t('Scan the bin before fitting. The wrong part gets a red stop and the reason, the right one a green tick.')}</span></li>
+            <li><b>${t('Integrity check')}</b><span>${t('BOM against instructions against changes. Finds the step that still fits the old screw after an engineering change.')}</span></li>
+          </ol>
+        </div>
+      </details>
     </div>`,
     mount(root) {
       const form = root.querySelector('#heroSearch');
       form.addEventListener('submit', (e) => { e.preventDefault(); submitQuery(root.querySelector('#hq').value); });
       root.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => submitQuery(b.dataset.q)));
+      fillPosters(app, root);
     },
   };
 }

@@ -46,6 +46,31 @@ function makeMaterials() {
     psu: () => std('psu', { color: 0xaeb6bf, roughness: 0.38, metalness: 0.85 }),
     copper: () => std('cu', { color: 0xd9b48a, roughness: 0.3, metalness: 1 }),
     recess: () => std('recess', { color: 0x14171b, roughness: 0.7, metalness: 0.2 }),
+    /** Materials a generic model names: a key below, or a colour such as "#ff7a1a". */
+    named(m) {
+      const N = {
+        alu: { color: 0xc8cdd3, roughness: 0.34, metalness: 0.9 },
+        'alu-black': { color: 0x2b2e33, roughness: 0.42, metalness: 0.65 },
+        steel: { color: 0xb9bfc6, roughness: 0.3, metalness: 1 },
+        rubber: { color: 0x1a1c1f, roughness: 0.92, metalness: 0 },
+        'plastic-black': { color: 0x202327, roughness: 0.62, metalness: 0 },
+        'plastic-grey': { color: 0x8b939c, roughness: 0.58, metalness: 0 },
+        'plastic-white': { color: 0xeef0f2, roughness: 0.55, metalness: 0 },
+        belt: { color: 0x121416, roughness: 0.85, metalness: 0 },
+        wood: { color: 0xc9a46b, roughness: 0.82, metalness: 0 },
+        brass: { color: 0xd9b25c, roughness: 0.3, metalness: 1 },
+        'acrylic-orange': { color: 0xff7a1a, roughness: 0.08, metalness: 0, transparent: true, opacity: 0.42, depthWrite: false },
+        'acrylic-clear': { color: 0xdfeefa, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.35, depthWrite: false },
+        'led-green': { color: 0x2bd46b, roughness: 0.3, metalness: 0, emissive: 0x2bd46b, emissiveIntensity: 1.4 },
+        'led-blue': { color: 0x5b7bff, roughness: 0.3, metalness: 0, emissive: 0x5b7bff, emissiveIntensity: 1.6 },
+        laser: { color: 0x7a5cff, roughness: 0.2, metalness: 0, emissive: 0x8f6bff, emissiveIntensity: 3 },
+        burn: { color: 0x3b2614, roughness: 0.9, metalness: 0 },
+        warning: { color: 0xf5c518, roughness: 0.5, metalness: 0 },
+      };
+      if (typeof m === 'string' && /^#[0-9a-f]{6}$/i.test(m)) return std('c-' + m, { color: m, roughness: 0.5, metalness: 0.1 });
+      if (m === 'pcb') return this.pcb();
+      return std('n-' + m, N[m] || N['plastic-grey']);
+    },
   };
 }
 function mix(a, b, t) {
@@ -389,6 +414,88 @@ function buildRibbon(o) {
   return g;
 }
 
+// ---------- Generic models: any product drawn from simple shapes in the library ----------
+const DEG = Math.PI / 180;
+/** Cross-section of an aluminium extrusion (20 × 20 per cell) with its slots. */
+function profileShape(cells) {
+  const w = 20, h = 20 * cells, slot = 6.2, depth = 4.2;
+  const s = new T.Shape();
+  const pts = [];
+  // Walk round the outline, cutting a slot in the middle of every 20 mm face.
+  const edge = (x0, y0, x1, y1, nx, ny) => {
+    const len = Math.hypot(x1 - x0, y1 - y0), n = Math.round(len / 20);
+    const ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+    for (let i = 0; i < n; i++) {
+      const c = i * 20 + 10;
+      const a = c - slot / 2, b = c + slot / 2;
+      pts.push([x0 + ux * (i * 20), y0 + uy * (i * 20)]);
+      pts.push([x0 + ux * a, y0 + uy * a]);
+      pts.push([x0 + ux * a - nx * depth, y0 + uy * a - ny * depth]);
+      pts.push([x0 + ux * b - nx * depth, y0 + uy * b - ny * depth]);
+      pts.push([x0 + ux * b, y0 + uy * b]);
+    }
+  };
+  edge(-w / 2, -h / 2, w / 2, -h / 2, 0, -1);
+  edge(w / 2, -h / 2, w / 2, h / 2, 1, 0);
+  edge(w / 2, h / 2, -w / 2, h / 2, 0, 1);
+  edge(-w / 2, h / 2, -w / 2, -h / 2, -1, 0);
+  pts.forEach(([x, y], i) => s[i ? 'lineTo' : 'moveTo'](x, y));
+  s.closePath();
+  const hole = new T.Path();
+  for (let k = 0; k < cells; k++) { const c = new T.Path(); c.absarc(0, -h / 2 + 10 + k * 20, 2.1, 0, Math.PI * 2, true); s.holes.push(c); }
+  void hole;
+  return s;
+}
+
+function buildModel(o, mats) {
+  const g = new T.Group();
+  const geoCache = new Map();
+  const put = (mesh, sh) => {
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    if (sh.p) mesh.position.set(...sh.p);
+    if (sh.r) mesh.rotation.set(sh.r[0] * DEG, sh.r[1] * DEG, sh.r[2] * DEG);
+    g.add(mesh);
+    return mesh;
+  };
+  for (const sh of o.shapes || []) {
+    const mat = mats.named(sh.m);
+    if (sh.t === 'box') put(new T.Mesh(new T.BoxGeometry(...sh.s), mat), sh);
+    else if (sh.t === 'cyl') {
+      const d2 = sh.d2 ?? sh.d;
+      put(new T.Mesh(new T.CylinderGeometry(d2 / 2, sh.d / 2, sh.h, sh.seg || 28), mat), sh);
+    } else if (sh.t === 'torus') put(new T.Mesh(new T.TorusGeometry(sh.R, sh.tube, 10, 28), mat), sh);
+    else if (sh.t === 'profile') {
+      const cells = sh.size === '2040' ? 2 : 1;
+      const key = `${cells}-${sh.len}`;
+      if (!geoCache.has(key)) {
+        const geo = new T.ExtrudeGeometry(profileShape(cells), { depth: sh.len, bevelEnabled: false, curveSegments: 10 });
+        geo.translate(0, 0, -sh.len / 2);
+        geoCache.set(key, geo);
+      }
+      const mesh = new T.Mesh(geoCache.get(key), mat);
+      // The extrusion runs along z; turn it to the axis the data asks for. "up" says where the 40 mm side points.
+      if (sh.axis === 'x') mesh.rotation.set(0, Math.PI / 2, sh.up === 'z' ? Math.PI / 2 : 0);
+      else if (sh.axis === 'y') mesh.rotation.set(Math.PI / 2, 0, 0);
+      else if (sh.up === 'x') mesh.rotation.set(0, 0, Math.PI / 2);
+      put(mesh, { ...sh, r: null });
+    } else if (sh.t === 'bar') {
+      // A straight bar from a to b with a w × h cross-section (a belt, a rod).
+      const a = new T.Vector3(...sh.a), b = new T.Vector3(...sh.b);
+      const len = a.distanceTo(b);
+      const mesh = new T.Mesh(new T.BoxGeometry(sh.w || 6, sh.h || 1.6, len), mat);
+      mesh.position.copy(a).add(b).multiplyScalar(0.5);
+      mesh.quaternion.setFromUnitVectors(new T.Vector3(0, 0, 1), b.clone().sub(a).normalize());
+      mesh.castShadow = true; mesh.receiveShadow = true;
+      g.add(mesh);
+    } else if (sh.t === 'label') {
+      const tex = labelTexture(sh.text, 512, Math.round(512 * (sh.s[1] / sh.s[0])), sh.bg ?? '#ffffff', sh.fg);
+      const mesh = new T.Mesh(new T.PlaneGeometry(sh.s[0], sh.s[1]), new T.MeshStandardMaterial({ map: tex, roughness: 0.6 }));
+      put(mesh, sh);
+    }
+  }
+  return g;
+}
+
 function labelTexture(lines, w = 512, h = 208, bg = '#ffffff', fg = '#111111') {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const x = c.getContext('2d');
@@ -410,13 +517,15 @@ function buildLabel(o) {
 }
 
 // ---------- Viewer ----------
-export function createViewer(container, { app, device, onPick, mode = 'step' } = {}) {
+const THUMB_KINDS = new Set(['model', 'chassis', 'psu', 'pcb', 'fan', 'display', 'bezel', 'cover']);
+
+export function createViewer(container, { app, device, onPick, mode = 'step', hotspots = false, autoRotate = false, preserve = false, insets: insets0 = null } = {}) {
   if (!webglAvailable()) return null;
   const scn = device.scene;
   if (!scn) return null;
   let renderer;
   try {
-    renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+    renderer = new T.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance', preserveDrawingBuffer: preserve });
   } catch { return null; }
   const coarse = window.matchMedia?.('(pointer: coarse)').matches;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, coarse ? 1.75 : 2));
@@ -501,6 +610,7 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
       else if (o.kind === 'ribbon') node = buildRibbon(o);
       else if (o.kind === 'label') node = buildLabel(o);
       else if (o.kind === 'tie') node = new T.Group();
+      else if (o.kind === 'model') node = buildModel(o, mats);
       else continue;
       if (o.pos && !['cable', 'ribbon', 'tie'].includes(o.kind)) node.position.set(...o.pos);
       tag(node);
@@ -527,13 +637,28 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
     }
   }
 
+  // Size the light, the shadows and the zoom limits to the product: a laser frame is much bigger than a console.
+  root.updateMatrixWorld(true);
+  const sceneSphere = new T.Box3().setFromObject(root).getBoundingSphere(new T.Sphere());
+  {
+    const R = Math.max(240, sceneSphere.radius * 1.05);
+    Object.assign(key.shadow.camera, { left: -R, right: R, top: R, bottom: -R, near: 10, far: R * 2 + 1400 });
+    key.shadow.camera.updateProjectionMatrix();
+    key.position.copy(sceneSphere.center).add(new T.Vector3(220, 420, 260).normalize().multiplyScalar(Math.max(547, R + 420)));
+    key.target.position.copy(sceneSphere.center);
+    scene.add(key.target);
+    controls.maxDistance = Math.max(1400, sceneSphere.radius * 7);
+    camera.far = Math.max(6000, sceneSphere.radius * 16);
+  }
+
   // Per-object highlight materials (clone on first highlight).
-  const highlightOn = (entry, on) => {
+  const highlightOn = (entry, on, level = 1) => {
+    if (on && level <= 0) on = false;
     for (const n of entry.nodes) n.traverse((c) => {
       if (!c.isMesh || !c.material || !('emissive' in c.material)) return;
       if (on && !c.userData.ownMat) { c.material = c.material.clone(); c.userData.ownMat = true; c.userData.baseEmissive = c.material.emissive.getHex(); c.userData.baseEI = c.material.emissiveIntensity; }
       if (!c.userData.ownMat) return;
-      if (on) { c.material.emissive.setHex(0x2f6bff); c.material.emissiveIntensity = entry.obj.kind === 'fastener' || entry.obj.kind === 'tie' ? 0.55 : 0.12; }
+      if (on) { c.material.emissive.setHex(0x2f6bff); c.material.emissiveIntensity = (entry.obj.kind === 'fastener' || entry.obj.kind === 'tie' ? 0.55 : 0.12) * level; }
       else { c.material.emissive.setHex(c.userData.baseEmissive); c.material.emissiveIntensity = c.userData.baseEI; }
     });
   };
@@ -548,34 +673,56 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
 
   // ---------- Labels ----------
   const labelLayer = document.createElement('div');
-  labelLayer.setAttribute('aria-hidden', 'true');
+  if (hotspots) labelLayer.className = 'vhots'; else labelLayer.setAttribute('aria-hidden', 'true');
   container.append(labelLayer);
   let labels = [];
   const setLabels = (entries) => {
     labelLayer.innerHTML = '';
-    labels = entries.filter((e) => e.part).map((e) => {
-      const el = document.createElement('div');
-      el.className = 'vlabel';
+    const list = entries.filter((e) => e.part);
+    if (hotspots) list.sort((a, b) => (a.obj.order || 0) - (b.obj.order || 0));
+    labels = list.map((e, i) => {
+      let el;
       const n = e.obj.kind === 'fastener' ? e.obj.at.length : 1;
-      el.textContent = e.obj.kind === 'fastener' ? `${n}× ${sizeLabel(e.part) || e.part.id}` : e.part.name.split(',')[0];
+      if (hotspots) {
+        // Numbered spots in the order the parts go in: 1 is where to start.
+        el = document.createElement('button');
+        el.type = 'button';
+        el.className = `vhot${i === 0 ? ' start' : ''}`;
+        el.textContent = String(i + 1);
+        el.setAttribute('aria-label', `${i + 1}. ${n > 1 ? `${n} × ` : ''}${e.part.name}`);
+        el.addEventListener('click', (ev) => { ev.stopPropagation(); onPick?.(e.part, e); });
+      } else {
+        el = document.createElement('div');
+        el.className = 'vlabel';
+        el.textContent = e.obj.kind === 'fastener' ? `${n}× ${sizeLabel(e.part) || e.part.id}` : e.part.name.split(',')[0];
+      }
       labelLayer.append(el);
       const center = new T.Vector3();
-      if (e.obj.kind === 'fastener') { e.obj.at.forEach((a) => center.add(new T.Vector3(...a))); center.multiplyScalar(1 / e.obj.at.length); const dir = new T.Vector3(...e.obj.dir).normalize(); center.addScaledVector(dir, -8); }
+      if (e.obj.kind === 'fastener') {
+        const dir = new T.Vector3(...e.obj.dir).normalize();
+        // Numbered spots sit on the first screw (where to start); plain labels in the middle of the group.
+        if (hotspots) center.set(...e.obj.at[0]);
+        else { e.obj.at.forEach((a) => center.add(new T.Vector3(...a))); center.multiplyScalar(1 / e.obj.at.length); }
+        center.addScaledVector(dir, -8);
+      }
       else if (e.obj.pos) center.set(...e.obj.pos);
       else if (e.obj.points) center.set(...e.obj.points[Math.floor(e.obj.points.length / 2)]);
-      return { el, center };
+      return { el, center, entry: e };
     });
   };
   const v = new T.Vector3();
   const placeLabels = () => {
     const w = container.clientWidth, h = container.clientHeight;
     const placed = [];
+    const since = anim ? performance.now() - anim.t0 : 0;
     for (const l of labels) {
       v.copy(l.center).project(camera);
-      const hidden = v.z > 1 || anim;
+      let x = ((v.x + 1) / 2) * w, y = ((1 - v.y) / 2) * h;
+      // While the parts fly in, each number appears when its part has landed.
+      const waiting = holdLabels || (anim && (anim.doneAt?.get(l.entry) ?? anim.end) > since);
+      const hidden = v.z > 1 || focused || waiting || y > h - insets.bottom + 8 || y < insets.top - 8;
       l.el.style.display = hidden ? 'none' : '';
       if (hidden) continue;
-      let x = ((v.x + 1) / 2) * w, y = ((1 - v.y) / 2) * h;
       const lw = l.el.offsetWidth || 90;
       // Nudge labels apart so two never cover each other.
       for (let k = 0; k < 6; k++) {
@@ -591,6 +738,15 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
 
   // ---------- State ----------
   let current = mode === 'overview' ? Infinity : 0;
+  let focused = null; // entries shown alone, close up
+  let focusPred = null;
+  let holdLabels = false;
+  let playTimer = 0;
+  let fade = null; // { t0, entries }: the step's highlight fading out after the parts have landed
+  let insets = { top: insets0?.top || 0, bottom: insets0?.bottom || 0 }; // px covered by the page's own panels
+  controls.autoRotateSpeed = 0.8;
+  const spin = (on) => { controls.autoRotate = !!on && !reduce && current === Infinity; dirty = true; };
+  controls.addEventListener('start', () => { if (controls.autoRotate) controls.autoRotate = false; });
   let exploded = false;
   let ghost = false;
   let anim = null;
@@ -601,6 +757,8 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   const applyVisibility = () => {
+    focused = null;
+    fade = null;
     for (const e of groups) {
       const visible = e.base || e.stepIdx <= current || ghost;
       const isGhost = !e.base && e.stepIdx > current && ghost;
@@ -624,21 +782,67 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
     dirty = true;
   };
 
+  // ---------- Framing ----------
+  // The page may cover the top and bottom of the view with its own panels: the model is framed in what is left.
+  const visFrac = () => { const h = container.clientHeight || 1; return Math.min(1, Math.max(0.3, (h - insets.top - insets.bottom) / h)); };
+  const applyOffset = () => {
+    const w = container.clientWidth, h = container.clientHeight;
+    if (!w || !h) return;
+    const dy = Math.round((insets.bottom - insets.top) / 2);
+    if (dy) camera.setViewOffset(w, h, 0, dy, w, h); else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  };
+  /** Corners of every visible mesh of these nodes, in world space. */
+  const cornersOf = (nodes) => {
+    const pts = [];
+    const b = new T.Box3();
+    for (const n of nodes) {
+      if (!n.visible) continue;
+      n.traverseVisible((c) => {
+        if (!c.isMesh || !c.geometry) return;
+        if (!c.geometry.boundingBox) c.geometry.computeBoundingBox();
+        b.copy(c.geometry.boundingBox);
+        for (let i = 0; i < 8; i++) pts.push(new T.Vector3(i & 1 ? b.max.x : b.min.x, i & 2 ? b.max.y : b.min.y, i & 4 ? b.max.z : b.min.z).applyMatrix4(c.matrixWorld));
+      });
+    }
+    return pts;
+  };
+  /** Where to aim and how far back along dir the camera must be for all these points to fit the visible part of the view. */
+  const fitPoints = (pts, dir, cam, { frac = 1, margin = 1.12, minR = 0 } = {}) => {
+    const fw = dir.clone().negate().normalize();
+    let up = new T.Vector3(0, 1, 0);
+    if (Math.abs(fw.dot(up)) > 0.98) up = new T.Vector3(0, 0, -1);
+    const rt = new T.Vector3().crossVectors(fw, up).normalize();
+    const uv = new T.Vector3().crossVectors(rt, fw).normalize();
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+    for (const p of pts) {
+      const x = p.dot(rt), y = p.dot(uv), z = p.dot(fw);
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; if (z < z0) z0 = z; if (z > z1) z1 = z;
+    }
+    const center = rt.clone().multiplyScalar((x0 + x1) / 2).addScaledVector(uv, (y0 + y1) / 2).addScaledVector(fw, (z0 + z1) / 2);
+    const tan = Math.tan((cam.fov * Math.PI) / 360);
+    const tv = (tan * frac) / margin, th = (tan * cam.aspect) / margin;
+    const q = new T.Vector3();
+    let d = minR / Math.min(tv, th);
+    for (const p of pts) {
+      q.copy(p).sub(center);
+      const z = q.dot(fw);
+      d = Math.max(d, Math.abs(q.dot(rt)) / th - z, Math.abs(q.dot(uv)) / tv - z);
+    }
+    return { center, dist: d };
+  };
+  const clampDist = (d) => Math.min(controls.maxDistance * 0.98, Math.max(controls.minDistance + 10, d));
+
   // Frame the parts of the current step (or the whole device) from the direction given in the data.
   const fitted = (camDef) => {
     const def = camDef || scn.overview;
     const focus = current === Infinity ? groups : groups.filter((e) => e.stepIdx === current);
     root.updateMatrixWorld(true);
-    const bb = new T.Box3();
-    for (const e of focus) for (const n of e.nodes) if (n.visible) bb.expandByObject(n);
-    if (bb.isEmpty()) return def;
-    const sphere = bb.getBoundingSphere(new T.Sphere());
-    const r = Math.max(sphere.radius, current === Infinity ? 120 : 55);
+    const pts = cornersOf(focus.flatMap((e) => e.nodes));
+    if (!pts.length) return def;
     const dir = new T.Vector3(...def.pos).sub(new T.Vector3(...def.target)).normalize();
-    const vfov = (camera.fov * Math.PI) / 180;
-    const hfov = 2 * Math.atan(Math.tan(vfov / 2) * camera.aspect);
-    const dist = (r / Math.sin(Math.min(vfov, hfov) / 2)) * 1.06;
-    return { pos: sphere.center.clone().addScaledVector(dir, dist).toArray(), target: sphere.center.toArray() };
+    const { center, dist } = fitPoints(pts, dir, camera, current === Infinity ? { frac: visFrac(), minR: 120 } : { frac: visFrac(), margin: hotspots ? 1.3 : 1.12, minR: hotspots ? 85 : 55 });
+    return { pos: center.clone().addScaledVector(dir, clampDist(dist)).toArray(), target: center.toArray() };
   };
 
   const flyTo = (camDef, instant = false) => {
@@ -649,9 +853,13 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
   };
 
   const playStep = () => {
+    holdLabels = false;
+    dirty = true;
     if (current === Infinity || reduce) return;
     const its = items.filter((it) => it.entry.stepIdx === current).sort((a, b) => a.order - b.order);
     if (!its.length) return;
+    fade = null;
+    for (const e of groups) if (e.stepIdx === current) highlightOn(e, true);
     const orders = [...new Set(its.map((i) => i.order))];
     const t0 = performance.now();
     const per = 850, gap = 220;
@@ -662,6 +870,8 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
       return { it, start: oi * (per + 150) + k * 90, dur: per };
     }) };
     anim.end = Math.max(...anim.its.map((a) => a.start + a.dur)) + gap;
+    anim.doneAt = new Map();
+    for (const a of anim.its) anim.doneAt.set(a.it.entry, Math.max(anim.doneAt.get(a.it.entry) || 0, a.start + a.dur));
     for (const a of anim.its) { a.it.node.position.copy(a.it.final.pos).add(a.it.offset); }
   };
 
@@ -689,7 +899,17 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
           a.it.node.quaternion.premultiply(qs);
         }
       }
-      if (el > anim.end) { anim = null; for (const it of items) if (it.entry.stepIdx === current) { it.node.position.copy(it.final.pos); it.node.quaternion.copy(it.final.quat); } }
+      if (el > anim.end) {
+        anim = null;
+        for (const it of items) if (it.entry.stepIdx === current) { it.node.position.copy(it.final.pos); it.node.quaternion.copy(it.final.quat); }
+        if (hotspots && !focused) fade = { t0: now, entries: groups.filter((e) => e.stepIdx === current) };
+      }
+      dirty = true;
+    }
+    if (fade) {
+      const k = Math.min(1, (now - fade.t0) / 1400);
+      for (const e of fade.entries) highlightOn(e, k < 1, 1 - easeOut(k));
+      if (k >= 1) fade = null;
       dirty = true;
     }
     if (current === Infinity && !exploded && !reduce) for (const e of groups) if (e.blades) { e.blades.rotation.z -= 0.22; dirty = true; }
@@ -702,6 +922,7 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.fov = w / h < 0.9 ? 44 : 32;
+    applyOffset();
     camera.updateProjectionMatrix();
     dirty = true;
   };
@@ -764,18 +985,133 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
   };
   document.addEventListener('visibilitychange', onVis);
 
+  /** Show one part close up: the camera flies to it and everything else turns to glass. */
+  const focusOn = (pred) => {
+    const shown = (e) => e.base || e.stepIdx <= current;
+    const list = groups.filter((e) => shown(e) && pred(e));
+    if (!list.length) return false;
+    anim = null;
+    fade = null;
+    holdLabels = false;
+    for (const it of items) { it.node.position.copy(it.final.pos); it.node.quaternion.copy(it.final.quat); }
+    for (const e of groups) {
+      const mine = list.includes(e);
+      for (const n of e.nodes) n.visible = shown(e) || mine;
+      ghostOn(e, !mine && shown(e));
+      highlightOn(e, false);
+    }
+    focused = list;
+    focusPred = pred;
+    spin(false);
+    root.updateMatrixWorld(true);
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    const { center, dist } = fitPoints(cornersOf(list.flatMap((e) => e.nodes)), dir, camera, { frac: visFrac(), margin: 1.7, minR: 12 });
+    flyTo({ pos: center.clone().addScaledVector(dir, clampDist(dist)).toArray(), target: center.toArray() });
+    dirty = true;
+    return true;
+  };
+
   applyVisibility();
   flyTo(fitted(current === Infinity ? scn.overview : scn.cameras?.[steps[0]?.id]), true);
+  spin(autoRotate);
   raf = requestAnimationFrame(tick);
 
   return {
+    /** Fly to a part (by id) or a scene object (by its id) and show it alone. */
+    focus(partId) { return focusOn((e) => e.part?.id === partId || e.obj.id === partId); },
+    clearFocus() {
+      if (!focused) return;
+      focusPred = null;
+      applyVisibility();
+      flyTo(fitted(current === Infinity ? scn.overview : scn.cameras?.[steps[current]?.id] || scn.overview));
+      spin(autoRotate);
+    },
+    get focused() { return !!focused; },
+    setAutoRotate(on) { autoRotate = on; spin(on); },
+    /** A picture of what is on screen now (for product cards), at most maxWidth pixels wide. */
+    capture(type = 'image/webp', quality = 0.86, maxWidth = 0) {
+      renderer.render(scene, camera);
+      if (!maxWidth || canvas.width <= maxWidth) return canvas.toDataURL(type, quality);
+      const c2 = document.createElement('canvas');
+      c2.width = maxWidth;
+      c2.height = Math.round((canvas.height * maxWidth) / canvas.width);
+      c2.getContext('2d').drawImage(canvas, 0, 0, c2.width, c2.height);
+      return c2.toDataURL(type, quality);
+    },
     setStep(stepId, { animate = true, instantCamera = false } = {}) {
       showTip(null);
       current = stepId == null ? Infinity : stepIndex.get(stepId) ?? 0;
       anim = null;
+      focusPred = null;
+      clearTimeout(playTimer);
+      holdLabels = animate && !reduce && current !== Infinity;
       applyVisibility();
+      spin(autoRotate);
       flyTo(fitted(current === Infinity ? scn.overview : scn.cameras?.[stepId] || scn.overview), instantCamera);
-      if (animate) setTimeout(playStep, instantCamera ? 50 : 450);
+      if (animate) playTimer = setTimeout(playStep, instantCamera ? 50 : 450);
+    },
+    /** Keep the model clear of the page's own panels (px from the top and from the bottom of the view). */
+    setInsets(top = 0, bottom = 0, { refit = true } = {}) {
+      const big = Math.abs(insets.top - top) > 24 || Math.abs(insets.bottom - bottom) > 24;
+      if (Math.abs(insets.top - top) < 2 && Math.abs(insets.bottom - bottom) < 2) return;
+      insets = { top, bottom };
+      applyOffset();
+      dirty = true;
+      if (!refit || !big) return;
+      if (focused && focusPred) focusOn(focusPred);
+      else if (!focused) flyTo(fitted(current === Infinity ? scn.overview : scn.cameras?.[steps[current]?.id] || scn.overview));
+    },
+    /** 3D pictures of single parts on a clear background, for part lists: Map(partId -> PNG data URL). */
+    thumbnails({ width = 168, height = 120 } = {}) {
+      const out = new Map();
+      const dpr = renderer.getPixelRatio();
+      const W = Math.round(width * dpr), H = Math.round(height * dpr);
+      if (canvas.width < W || canvas.height < H) return out;
+      const v4 = () => ({ x: 0, y: 0, z: 0, w: 0, copy(o) { this.x = o.x; this.y = o.y; this.z = o.z; this.w = o.w; return this; } });
+      const vp = renderer.getViewport(v4()), sc = renderer.getScissor(v4()), scOn = renderer.getScissorTest();
+      const vis = new Map();
+      root.traverse((o) => vis.set(o, o.visible));
+      const groundOn = ground.visible;
+      ground.visible = false;
+      const cam = new T.PerspectiveCamera(30, width / height, 1, 20000);
+      const dir = new T.Vector3(0.62, 0.55, 1).normalize();
+      const pic = document.createElement('canvas');
+      pic.width = W; pic.height = H;
+      const g2 = pic.getContext('2d');
+      renderer.setScissorTest(true);
+      renderer.setViewport(0, 0, width, height);
+      renderer.setScissor(0, 0, width, height);
+      try {
+        for (const e of groups) {
+          if (!e.part || out.has(e.part.id) || !THUMB_KINDS.has(e.obj.kind)) continue;
+          for (const g of groups) for (const n of g.nodes) n.visible = g === e;
+          ghostOn(e, false);
+          highlightOn(e, false);
+          for (const it of items) if (it.entry === e) { it.node.position.copy(it.final.pos); it.node.quaternion.copy(it.final.quat); }
+          root.updateMatrixWorld(true);
+          const pts = cornersOf(e.nodes);
+          if (!pts.length) continue;
+          const { center: c, dist: d } = fitPoints(pts, dir, cam, { margin: 1.1, minR: 3 });
+          cam.position.copy(c).addScaledVector(dir, d);
+          cam.near = Math.max(0.5, d / 40);
+          cam.far = d * 4 + 600;
+          cam.lookAt(c);
+          cam.updateProjectionMatrix();
+          renderer.render(scene, cam);
+          g2.clearRect(0, 0, W, H);
+          g2.drawImage(canvas, 0, canvas.height - H, W, H, 0, 0, W, H);
+          out.set(e.part.id, pic.toDataURL('image/png'));
+        }
+      } finally {
+        renderer.setScissorTest(scOn);
+        renderer.setScissor(sc.x, sc.y, sc.z, sc.w);
+        renderer.setViewport(vp.x, vp.y, vp.z, vp.w);
+        for (const [o, on] of vis) o.visible = on;
+        ground.visible = groundOn;
+        if (focused) { const f = focused; for (const e of groups) ghostOn(e, !f.includes(e) && (e.base || e.stepIdx <= current)); } else applyVisibility();
+        renderer.render(scene, camera);
+      }
+      return out;
     },
     play: playStep,
     setExploded(on) { exploded = on; applyVisibility(); if (current === Infinity) flyTo(fitted(scn.overview)); },
@@ -784,6 +1120,7 @@ export function createViewer(container, { app, device, onPick, mode = 'step' } =
     dispose() {
       running = false;
       cancelAnimationFrame(raf);
+      clearTimeout(playTimer);
       ro.disconnect();
       document.removeEventListener('visibilitychange', onVis);
       controls.dispose();

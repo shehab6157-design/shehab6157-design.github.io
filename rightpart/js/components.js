@@ -6,9 +6,36 @@ import { drawPart } from './draw.js';
 import { CODE_TYPES } from './core/model.js';
 import { CATEGORY_LABELS, sizeLabel, materialLabel, HEADS, DRIVES } from './core/dims.js';
 import { CHECKS } from './core/audit.js';
+import { cachedPoster } from './posters.js';
 
 export const partHref = (id) => `#/part/${encodeURIComponent(id)}`;
 export const stepHref = (deviceId, stepId, mode) => `#/guide/${encodeURIComponent(deviceId)}/${encodeURIComponent(stepId)}${mode ? '?mode=' + mode : ''}`;
+/** Where "show me how to build it" goes: the 3D guide when the product has a 3D model, else the step-by-step guide. */
+export const guideHref = (dev, stepId) => {
+  const steps = dev.instructions?.steps || [];
+  if (dev.scene) return `#/show/${encodeURIComponent(dev.id)}${stepId ? `/${encodeURIComponent(stepId)}` : ''}`;
+  return steps.length ? stepHref(dev.id, stepId || steps[0].id, 'learn') : `#/device/${encodeURIComponent(dev.id)}`;
+};
+
+/** The picture of a product (made from its 3D model on this device), with a play button when it opens the 3D guide. */
+export function poster(dev, { play = true, cls = '' } = {}) {
+  const pic = cachedPoster(dev);
+  return html`<span class="poster ${cls} ${pic ? 'ready' : dev.scene ? '' : 'none'}">${dev.scene ? html`<img data-poster="${dev.id}" ${pic ? html`src="${pic}"` : ''} alt="" draggable="false">` : ''}<span class="ph">${icon('cube')}</span>${play && dev.scene ? html`<span class="play">${icon('play')}</span>` : ''}</span>`;
+}
+
+/** A product: its picture, its name, and one tap into the guide. */
+export function productCard(app, dev) {
+  const steps = dev.instructions?.steps || [];
+  const crit = app.audit.findings.filter((f) => f.deviceId === dev.id && f.severity === 'critical').length;
+  return html`<article class="prod">
+    <a class="prod-main" href="${guideHref(dev)}">
+      ${poster(dev)}
+      <span class="prod-name">${dev.name}</span>
+      <span class="prod-meta">${dev.scene ? html`${icon('cube')}${t('3D guide')} · ` : ''}${t('{n, plural, one {# step} other {# steps}}', { n: steps.length })}${crit ? html` · <span class="bad">${icon('alert')}${t('{n, plural, one {# critical issue} other {# critical issues}}', { n: crit })}</span>` : ''}</span>
+    </a>
+    <a class="prod-more" href="#/device/${encodeURIComponent(dev.id)}" aria-label="${t('About {device}', { device: dev.name })}" title="${t('About {device}', { device: dev.name })}">${icon('info')}</a>
+  </article>`;
+}
 
 export function thumb(part) {
   return raw(drawPart(part, { view: 'auto' }));

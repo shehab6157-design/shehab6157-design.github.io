@@ -9,7 +9,9 @@ import { answer, retrieveRecords } from '../js/core/assistant.js';
 const lib = JSON.parse(readFileSync(new URL('../data/demo-library.json', import.meta.url), 'utf8'));
 const index = buildIndex(lib);
 const audit = runAudit(index);
-const ask = (q, ctx) => answer(index, audit, q, ctx);
+// The demo has two products; these questions are about the Nova-1 console, as if asked on its pages.
+const NOVA = { deviceId: 'NOVA-1' };
+const ask = (q, ctx = NOVA) => answer(index, audit, q, ctx);
 
 test('which screw for a step warns when the BOM disagrees', () => {
   for (const q of ['Which screw goes in step 7?', 'which screws for the front bezel?', 'איזה בורג בשלב 7?', 'أي برغي في الخطوة 7؟']) {
@@ -63,11 +65,25 @@ test('unknown questions fall back honestly', () => {
 });
 
 test('records retrieved for the AI carry ids it can cite', () => {
-  const recs = retrieveRecords(index, audit, 'Which screw goes in step 7?');
+  const recs = retrieveRecords(index, audit, 'Which screw goes in step 7?', NOVA);
   const ids = recs.map((r) => r.id);
   assert.ok(ids.includes('step:NOVA-1/S7'));
   assert.ok(ids.includes('part:100-0234'));
   assert.ok(ids.includes('change:ECO-0142'));
   assert.ok(ids.some((id) => id.startsWith('finding:likely-substitution')));
   assert.ok(recs.length <= 40);
+});
+
+test('with two products, a step number alone asks which product, and each choice answers for that product', () => {
+  const a = answer(index, audit, 'Which screw goes in step 7?', {});
+  assert.equal(a.intent, 'pickDevice');
+  assert.equal(a.followUps.length, 2);
+  const laser = a.followUps.find((f) => f.includes('LX-1'));
+  const b = answer(index, audit, laser, {});
+  assert.equal(b.context.deviceId, 'LX-1');
+  assert.equal(b.context.stepId, 'S7');
+  assert.ok(b.items.some((i) => i.part.id === '840-0003'), 'the M5x10 controller screws');
+  const nova = answer(index, audit, a.followUps.find((f) => f.includes('Nova')), {});
+  assert.equal(nova.context.deviceId, 'NOVA-1');
+  assert.equal(answer(index, audit, 'what is C-55013?', {}).intent !== 'pickDevice', true, 'a code needs no product');
 });

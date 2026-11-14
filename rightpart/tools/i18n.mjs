@@ -19,7 +19,7 @@ const LOCALES = path.join(root, 'locales');
 // scanning, the Ask panel, part names and look-alike warnings. Every built-in language covers these.
 export const FLOOR_FILES = [
   'js/app.js', 'js/ui.js', 'js/lang.js', 'js/components.js', 'js/scan.js', 'js/askpanel.js', 'js/askui.js',
-  'js/views/guide.js', 'js/views/device.js', 'js/views/devices.js',
+  'js/views/guide.js', 'js/views/show.js', 'js/views/device.js', 'js/views/devices.js',
   'js/core/model.js', 'js/core/lookalike.js', 'js/core/dims.js',
 ];
 // The safety messages from the integrity check and Ask that appear inside the build guide.
