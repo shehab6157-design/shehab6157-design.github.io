@@ -25,6 +25,7 @@ The single source of truth for the look and motion of this portfolio. Every colo
 | | `--ruby` | `#FF4D3D` | Attacks only |
 | Gems | `--c-apis` `--c-mcp` `--c-animal` `--c-solar` | `#FFB43F` `#B38CFF` `#3FD69A` `#4FD3E6` | One colour per project: its cell in the comb, card rim, sketch, skill gems |
 | | `--c-sos` `--c-scam` `--c-phish` `--c-ai` | `#FF9466` `#6E9BFF` `#FF6FAE` `#B6E36A` | |
+| | `--c-hud` `--c-rp` | `#F2CF5B` `#B9C7D6` | Hudward (hoopoe gold) and RightPart (steel) |
 | Sketch | `--ch-host` `--ch-auth` `--ch-merge` `--lumen` | `#8EB0D6` `#FF4D3D` `#FFF2D8` `#FFD27A` | Neutral hosts, alerts, confirmed, observations and daylight inside the live sketches |
 | Type | `--f-display` | Bodoni Moda (optical sizes) | Name, headings, numbers |
 | | `--f-body` | Instrument Sans | Reading text, buttons, labels |

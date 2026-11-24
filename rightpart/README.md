@@ -2,7 +2,7 @@
 
 **The right part, every time.** A working prototype of digital work instructions that know what every part is, and check themselves. Any production company can load its own devices, parts, BOMs and steps, and every worker gets step-by-step guidance and answers to their questions from that company's data.
 
-Live (once this folder is on `main`): **https://shehab6157-design.github.io/rightpart/**
+Live: **https://shehab6157-design.github.io/rightpart/**
 
 Most assembly lines still build from step-by-step PDFs. One screw can go by four names (internal, customer, supplier, an old code), two screws can differ by 2 mm, and a PDF cannot check anything. When an engineering change swaps one screw for another and the instructions are never updated, the old screw keeps being fitted for years. RightPart connects the data so a computer catches that in milliseconds.
 
@@ -17,11 +17,11 @@ The demo library has two **fictional** products: a bench-top console, the *Nova-
 | **Drawn from the data** | Screws, nuts, washers and standoffs are drawn from their own spec in 2D and 3D, at true size on a calibrated screen or a printed label. The picture cannot disagree with the data. |
 | **Look-alike guard** | Finds parts that are easy to confuse (length, diameter, metric vs inch, Phillips vs Pozidriv, plain vs lock nut, duplicate records) and names the difference. |
 | **3D guide, few words** | The whole product turns in 3D. Press Start and each step shows only its parts: they fly into place, and numbered spots appear as they land (the red, pulsing **1** is where to start). Tap a part, on the model or in the strip of 3D pictures, and the camera flies to it while everything else turns to glass; the words (what it does, why, what goes wrong, tool, codes) open only when asked. Swipe or tap the numbers to move between steps. |
-| **Build guide** | Each step: which parts, how many, torque, tools, how, why, what to check, in a text view for learning and a build mode with bin scanning. The 3D model is generated from the library (an M3 × 10 is really 10 mm long). |
+| **Build guide** | Each step: which parts, how many, torque, tools, how, why, what to check, in a text view for learning and a build mode with bin scanning. The 3D model is generated from the library (an M3 x 10 is really 10 mm long). |
 | **Learn and Build modes** | Learn: explanations and "More about this part". Build: scan or type the bin code before fitting; wrong part = red stop with the reason; a critical issue needs a recorded supervisor decision; everything goes into a build record. |
 | **Integrity check** | BOM vs instructions vs change history vs part records: likely wrong part in a step, one code for two parts, unknown codes, retired parts, quantity mismatches, revision mismatch, old codes, codes that spell a different size, duplicates, look-alikes on the same device, missing torque. |
 | **Identify a loose part** | Lay it on the screen and measure it (calibrated with a bank card), photograph it (the identifier learns your parts on the device), or scan any code. |
-| **Bin labels** | 100 × 50 mm, Code 128 barcode, every code the part goes by, a "NOT M3 × 10" warning, and the part's outline at actual size. |
+| **Bin labels** | 100 by 50 mm, Code 128 barcode, every code the part goes by, a "NOT M3 x 10" warning, and the part's outline at actual size. |
 | **Training** | Fastener basics (heads, drives, threads, length, materials) and a quiz generated from the real device. |
 | **Every company, its own data** | Each company is a separate space with its own library. **Load company data** takes all its files at once (Excel, CSV, PDF, JSON), recognises what each table is, loads it and checks everything. Switch between companies from the header. |
 | **Reads your PDFs** | The work instructions a company already has: steps, the parts each step names (by any of their codes), quantities, torques, tools, warnings and checks are read on the device, and every code the parts list does not know is listed. Steps stay drafts, marked in the guide, until an engineer compares them with the PDF and ticks Reviewed. |
@@ -34,27 +34,27 @@ The demo library has two **fictional** products: a bench-top console, the *Nova-
 
 ## Five-minute tour
 
-1. **Home → Lumen LX-1 laser engraver**: the 3D guide opens. Turn it, press **Start**, watch step 1 build the frame, tap a part, then **More details**.
-2. **Home → Examples**: `C-55013` (customer code), `DS-103-308` (one code, two parts), `100-0283` (typo).
-3. **Check**: the integrity check finds that step 7 fits `100-0234` (M3 × 10) where BOM rev C asks for `100-0233` (M3 × 8), and names the engineering change that never reached the instructions.
-4. **Build → Nova-1 → Text view**: walk the 10 steps. Step 7 is flagged.
-5. **Nova-1 → Start a build**: scan or type `AF-SO-M3-12-MF` at step 1 (wrong standoff: red stop), then `C-55030` (right one: green).
-6. **Identify → Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
-7. **Part page → Bin label**, then print at 100 %.
+1. **Home**, then **Lumen LX-1 laser engraver**: the 3D guide opens. Turn it, press **Start**, watch step 1 build the frame, tap a part, then **More details**.
+2. **Home**, then **Examples**: `C-55013` (customer code), `DS-103-308` (one code, two parts), `100-0283` (typo).
+3. **Check**: the integrity check finds that step 7 fits `100-0234` (M3 x 10) where BOM rev C asks for `100-0233` (M3 x 8), and names the engineering change that never reached the instructions.
+4. **Build**, then **Nova-1**, then **Text view**: walk the 10 steps. Step 7 is flagged.
+5. **Nova-1**, then **Start a build**: scan or type `AF-SO-M3-12-MF` at step 1 (wrong standoff: red stop), then `C-55030` (right one: green).
+6. **Identify**, then **Measure**: calibrate with a card, lay a screw on the screen, drag the handles.
+7. **Part page**, then **Bin label**, then print at 100 %.
 8. **Ask** (the button at the bottom right of every page): open step 7, press Ask, and ask "which screw here?".
 9. **Learned from nature**: at step 3 the guide warns that `100-0232` (Pozidriv) was picked by mistake before; *Try it for 10 minutes* turns on night watch for a build; the device page shows floor trails; *Light sync* sends the library to a second phone through its camera.
-10. **Set up this company → Try the sample PDF**: a fictional two-page work instruction becomes five draft steps; the check flags its old code, its unknown code and the missing BOM.
+10. **Set up this company**, then **Try the sample PDF**: a fictional two-page work instruction becomes five draft steps; the check flags its old code, its unknown code and the missing BOM.
 
 ## Your own company
 
-1. Press the company name in the header → **Add a company**. Each company gets its own storage; the demo stays as it was.
+1. Press the company name in the header, then **Add a company**. Each company gets its own storage; the demo stays as it was.
 2. **Load company data**: drop every file at once (Excel `.xlsx`, CSV, PDF work instructions, a RightPart `.json`). Each workbook sheet is read on the device and recognised as a parts list, a BOM, a step list or a list of codes, from its column names (SAP, Priority, Oracle and similar exports, in English, Hebrew, Arabic, German and more) and its values. You see what each column was read as and can change it; then everything loads in one go and a report lists what does not add up (unknown codes, codes for two parts, fasteners without a size, devices without a BOM or steps, critical findings). *Try the sample files* loads a fictional company (`data/sample-company.xlsx`).
 3. Or follow **Set up this company** step by step: import parts, then BOMs, then steps (read from your PDF work instructions, imported from a spreadsheet, or written in the editor), then print bin labels and run the integrity check.
 4. To share one library between people and tablets, connect a company server and sign in (see [backend/README.md](backend/README.md)). Without one, the data stays on the device it was loaded on: export it from **Data and records** to move it.
 
 Everything you import stays in this browser (IndexedDB) unless you publish it to your company server.
 
-**Parts CSV** (Excel → Save as CSV; comma, semicolon or tab). Download the template in the app. Columns:
+**Parts CSV** (in Excel, Save as CSV; comma, semicolon or tab). Download the template in the app. Columns:
 
 `id, category, name, designation, thread, d_mm, pitch_mm, length_mm, head, drive, drive_size, material, torque_nm, tool, status, replaced_by, function, why, if_wrong, tips, customer_codes, supplier_codes, manufacturer_codes, drawing_codes, legacy_codes`
 
@@ -66,7 +66,7 @@ Everything you import stays in this browser (IndexedDB) unless you publish it to
 
 **Steps CSV** (one row per step; download the template in the app): `device_id, device_name, instructions_rev, step, title, summary, parts, tools, instructions, checks, warnings, why, critical, esd, image`.
 
-- `parts`: `100-0233 x4 @0.6; 500-4001 x A/R; 200-1002` (any code of the part, `x` quantity, `@` torque in N·m, `A/R` for as required). Parts are separated by `;`.
+- `parts`: `100-0233 x4 @0.6; 500-4001 x A/R; 200-1002` (any code of the part, `x` quantity, `@` torque in Nm, `A/R` for as required). Parts are separated by `;`.
 - `tools`, `instructions`, `checks` and `warnings`: separate items with `|` or put one per line inside the cell. A warning can start with `warning:`, `caution:` or `notice:`.
 - `critical` and `esd`: `yes` or empty.
 - Importing steps for a device replaces that device's steps and keeps its BOM, so a device is updated by importing its steps again. Devices that do not exist yet are created.
@@ -77,7 +77,7 @@ The step editor checks each step against the BOM as you type: unknown codes, par
 
 - step headings like `Step 3: Fit the bezel`, `3.0 Fit the bezel`, or a numbered list (`1.`, `2.` …), in English, Hebrew, Arabic or Russian (`שלב 3`, `خطوة 3`, `шаг 3`); a table of contents is skipped;
 - part codes by any code the parts library knows, also across spaces (`ISO 7380-1 M3x8 A2`), with quantities written as `4 x CODE`, `CODE x4`, `CODE (4)`, `4 screws CODE`, `CODE qty 4`, or in a parts table;
-- torques in N·m or in·lb, placed on the part named on the same line;
+- torques in Nm or inch pounds, placed on the part named on the same line;
 - `Tools:`, `Parts:`, `Check:`, `Warning:`, `Caution:` and `Note:` lines (and their Hebrew and Arabic words), ESD notes, and the document number, revision and product name;
 - headers and footers repeated on every page are ignored.
 
@@ -184,8 +184,16 @@ node tools/problems-md.mjs
 
 ## Next steps
 
-Pilot on one sub-assembly with real data on an approved private copy · read codes, BOMs and changes from the ERP/PLM so the check runs on every change · load the real 3D model from CAD (glTF) · instructions in Hebrew, Arabic, Russian and English with right-to-left layout · electronic signatures, then validation · single sign-on with the company's accounts · text recognition for scanned PDFs, and AI help for documents without clear step numbers, approved by an engineer · a shared photo identifier trained on the line's own parts · a supervisor dashboard (wrong scans per step, doubts, questions asked, training scores).
+- Pilot on one sub-assembly with real data on an approved private copy
+- Read codes, BOMs and changes from the ERP or PLM so the check runs on every change
+- Load the real 3D model from CAD (glTF)
+- Instructions in Hebrew, Arabic, Russian and English with right-to-left layout
+- Electronic signatures, then validation
+- Single sign-on with the company's accounts
+- Text recognition for scanned PDFs, and AI help for documents without clear step numbers, approved by an engineer
+- A shared photo identifier trained on the line's own parts
+- A supervisor dashboard: wrong scans per step, doubts, questions asked and training scores
 
 ## Credits
 
-[three.js](https://threejs.org) (MIT) · [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0) · [ZXing](https://github.com/zxing-js/library) (Apache 2.0) · [supabase-js](https://github.com/supabase/supabase-js) (MIT) · [pdf.js](https://mozilla.github.io/pdf.js/) (Apache 2.0). The Nova-1, its parts, codes and suppliers are fictional.
+[three.js](https://threejs.org) (MIT), [TensorFlow.js](https://www.tensorflow.org/js) and MobileNet v1 weights (Apache 2.0), [ZXing](https://github.com/zxing-js/library) (Apache 2.0), [supabase-js](https://github.com/supabase/supabase-js) (MIT) and [pdf.js](https://mozilla.github.io/pdf.js/) (Apache 2.0). The Nova-1, its parts, codes and suppliers are fictional.

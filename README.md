@@ -2,11 +2,11 @@
 
 Source for my personal portfolio: **https://shehab6157-design.github.io**
 
-Shehab Shibli, Network Engineering and Computer Security graduate (CCNA, AWS Certified Cloud Practitioner). The site presents the security tools I build and test on real data: APIS (lateral-movement detection), the MCP Security Proxy for AI agents, my edge-to-cloud animal detection project, the bio-inspired solar screen, ScamShield, the phishing detector, S.O.S (NASA Space Apps 3rd place), plus certifications and contact details.
+Shehab Shibli, Network Engineering and Computer Security graduate, CCNA and AWS Certified Cloud Practitioner. The site presents the tools I build and test on real data: APIS for lateral movement detection, Hudward, my anti scam app on the Anna App Store, RightPart, digital work instructions for assembly lines, the MCP Security Proxy for AI agents, my edge to cloud animal detection project, the bio inspired solar screen, ScamShield, the phishing detector and S.O.S, which placed 3rd at NASA Space Apps, plus certifications and contact details.
 
 ## Design
 
-My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. When you reach another project, the camera dives into its cell and that project's own 3D world opens out of the honeycomb, showing how it works: the MCP proxy's audit trail, the in-car night-vision unit spotting an animal and warning cars within 1 km, the solar screen's layers saving energy step by step, the S.O.S sweeper netting debris over Earth, and ScamShield, the phishing detector and the AI assistant on one line of messages. The full design system is in [`MASTER.md`](MASTER.md).
+My flagship project, APIS, defends a network the way a honeybee colony defends its hive, so the site is built inside one: a real-time 3D honeycomb of brushed gold and amber glass, lit like a product shot. Scrolling moves the camera over the comb, each project lights its own cell in its own colour, and in the hero you can click any cell to launch an attack and watch the hive detect it, confirm it and seal it off. When you reach another project, the camera dives into its cell and that project's own 3D world opens out of the honeycomb, showing how it works: the MCP proxy's audit trail, the in-car night-vision unit spotting an animal and warning cars within 1 km, the solar screen's layers saving energy step by step, the S.O.S sweeper netting debris over Earth, and ScamShield, the phishing detector and the AI assistant on one line of messages. Hudward and RightPart, the newest projects, have their own live sketches but no 3D world yet, so the comb stays in view while you read them. The full design system is in [`MASTER.md`](MASTER.md).
 
 ## About this repo
 
@@ -18,7 +18,7 @@ My flagship project, APIS, defends a network the way a honeybee colony defends i
 - `smooth-jazz.mp3`: quiet background music to read by: "Daytime Smooth Jazz (2025) 2" by SenorMusica81, from [Pixabay](https://pixabay.com/music/smooth-jazz-daytime-smooth-jazz-2025-2-458721/) under the Pixabay Content License (Pixabay marks it as AI-generated), softened a touch and levelled quiet. It starts after the intro film if the film played with its sound on, and a short notice points to the music button in the navigation, which starts or stops it at any time; the choice is remembered. It loops, and rests while the tab is hidden.
 
 The intro score is played from real recorded samples: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) and the [Versilian Community Sample Library](https://github.com/sgossner/VCSL), both CC0, by Versilian Studios and their contributors (the hand chimes, tubular bells, glockenspiel and vibraphone among them). Thank you.
-- `og.jpg`: the 1200×630 preview image shown when the link is shared.
+- `og.jpg`: the 1200 by 630 preview image shown when the link is shared.
 - `robots.txt`, `sitemap.xml`, `favicon-32.png`, `apple-touch-icon.png`: search and icon files.
 - `Shehab_Shibli_CV.pdf`: the CV behind the Download CV buttons.
 - `shehab-shibli.webp`: the About portrait. `shehab-shibli.jpg` is the same photo for search-engine data.

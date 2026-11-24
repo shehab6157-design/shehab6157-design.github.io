@@ -21,8 +21,8 @@ The server is [Supabase](https://supabase.com) (PostgreSQL with sign-in). Use th
 
 1. Create a Supabase project.
 2. Open **SQL Editor**, paste all of `supabase/schema.sql`, and run it.
-3. Open **Authentication → Sign In / Providers** and keep **Email** turned on.
-4. Open **Authentication → URL Configuration**. Set **Site URL** to the address people open RightPart at (for example `https://your-name.github.io/rightpart/`) and add the same address to **Redirect URLs**. The confirmation and sign-in e-mails link back there.
+3. Open **Authentication**, then **Sign In / Providers** and keep **Email** turned on.
+4. Open **Authentication**, then **URL Configuration**. Set **Site URL** to the address people open RightPart at (for example `https://your-name.github.io/rightpart/`) and add the same address to **Redirect URLs**. The confirmation and sign-in e-mails link back there.
 
 ## 2. Connect the app
 
@@ -30,7 +30,7 @@ You need two values from the project's **API settings**: the **Project URL** and
 
 Either:
 
-- **Each device:** in RightPart open **More → Companies and sign-in → Connect a company server** and enter the two values; or
+- **Each device:** in RightPart open **More**, then **Companies and sign-in**, then **Connect a company server** and enter the two values; or
 - **The company's own copy of the app:** put them in `js/config.js`, then change `VERSION` in `sw.js` so installed copies pick up the change.
 
 If the server is **not** on `*.supabase.co` (a self-hosted server on your own domain), add its address to `connect-src` in the `Content-Security-Policy` line of `index.html`. The app refuses to talk to any other address.
@@ -39,7 +39,7 @@ If the server is **not** on `*.supabase.co` (a self-hosted server on your own do
 
 1. In the app: **Create account**, confirm the e-mail, sign in, then **Create a company**. You are its owner.
 2. Under **Team**, invite people by e-mail with a role. They create an account with that same e-mail and press **Check invitations**.
-3. An engineer loads the parts, BOMs and steps (see **More → Set up this company**) and presses **Publish**. Every signed-in device can now press **Download latest**, and downloads it by itself when the app opens.
+3. An engineer loads the parts, BOMs and steps (see **More**, then **Set up this company**) and presses **Publish**. Every signed-in device can now press **Download latest**, and downloads it by itself when the app opens.
 
 ### Roles
 
